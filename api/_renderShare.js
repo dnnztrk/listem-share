@@ -81,7 +81,7 @@ function renderShareHTML(data, host) {
     '.item-row{display:flex;align-items:center;min-height:46px;padding:0 16px}' +
     '.item-content{display:flex;align-items:center;flex:1;min-height:46px;border-top:1px solid var(--divider)}' +
     '.item-row:first-of-type .item-content{border-top:none}' +
-    '.item-dot{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);margin-right:16px;flex-shrink:0}' +
+    '.item-dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);margin-right:12px;flex-shrink:0}' +
     '.item-name{font-size:15px;font-weight:400;flex:1}' +
     '.qty-badge{font-size:12px;font-weight:600;color:var(--badge-text);background:var(--badge-bg);padding:2px 10px;border-radius:100px;margin-left:8px}' +
     '.cta{width:100%}' +
