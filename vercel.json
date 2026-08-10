@@ -1,6 +1,8 @@
 {
   "rewrites": [
     { "source": "/share", "destination": "/api/share" },
-    { "source": "/s/:id", "destination": "/api/s/:id" }
+    { "source": "/s/:id", "destination": "/api/s/:id" },
+    { "source": "/gizlilik", "destination": "/privacy-policy.html" },
+    { "source": "/kosullar", "destination": "/terms-of-use.html" }
   ]
 }
