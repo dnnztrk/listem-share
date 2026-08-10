@@ -100,4 +100,29 @@ function renderShareHTML(data, host) {
     '</div><script>document.getElementById("openApp").addEventListener("click",function(e){e.preventDefault();window.location.href="' + deepLink + '";setTimeout(function(){window.location.href="' + appStoreLink + '"},1500)})</script></body></html>';
 }
 
+function renderExpiredHTML(host) {
+  return '<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta property="og:title" content="Paylaşım bağlantısının süresi doldu"><meta property="og:type" content="website"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><title>Bağlantının süresi doldu — List-em</title><style>' +
+    ':root{--bg:#F4F2ED;--card:#FFFFFF;--text:#1B221E;--text-secondary:#6B7570;--text-faint:#8A948E;--border:#E5E8E3;--accent:#2D8B75}' +
+    '@media (prefers-color-scheme:dark){:root{--bg:#141816;--card:#1C211E;--text:#ECEFEA;--text-secondary:#9AA49D;--text-faint:#6E7871;--border:#2A302C;--accent:#3AA98F}}' +
+    '*{margin:0;padding:0;box-sizing:border-box}' +
+    'body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:32px 20px}' +
+    '.page{max-width:420px;width:100%;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center}' +
+    '.icon-circle{width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}' +
+    'h1{font-size:22px;font-weight:700;margin-bottom:6px}' +
+    'p{font-size:14px;color:var(--text-secondary);margin-bottom:4px}' +
+    '.divider{width:32px;height:1px;background:var(--border);margin:20px 0}' +
+    '.btn{display:block;background:var(--accent);color:white;text-decoration:none;height:50px;line-height:50px;padding:0 24px;text-align:center;border-radius:14px;font-size:16px;font-weight:600;margin-top:20px}' +
+    '</style></head><body><div class="page">' +
+    '<div class="icon-circle">⏳</div>' +
+    '<h1>Bu paylaşım bağlantısının süresi doldu</h1>' +
+    '<p>Paylaşan kişiden listeyi yeniden göndermesini isteyebilirsin.</p>' +
+    '<div class="divider"></div>' +
+    '<h1>This share link has expired</h1>' +
+    '<p>Ask the person who shared it to send the list again.</p>' +
+    '<a href="https://apps.apple.com/app/list-em/id0000000000" class="btn">List-em</a>' +
+    '</div></body></html>';
+}
+
+renderShareHTML.renderExpiredHTML = renderExpiredHTML;
+
 module.exports = renderShareHTML;

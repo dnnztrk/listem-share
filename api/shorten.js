@@ -1,6 +1,8 @@
 const { kv } = require('@vercel/kv');
 const crypto = require('crypto');
 
+const SHARE_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -14,7 +16,7 @@ module.exports = async (req, res) => {
   }
 
   const id = crypto.randomBytes(6).toString('base64url').slice(0, 8);
-  await kv.set(`share:${id}`, data);
+  await kv.set(`share:${id}`, data, { ex: SHARE_TTL_SECONDS });
 
   const host = req.headers.host || 'list-em.app';
   const shortUrl = `https://${host}/s/${id}`;
