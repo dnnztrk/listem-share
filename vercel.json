@@ -4,5 +4,11 @@
     { "source": "/s/:id", "destination": "/api/s/:id" },
     { "source": "/gizlilik", "destination": "/privacy-policy.html" },
     { "source": "/kosullar", "destination": "/terms-of-use.html" }
+  ],
+  "headers": [
+    {
+      "source": "/assets/v1/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    }
   ]
 }

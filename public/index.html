@@ -1,0 +1,727 @@
+<!doctype html>
+<html lang="tr" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>List-em — Türkiye’ye özel market alışveriş listesi</title>
+<meta name="description" content="Ürün yazmak yok, seçmek var. Kalorisi, gramajı, mevsimi tek bakışta.">
+<meta name="theme-color" content="#F8F7F4">
+<link rel="canonical" href="https://list-em.app/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="List-em">
+<meta property="og:url" content="https://list-em.app/">
+<meta property="og:title" content="List-em — Türkiye’ye özel market alışveriş listesi">
+<meta property="og:description" content="Ürün yazmak yok, seçmek var. Kalorisi, gramajı, mevsimi tek bakışta.">
+<meta property="og:image" content="https://list-em.app/assets/v1/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="List-em logosu, kâğıt market listesinin üst kenarında; üstünde ÇOK YAKINDA yazıyor.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@listemapp">
+<link rel="icon" type="image/svg+xml" href="/assets/v1/icons/icon.svg">
+<link rel="apple-touch-icon" href="/assets/v1/icons/icon-180.png">
+<link rel="manifest" href="/assets/v1/site.webmanifest">
+<link rel="preload" href="/assets/v1/fonts/fraunces-600-latin.woff2" as="font" type="font/woff2" crossorigin>
+<script>
+(function (d) {
+  var r = d.documentElement, seen = false;
+  r.className = 'js';
+  try { seen = sessionStorage.getItem('listem-film') === '1'; } catch (e) {}
+  if (seen || matchMedia('(prefers-reduced-motion: reduce)').matches) r.classList.add('film-final');
+})(document);
+</script>
+<style>
+@font-face {
+  font-family: Fraunces;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/assets/v1/fonts/fraunces-600-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  ascent-override: 97.8%;
+  descent-override: 25.5%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: Fraunces;
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url(/assets/v1/fonts/fraunces-600-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  ascent-override: 97.8%;
+  descent-override: 25.5%;
+  line-gap-override: 0%;
+}
+
+:root {
+  color-scheme: light;
+  --cream: #F8F7F4;
+  --green: #2D8B75;
+  --ink: #1F2A26;
+  --line: rgba(45, 139, 117, .25);
+  --frame: rgba(31, 42, 38, .5);
+  --g: clamp(16px, 4vw, 56px);
+  --half: 600px;
+  /* Fraunces baseline from the top of a 1em line box; refined in JS once the font has loaded */
+  --asc: .8615;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+body {
+  margin: 0;
+  background: var(--cream);
+  color: var(--ink);
+  font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+p { margin: 0; }
+p + p { margin-top: .75em; }
+img { max-width: 100%; }
+a { color: inherit; text-decoration: underline; text-decoration-color: var(--green); text-decoration-thickness: 1.5px; text-underline-offset: .22em; }
+a:hover { color: var(--green); }
+:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 2px; }
+
+.h {
+  margin: 0;
+  font-family: Fraunces, Georgia, serif;
+  font-weight: 600;
+  font-variation-settings: "SOFT" 100, "opsz" 144;
+  letter-spacing: -.01em;
+  line-height: 1.05;
+  color: var(--green);
+  text-wrap: balance;
+  /* pull the box up so the last line's baseline is the box's bottom edge */
+  margin-bottom: calc(-1em * (1.025 - var(--asc)));
+}
+.h2 { font-size: clamp(2rem, 1.35rem + 2.3vw, 3.5rem); max-width: 11em; }
+.h1 { font-size: clamp(2.5rem, 1.5rem + 3.6vw, 4.75rem); max-width: 12em; }
+
+.skip {
+  position: absolute; left: var(--g); top: 12px; z-index: 30;
+  padding: 8px 12px; background: var(--cream); color: var(--ink);
+  transform: translateY(-200%);
+}
+.skip:focus { transform: none; }
+
+/* Top bar */
+.top {
+  position: fixed; inset: 0 0 auto; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px; padding: 0 var(--g);
+  border-bottom: 1px solid transparent;
+  visibility: hidden; opacity: 0;
+}
+.film-final .top, .no-js .top { visibility: visible; opacity: 1; transition: opacity .4s; }
+@media (prefers-reduced-motion: reduce) { .film-final .top { transition: none; } }
+.top.is-solid { background: var(--cream); border-bottom-color: var(--line); }
+.top__logo { display: block; padding: 8px 0; color: var(--green); }
+.top__logo svg { display: block; height: 20px; width: calc(20px * 8420.9 / 2134); }
+.top__nav { display: flex; gap: 4px; margin-right: -10px; }
+.top__nav a { padding: 10px; text-decoration: none; font-size: 15px; }
+.top__nav a:hover { text-decoration: underline; text-decoration-color: var(--green); }
+
+/* Opening film */
+.film {
+  position: relative; overflow: hidden; isolation: isolate;
+  height: 100vh; height: 100svh;
+  container-type: size;
+  background: #C1B8A7;
+  --T: 48cqh;
+  --fs: min(8.4cqh, 11.4cqw);
+  --logo-h: calc(1.25 * var(--fs));
+  --soon-fs: calc(var(--logo-h) * 520 / 2134); /* 26% of the wordmark's 2000-unit em */
+}
+.film__frame { position: absolute; inset: 0; visibility: hidden; }
+.film__frame.is-on { visibility: visible; }
+.film-final .film__frame, .no-js .film__frame { visibility: hidden; }
+.film-final .f5, .no-js .f5.nojs { visibility: visible; }
+.film__frame img {
+  /* Cover the screen with the photo's surface edge (L) pinned to the horizon (T). */
+  --hr: max(100cqw * var(--ih) / var(--iw), 48cqh / var(--L), 52cqh / (1 - var(--L)));
+  position: absolute; max-width: none;
+  height: var(--hr);
+  width: calc(var(--hr) * var(--iw) / var(--ih));
+  left: calc(50% - var(--hr) * var(--iw) / var(--ih) / 2);
+  top: calc(var(--T) - var(--L) * var(--hr));
+  transform-origin: 50% calc(var(--L) * 100%);
+}
+.film__frame { --iw: 1520; --ih: 2688; }
+.f1 { --L: .5457; } .f2 { --L: .4732; } .f3 { --L: .4694; } .f4 { --L: .4836; } .f5 { --L: .5457; }
+@media (min-aspect-ratio: 1/1) {
+  .film__frame { --iw: 2688; --ih: 1520; }
+  .f1 { --L: .4492; } .f2 { --L: .4256; } .f3 { --L: .4389; } .f4 { --L: .4286; } .f5 { --L: .4492; }
+}
+.film__word, .film__soon {
+  position: absolute; left: 0; right: 0; margin: 0;
+  font-family: Fraunces, Georgia, serif; font-weight: 600;
+  font-variation-settings: "SOFT" 100, "opsz" 144;
+  line-height: 1; text-align: center; white-space: nowrap;
+  color: var(--green); mix-blend-mode: multiply;
+}
+.film__word {
+  font-size: var(--fs); letter-spacing: -.01em;
+  top: calc(var(--T) - 1px - var(--asc) * var(--fs));
+  opacity: 0;
+}
+.film__logo {
+  position: absolute; left: 50%; margin-left: calc(var(--logo-h) * 8420.9 / 2134 / -2);
+  height: var(--logo-h); width: calc(var(--logo-h) * 8420.9 / 2134);
+  top: calc(var(--T) - var(--logo-h) * 2100 / 2134);
+  color: var(--green); mix-blend-mode: multiply; overflow: visible;
+  opacity: 0;
+}
+.film__soon {
+  font-size: var(--soon-fs); letter-spacing: .22em; padding-left: .22em;
+  top: calc(var(--T) - var(--logo-h) * 2100 / 2134 - var(--logo-h) / 2 - var(--asc) * var(--soon-fs));
+  opacity: 0;
+}
+.film-final .film__logo, .film-final .film__soon, .no-js .film__logo, .no-js .film__soon { opacity: 1; }
+.film-final .film__word { visibility: hidden; }
+
+/* Sections: heading and pictures stand on one full-width line */
+.sec {
+  display: grid;
+  grid-template-columns: [full-start] minmax(var(--g), 1fr) [c-start] minmax(0, var(--half)) [mid] minmax(0, var(--half)) [c-end] minmax(var(--g), 1fr) [full-end];
+  padding-top: clamp(96px, 11vw, 168px);
+}
+.sec > .h { grid-area: 1 / c-start / 2 / mid; align-self: end; padding-right: 32px; }
+.sec__visual { grid-area: 1 / mid / 2 / c-end; align-self: end; display: flex; align-items: flex-end; gap: 24px; }
+.rule { grid-column: full; grid-row: 2; height: 1px; background: var(--line); }
+.sec__body { grid-area: 3 / c-start / 4 / mid; padding-top: 28px; max-width: 34em; }
+.sec__foot { display: none; }
+.sec--text > .h, .sec--text .sec__body { grid-column: c-start / c-end; }
+#giris { padding-top: clamp(112px, 13vw, 184px); }
+#giris .sec__body { font-size: 19px; }
+
+.phone {
+  --pw: clamp(220px, 22vw, 300px);
+  flex: none; margin: 0;
+  width: var(--pw);
+  padding: calc(var(--pw) * .03);
+  border: 1px solid var(--frame);
+  border-radius: calc(var(--pw) * .1475);
+  background: var(--cream);
+}
+.phone img { display: block; width: 100%; height: auto; border-radius: calc(var(--pw) * .1175); }
+.pair .phone { --pw: clamp(150px, 18.5vw, 270px); }
+.paper-pair .phone { --pw: clamp(150px, 16.5vw, 240px); }
+.paper {
+  flex: none; margin: 0; display: block;
+  /* same height as the phone beside it */
+  height: calc((var(--pw) * .94 - 2px) * 2718 / 1320 + var(--pw) * .06 + 2px);
+  aspect-ratio: 840 / 1218;
+}
+.paper img { display: block; width: 100%; height: 100%; }
+.paper-pair { --pw: clamp(150px, 16.5vw, 240px); }
+
+/* Season band: the market photo's own horizon is the line */
+.sec--band { container-type: inline-size; }
+.band {
+  grid-column: full; grid-row: 1; position: relative; overflow: hidden;
+  --bw: max(100cqw, 760px);
+  --bh: calc(var(--bw) * 1520 / 2688);
+  --hy: calc(var(--bh) * .4256);
+  --A: min(var(--hy), 320px);
+  --B: min(var(--bh) - var(--hy), 280px);
+  height: calc(var(--A) + var(--B));
+}
+.band__photo img {
+  position: absolute; max-width: none;
+  width: var(--bw); height: var(--bh);
+  left: calc(50% - var(--bw) / 2);
+  top: calc(var(--A) - var(--hy));
+}
+.band__line { position: absolute; left: 0; right: 0; top: var(--A); height: 1px; background: var(--line); }
+.band .h {
+  position: absolute; margin: 0;
+  left: max(var(--g), 50% - var(--half));
+  bottom: calc(var(--B) - 1em * (1.025 - var(--asc)));
+  width: calc(min(var(--half), 50% - var(--g)) - 32px);
+  mix-blend-mode: multiply;
+}
+.band__shot {
+  position: absolute; margin: 0;
+  left: 50%; bottom: var(--B);
+  width: clamp(300px, 32vw, 440px);
+}
+.shot { border: 1px solid var(--frame); border-radius: 18px; overflow: hidden; background: #F7F6F3; }
+.shot img { display: block; width: 100%; height: auto; }
+.sec--band .sec__body { grid-row: 2; }
+
+/* Themes: eight screens on one line, scrolls sideways on small screens */
+.themes {
+  grid-column: full; grid-row: 4;
+  --tw: clamp(150px, (100vw - 2 * var(--g) - 7 * 16px) / 8, 210px);
+  --ph: calc((var(--tw) * .94 - 2px) * 2718 / 1320 + var(--tw) * .06 + 2px);
+  display: grid; grid-auto-flow: column; grid-auto-columns: var(--tw); gap: 16px;
+  justify-content: safe center;
+  margin: 72px 0 0; padding: 0 var(--g) 8px; list-style: none;
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--g);
+  background: linear-gradient(var(--line), var(--line)) 0 var(--ph) / 100% 1px no-repeat local;
+}
+.themes li { scroll-snap-align: start; }
+.themes .phone { --pw: var(--tw); }
+.themes p { margin-top: 12px; font-size: 15px; }
+
+@media (max-width: 859px) {
+  .sec { grid-template-columns: [full-start] var(--g) [c-start] minmax(0, 1fr) [c-end] var(--g) [full-end]; }
+  .sec > .h, .sec__body { grid-column: c-start / c-end; padding-right: 0; }
+  .sec__visual { grid-column: c-start / c-end; grid-row: 4; margin-top: 56px; gap: 12px; }
+  .sec__foot { display: block; grid-row: 5; }
+  .phone { --pw: min(64vw, 280px); }
+  .pair .phone { --pw: calc((100vw - 2 * var(--g) - 12px) / 2); }
+  .paper-pair, .paper-pair .phone { --pw: calc((100vw - 2 * var(--g) - 12px) / 2.379); }
+  .band .h { width: auto; right: var(--g); }
+  .band__shot { left: var(--g); bottom: auto; top: calc(var(--A) + 20px); width: min(100% - 2 * var(--g), 380px); }
+  .themes { --tw: min(46vw, 210px); justify-content: start; }
+}
+
+/* Footer */
+.foot { margin-top: clamp(120px, 14vw, 200px); }
+/* off-screen sections skip rendering, and their lazy images wait, until scrolled near */
+.sec:not(#giris), .foot { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+.foot .rule { height: 1px; background: var(--line); }
+.foot__in {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px;
+  max-width: calc(2 * var(--half)); margin: 0 auto; padding: 28px var(--g) 48px;
+  box-sizing: content-box; font-size: 15px;
+}
+.foot__in > a { color: var(--green); display: block; padding: 6px 0; }
+.foot__in svg { display: block; height: 18px; width: calc(18px * 8420.9 / 2134); }
+.foot ul { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; list-style: none; }
+.foot ul a { display: inline-block; padding: 6px 0; }
+.foot__copy { margin-left: auto; }
+@media (max-width: 859px) { .foot__copy { margin-left: 0; width: 100%; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="lockup" viewBox="0 -2100 8420.9 2134"><path fill="currentColor" transform="translate(0 0) scale(3.33587) translate(-194.29 -827.08)" d="M231.1 332.12H292.73Q314.61 332.12 329.49 344.71Q344.05 357.03 348.02 378.21L360.32 438.04H567.45Q568.43 407.02 573.45 381.63Q575.96 368.91 579.76 356.3C517.61 359.84 472.39 307.87 451.81 255.76C505.43 239.91 573.91 243.49 609.51 294.18C639.34 219.85 723.9 198.21 793.19 204.62C776.77 277.75 723.76 357.66 632.23 351.66Q624.51 371.22 620.61 390.94Q616.47 411.89 615.55 438.04H753.03Q765.42 438.04 770.74 444.18Q776.16 450.44 774.21 463.08L756.88 572.86Q751.1 609.45 712.59 609.45H395.58L403.5 647.97H672.14Q678.27 647.97 683.93 650.32Q689.6 652.66 693.93 657Q698.26 661.33 700.61 666.99Q702.96 672.66 702.96 678.79Q702.96 684.91 700.61 690.58Q698.26 696.24 693.93 700.57Q689.6 704.91 683.93 707.25Q678.27 709.6 672.14 709.6H402.51Q379.66 709.6 364 697.07Q348.12 684.37 343.44 661.88L288.29 393.75H231.1Q224.97 393.75 219.31 391.4Q213.65 389.06 209.31 384.72Q204.98 380.39 202.63 374.73Q200.29 369.06 200.29 362.93Q200.29 356.8 202.63 351.14Q204.98 345.48 209.31 341.14Q213.65 336.81 219.31 334.46Q224.97 332.12 231.1 332.12ZM396.73 512.19Q391.95 512.19 388.56 515.58Q385.18 518.96 385.18 523.75Q385.18 528.53 388.56 531.92Q391.95 535.3 396.73 535.3H694.4Q699.19 535.3 702.58 531.92Q705.96 528.53 705.96 523.75Q705.96 518.96 702.58 515.58Q699.19 512.19 694.4 512.19ZM389.03 780.86C389.03 755.33 409.72 734.64 435.25 734.64C460.78 734.64 481.47 755.33 481.47 780.86C481.47 806.39 460.78 827.08 435.25 827.08C409.72 827.08 389.03 806.39 389.03 780.86ZM593.18 780.86C593.18 755.33 613.87 734.64 639.4 734.64C664.93 734.64 685.62 755.33 685.62 780.86C685.62 806.39 664.93 827.08 639.4 827.08C613.87 827.08 593.18 806.39 593.18 780.86ZM396.73 560.34Q391.95 560.34 388.56 563.73Q385.18 567.11 385.18 571.9Q385.18 576.68 388.56 580.07Q391.95 583.45 396.73 583.45H616.75Q621.54 583.45 624.92 580.07Q628.31 576.68 628.31 571.9Q628.31 567.11 624.92 563.73Q621.54 560.34 616.75 560.34ZM396.73 464.04Q391.95 464.04 388.56 467.43Q385.18 470.81 385.18 475.6Q385.18 480.39 388.56 483.77Q391.95 487.16 396.73 487.16H545.57Q550.36 487.16 553.74 483.77Q557.12 480.39 557.12 475.6Q557.12 470.81 553.74 467.43Q550.36 464.04 545.57 464.04Z"/><path fill="currentColor" transform="translate(2379.9 0)" d="M584 -1260 535 -1246Q509 -1235 498.0 -1218.0Q487 -1201 487 -1171V-222Q487 -178 507.0 -158.5Q527 -139 566 -139H760Q803 -139 833.0 -152.0Q863 -165 886.0 -196.0Q909 -227 929 -280L970 -388Q985 -425 1007.5 -436.5Q1030 -448 1058 -442Q1088 -436 1100.5 -411.0Q1113 -386 1103 -348L1030 -62Q1017 -12 996.5 11.0Q976 34 938 34Q912 34 890.0 25.5Q868 17 843.5 8.5Q819 0 786 0H133Q97 0 77.5 -17.5Q58 -35 58 -67Q58 -119 108 -140L158 -154Q184 -165 195.0 -182.0Q206 -199 206 -229V-1171Q206 -1201 195.0 -1218.0Q184 -1235 158 -1246L108 -1260Q58 -1281 58 -1333Q58 -1365 77.5 -1382.5Q97 -1400 133 -1400H560Q597 -1400 616.0 -1382.5Q635 -1365 635 -1333Q635 -1282 584 -1260Z M1493.0 -828V-201Q1493.0 -163 1501.0 -147.5Q1509.0 -132 1527.0 -124L1554.0 -115Q1572.0 -105 1581.5 -91.0Q1591.0 -77 1591.0 -56Q1591.0 -29 1575.0 -14.5Q1559.0 0 1530.0 0H1207.0Q1178.0 0 1162.0 -14.5Q1146.0 -29 1146.0 -56Q1146.0 -77 1155.5 -91.0Q1165.0 -105 1183.0 -115L1210.0 -124Q1229.0 -132 1236.5 -147.5Q1244.0 -163 1244.0 -201V-627Q1244.0 -660 1236.0 -673.5Q1228.0 -687 1210.0 -693L1170.0 -697Q1150.0 -707 1141.0 -719.0Q1132.0 -731 1132.0 -749Q1132.0 -769 1145.0 -784.0Q1158.0 -799 1190.0 -812L1335.0 -867Q1374.0 -882 1395.5 -887.0Q1417.0 -892 1436.0 -892Q1464.0 -892 1478.5 -874.5Q1493.0 -857 1493.0 -828ZM1358.0 -1025Q1286.0 -1025 1242.5 -1066.0Q1199.0 -1107 1199.0 -1175Q1199.0 -1243 1242.5 -1284.0Q1286.0 -1325 1358.0 -1325Q1431.0 -1325 1474.0 -1284.0Q1517.0 -1243 1517.0 -1175Q1517.0 -1107 1474.0 -1066.0Q1431.0 -1025 1358.0 -1025Z M1995.0 -86Q2054.0 -86 2085.0 -114.0Q2116.0 -142 2116.0 -184Q2116.0 -212 2104.0 -233.5Q2092.0 -255 2059.5 -274.0Q2027.0 -293 1967.0 -309Q1834.0 -347 1759.0 -390.0Q1684.0 -433 1653.5 -489.5Q1623.0 -546 1623.0 -624Q1623.0 -743 1707.0 -820.5Q1791.0 -898 1960.0 -898Q2018.0 -898 2056.0 -887.0Q2094.0 -876 2119.5 -865.0Q2145.0 -854 2163.0 -854Q2177.0 -854 2185.5 -865.0Q2194.0 -876 2205.0 -887.0Q2216.0 -898 2236.0 -898Q2256.0 -898 2271.0 -885.0Q2286.0 -872 2297.0 -834L2336.0 -713Q2350.0 -666 2344.5 -635.0Q2339.0 -604 2313.0 -593Q2285.0 -582 2257.5 -593.0Q2230.0 -604 2209.0 -636Q2175.0 -693 2138.5 -726.0Q2102.0 -759 2061.5 -774.0Q2021.0 -789 1976.0 -789Q1906.0 -789 1873.5 -758.5Q1841.0 -728 1841.0 -685Q1841.0 -655 1857.0 -629.5Q1873.0 -604 1912.5 -583.0Q1952.0 -562 2023.0 -543Q2127.0 -517 2196.0 -478.0Q2265.0 -439 2299.5 -383.0Q2334.0 -327 2334.0 -248Q2334.0 -167 2293.0 -106.0Q2252.0 -45 2178.5 -10.5Q2105.0 24 2006.0 24Q1941.0 24 1903.5 11.0Q1866.0 -2 1847.0 -14.5Q1828.0 -27 1816.0 -27Q1802.0 -27 1793.5 -14.5Q1785.0 -2 1775.0 11.0Q1765.0 24 1746.0 24Q1727.0 24 1714.5 11.0Q1702.0 -2 1696.0 -33L1665.0 -169Q1655.0 -222 1659.5 -249.5Q1664.0 -277 1694.0 -285Q1720.0 -292 1745.0 -279.0Q1770.0 -266 1794.0 -229Q1837.0 -151 1884.0 -118.5Q1931.0 -86 1995.0 -86Z M2440.0 -746 2401.0 -755Q2376.0 -764 2369.0 -780.0Q2362.0 -796 2362.0 -817Q2362.0 -844 2380.5 -861.0Q2399.0 -878 2428.0 -878H2470.0Q2486.0 -878 2498.5 -888.5Q2511.0 -899 2529.0 -930L2582.0 -1039Q2602.0 -1069 2624.0 -1084.5Q2646.0 -1100 2670.0 -1100Q2695.0 -1100 2710.5 -1084.0Q2726.0 -1068 2726.0 -1034V-284Q2726.0 -226 2749.0 -196.5Q2772.0 -167 2816.0 -167Q2844.0 -167 2863.0 -177.5Q2882.0 -188 2895.5 -202.5Q2909.0 -217 2921.0 -227.5Q2933.0 -238 2945.0 -238Q2959.0 -238 2966.5 -226.5Q2974.0 -215 2974.0 -188Q2974.0 -136 2941.5 -88.0Q2909.0 -40 2852.5 -10.0Q2796.0 20 2724.0 20Q2604.0 20 2540.5 -44.0Q2477.0 -108 2477.0 -243V-676Q2477.0 -706 2471.0 -721.5Q2465.0 -737 2440.0 -746ZM2627.0 -745V-878H2916.0Q2946.0 -878 2962.0 -865.0Q2978.0 -852 2978.0 -828Q2978.0 -792 2948.5 -768.5Q2919.0 -745 2852.0 -745Z M3480.0 -601Q3541.0 -601 3519.0 -536L3501.0 -479Q3491.0 -448 3476.0 -437.5Q3461.0 -427 3435.0 -427H3051.0Q2990.0 -427 3011.0 -492L3030.0 -549Q3041.0 -580 3055.5 -590.5Q3070.0 -601 3096.0 -601Z M4397.0 -563Q4397.0 -497 4362.5 -462.5Q4328.0 -428 4264.0 -428H3747.0V-525H4085.0Q4141.0 -525 4141.0 -581Q4141.0 -669 4099.5 -718.5Q4058.0 -768 3993.0 -768Q3939.0 -768 3897.5 -737.0Q3856.0 -706 3832.0 -648.0Q3808.0 -590 3808.0 -506Q3808.0 -338 3884.5 -251.0Q3961.0 -164 4085.0 -164Q4163.0 -164 4222.0 -199.5Q4281.0 -235 4314.0 -286Q4330.0 -303 4342.0 -309.5Q4354.0 -316 4365.0 -316Q4380.0 -316 4389.0 -304.5Q4398.0 -293 4398.0 -269Q4393.0 -194 4345.5 -128.0Q4298.0 -62 4214.5 -21.0Q4131.0 20 4017.0 20Q3884.0 20 3785.5 -36.5Q3687.0 -93 3633.5 -195.0Q3580.0 -297 3580.0 -431Q3580.0 -565 3632.0 -670.5Q3684.0 -776 3784.5 -837.0Q3885.0 -898 4027.0 -898Q4139.0 -898 4222.0 -854.0Q4305.0 -810 4351.0 -734.0Q4397.0 -658 4397.0 -563Z M4809.0 -828V-201Q4809.0 -161 4816.0 -143.5Q4823.0 -126 4842.0 -118L4870.0 -108Q4901.0 -89 4901.0 -56Q4901.0 0 4845.0 0H4523.0Q4494.0 0 4478.0 -14.5Q4462.0 -29 4462.0 -56Q4462.0 -77 4471.5 -90.5Q4481.0 -104 4499.0 -115L4526.0 -124Q4545.0 -131 4552.5 -147.0Q4560.0 -163 4560.0 -201V-627Q4560.0 -660 4552.0 -673.5Q4544.0 -687 4526.0 -693L4486.0 -697Q4466.0 -707 4457.0 -719.0Q4448.0 -731 4448.0 -749Q4448.0 -769 4461.0 -784.0Q4474.0 -799 4506.0 -812L4651.0 -867Q4690.0 -882 4711.5 -887.0Q4733.0 -892 4752.0 -892Q4780.0 -892 4794.5 -874.5Q4809.0 -857 4809.0 -828ZM4783.0 -598 4732.0 -659 4771.0 -700Q4874.0 -807 4960.5 -852.5Q5047.0 -898 5127.0 -898Q5236.0 -898 5301.0 -825.0Q5366.0 -752 5366.0 -620V-201Q5366.0 -161 5373.0 -143.5Q5380.0 -126 5399.0 -118L5427.0 -108Q5458.0 -89 5458.0 -56Q5458.0 0 5402.0 0H5081.0Q5025.0 0 5025.0 -56Q5025.0 -89 5056.0 -108L5084.0 -118Q5103.0 -126 5110.0 -143.5Q5117.0 -161 5117.0 -201V-556Q5117.0 -633 5083.0 -673.0Q5049.0 -713 4991.0 -713Q4950.0 -713 4905.5 -693.0Q4861.0 -673 4815.0 -628ZM5340.0 -606 5288.0 -667 5329.0 -707Q5429.0 -810 5506.5 -854.0Q5584.0 -898 5659.0 -898Q5765.0 -898 5818.0 -833.5Q5871.0 -769 5885.0 -654L5942.0 -201Q5947.0 -163 5952.5 -147.5Q5958.0 -132 5976.0 -124L6003.0 -115Q6021.0 -104 6031.0 -90.5Q6041.0 -77 6041.0 -56Q6041.0 -29 6025.0 -14.5Q6009.0 0 5980.0 0H5656.0Q5600.0 0 5600.0 -56Q5600.0 -88 5631.0 -108L5660.0 -118Q5679.0 -126 5688.0 -142.0Q5697.0 -158 5692.0 -195L5642.0 -556Q5631.0 -634 5602.5 -673.5Q5574.0 -713 5517.0 -713Q5486.0 -713 5451.0 -695.0Q5416.0 -677 5372.0 -636Z"/></symbol>
+</svg>
+
+<a class="skip" href="#giris">İçeriğe geç</a>
+
+<header class="top" id="top-bar">
+  <a class="top__logo" href="#top" aria-label="List-em, sayfanın başına dön">
+    <svg aria-hidden="true" focusable="false"><use href="#lockup"/></svg>
+  </a>
+  <nav class="top__nav" aria-label="Sosyal medya">
+    <a href="https://x.com/listemapp">X</a>
+    <a href="https://instagram.com/listem.app">Instagram</a>
+  </nav>
+</header>
+
+<main id="top">
+  <div class="film" id="film">
+    <picture class="film__frame f1 is-on">
+      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l1-1008.avif 1008w, /assets/v1/film/l1-1344.avif 1344w, /assets/v1/film/l1-1680.avif 1680w, /assets/v1/film/l1-2016.avif 2016w, /assets/v1/film/l1-2688.avif 2688w">
+      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l1-1008.webp 1008w, /assets/v1/film/l1-1344.webp 1344w, /assets/v1/film/l1-1680.webp 1680w, /assets/v1/film/l1-2016.webp 2016w, /assets/v1/film/l1-2688.webp 2688w">
+      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p1-570.avif 570w, /assets/v1/film/p1-760.avif 760w, /assets/v1/film/p1-950.avif 950w, /assets/v1/film/p1-1140.avif 1140w, /assets/v1/film/p1-1520.avif 1520w">
+      <img src="/assets/v1/film/p1-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p1-570.webp 570w, /assets/v1/film/p1-760.webp 760w, /assets/v1/film/p1-950.webp 950w, /assets/v1/film/p1-1140.webp 1140w, /assets/v1/film/p1-1520.webp 1520w" alt="Krem bir duvarın önünde, kâğıda el yazısıyla yazılmış bir market listesi ve yeşil bir kalem." fetchpriority="high">
+    </picture>
+    <picture class="film__frame f2">
+      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l2-1008.avif 1008w, /assets/v1/film/l2-1344.avif 1344w, /assets/v1/film/l2-1680.avif 1680w, /assets/v1/film/l2-2016.avif 2016w, /assets/v1/film/l2-2688.avif 2688w">
+      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l2-1008.webp 1008w, /assets/v1/film/l2-1344.webp 1344w, /assets/v1/film/l2-1680.webp 1680w, /assets/v1/film/l2-2016.webp 2016w, /assets/v1/film/l2-2688.webp 2688w">
+      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p2-570.avif 570w, /assets/v1/film/p2-760.avif 760w, /assets/v1/film/p2-950.avif 950w, /assets/v1/film/p2-1140.avif 1140w, /assets/v1/film/p2-1520.avif 1520w">
+      <img data-src="/assets/v1/film/p2-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p2-570.webp 570w, /assets/v1/film/p2-760.webp 760w, /assets/v1/film/p2-950.webp 950w, /assets/v1/film/p2-1140.webp 1140w, /assets/v1/film/p2-1520.webp 1520w" alt="Manavda tahta kasalar içinde mandalina, nar, ıspanak, maydanoz, limon ve domates.">
+    </picture>
+    <picture class="film__frame f3">
+      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l3-1008.avif 1008w, /assets/v1/film/l3-1344.avif 1344w, /assets/v1/film/l3-1680.avif 1680w, /assets/v1/film/l3-2016.avif 2016w, /assets/v1/film/l3-2688.avif 2688w">
+      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l3-1008.webp 1008w, /assets/v1/film/l3-1344.webp 1344w, /assets/v1/film/l3-1680.webp 1680w, /assets/v1/film/l3-2016.webp 2016w, /assets/v1/film/l3-2688.webp 2688w">
+      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p3-570.avif 570w, /assets/v1/film/p3-760.avif 760w, /assets/v1/film/p3-950.avif 950w, /assets/v1/film/p3-1140.avif 1140w, /assets/v1/film/p3-1520.avif 1520w">
+      <img data-src="/assets/v1/film/p3-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p3-570.webp 570w, /assets/v1/film/p3-760.webp 760w, /assets/v1/film/p3-950.webp 950w, /assets/v1/film/p3-1140.webp 1140w, /assets/v1/film/p3-1520.webp 1520w" alt="Market rafları: kavanozlarda zeytin ve turşu, makarna, bakliyat, yumurta ve zeytinyağı.">
+    </picture>
+    <picture class="film__frame f4">
+      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l4-1008.avif 1008w, /assets/v1/film/l4-1344.avif 1344w, /assets/v1/film/l4-1680.avif 1680w, /assets/v1/film/l4-2016.avif 2016w, /assets/v1/film/l4-2688.avif 2688w">
+      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l4-1008.webp 1008w, /assets/v1/film/l4-1344.webp 1344w, /assets/v1/film/l4-1680.webp 1680w, /assets/v1/film/l4-2016.webp 2016w, /assets/v1/film/l4-2688.webp 2688w">
+      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p4-570.avif 570w, /assets/v1/film/p4-760.avif 760w, /assets/v1/film/p4-950.avif 950w, /assets/v1/film/p4-1140.avif 1140w, /assets/v1/film/p4-1520.avif 1520w">
+      <img data-src="/assets/v1/film/p4-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p4-570.webp 570w, /assets/v1/film/p4-760.webp 760w, /assets/v1/film/p4-950.webp 950w, /assets/v1/film/p4-1140.webp 1140w, /assets/v1/film/p4-1520.webp 1520w" alt="Kasa bandında ekmek, süt, yumurta, poşetlerde mandalina ve domates, maydanoz, limon ve beyaz peynir.">
+    </picture>
+    <picture class="film__frame f5">
+      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l5-1008.avif 1008w, /assets/v1/film/l5-1344.avif 1344w, /assets/v1/film/l5-1680.avif 1680w, /assets/v1/film/l5-2016.avif 2016w, /assets/v1/film/l5-2688.avif 2688w">
+      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l5-1008.webp 1008w, /assets/v1/film/l5-1344.webp 1344w, /assets/v1/film/l5-1680.webp 1680w, /assets/v1/film/l5-2016.webp 2016w, /assets/v1/film/l5-2688.webp 2688w">
+      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p5-570.avif 570w, /assets/v1/film/p5-760.avif 760w, /assets/v1/film/p5-950.avif 950w, /assets/v1/film/p5-1140.avif 1140w, /assets/v1/film/p5-1520.avif 1520w">
+      <img data-src="/assets/v1/film/p5-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p5-570.webp 570w, /assets/v1/film/p5-760.webp 760w, /assets/v1/film/p5-950.webp 950w, /assets/v1/film/p5-1140.webp 1140w, /assets/v1/film/p5-1520.webp 1520w" alt="Aynı market listesi, bütün maddelerinin üstü çizilmiş; yanında yeşil kalem.">
+    </picture>
+    <noscript><picture class="film__frame f5 nojs">
+      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l5-1008.avif 1008w, /assets/v1/film/l5-1344.avif 1344w, /assets/v1/film/l5-1680.avif 1680w, /assets/v1/film/l5-2016.avif 2016w, /assets/v1/film/l5-2688.avif 2688w">
+      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l5-1008.webp 1008w, /assets/v1/film/l5-1344.webp 1344w, /assets/v1/film/l5-1680.webp 1680w, /assets/v1/film/l5-2016.webp 2016w, /assets/v1/film/l5-2688.webp 2688w">
+      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p5-570.avif 570w, /assets/v1/film/p5-760.avif 760w, /assets/v1/film/p5-950.avif 950w, /assets/v1/film/p5-1140.avif 1140w, /assets/v1/film/p5-1520.avif 1520w">
+      <img src="/assets/v1/film/p5-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p5-570.webp 570w, /assets/v1/film/p5-760.webp 760w, /assets/v1/film/p5-950.webp 950w, /assets/v1/film/p5-1140.webp 1140w, /assets/v1/film/p5-1520.webp 1520w" alt="Aynı market listesi, bütün maddelerinin üstü çizilmiş; yanında yeşil kalem.">
+    </picture></noscript>
+    <p class="film__word" aria-hidden="true"></p>
+    <p class="film__soon">ÇOK YAKINDA</p>
+    <svg class="film__logo" role="img" aria-label="List-em" focusable="false"><use href="#lockup"/></svg>
+  </div>
+
+  <section class="sec sec--text" id="giris" aria-labelledby="giris-h">
+    <h1 class="h h1" id="giris-h">Türkiye’ye özel market alışveriş listesi.</h1>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Ürün yazmak yok, seçmek var. Kalorisi, gramajı, mevsimi tek bakışta.</p>
+      <p>App Store’da çok yakında.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="kagittan" aria-labelledby="kagittan-h">
+    <h2 class="h h2" id="kagittan-h">Aynı liste, her şeyi bilen hâli.</h2>
+    <div class="sec__visual paper-pair">
+      <figure class="paper">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 331px, 52vw" srcset="/assets/v1/film/paper-420.avif 420w, /assets/v1/film/paper-640.avif 640w, /assets/v1/film/paper-840.avif 840w">
+          <img src="/assets/v1/film/paper-420.webp" sizes="(min-width: 860px) 331px, 52vw" srcset="/assets/v1/film/paper-420.webp 420w, /assets/v1/film/paper-640.webp 640w, /assets/v1/film/paper-840.webp 840w" width="840" height="1218" loading="lazy" decoding="async" alt="Kâğıda el yazısıyla yazılmış market listesi: 2 ekmek, süt (1 lt), 15’li yumurta, siyah zeytin, 3 limon, maydanoz, 1 kg mandalina, nar, ıspanak, 1 kg domates, beyaz peynir (az tuzlu), deterjan.">
+        </picture>
+      </figure>
+      <figure class="phone">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 226px, 37vw" srcset="/assets/v1/screens/8550-440.avif 440w, /assets/v1/screens/8550-660.avif 660w, /assets/v1/screens/8550-880.avif 880w">
+          <img src="/assets/v1/screens/8550-660.webp" sizes="(min-width: 860px) 226px, 37vw" srcset="/assets/v1/screens/8550-440.webp 440w, /assets/v1/screens/8550-660.webp 660w, /assets/v1/screens/8550-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Aynı ürünler List-em’de, reyonlarına göre: Meyve’de Mandalina ve Nar mevsiminde rozetiyle, yanında Limon; Sebze’de Ispanak ve Maydanoz; Fırın’da Beyaz ekmek. Her ürünün altında gramajı ve kalorisi yazıyor.">
+        </picture>
+      </figure>
+    </div>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Ürünleri katalogdan seçersin. Gramajı, kalorisi, mevsimi ve marketteki yeri kendiliğinden gelir.</p>
+    </div>
+    <div class="rule sec__foot"></div>
+  </section>
+
+  <section class="sec" id="gramiyla" aria-labelledby="gramiyla-h">
+    <h2 class="h h2" id="gramiyla-h">Gramıyla, kilosuyla.</h2>
+    <div class="sec__visual">
+      <figure class="phone">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8554-440.avif 440w, /assets/v1/screens/8554-660.avif 660w, /assets/v1/screens/8554-880.avif 880w">
+          <img src="/assets/v1/screens/8554-660.webp" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8554-440.webp 440w, /assets/v1/screens/8554-660.webp 660w, /assets/v1/screens/8554-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Domates ürün kartı: 100 gramında 18 kcal, 0,9 g protein, 0,2 g yağ ve 1,2 g lif. Tür olarak Salkım, Cherry ya da Kokteyl; miktar olarak 500 g, 1 kg ya da 2 kg seçiliyor. Altında Mevsiminde, Yaz-Sonbahar etiketi ve Listeye Ekle düğmesi var.">
+        </picture>
+      </figure>
+    </div>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Her ürün türüyle ve miktarıyla hazır. Salkım mı cherry mi, 500 g mı 1 kg mı; tek dokunuşla seçersin.</p>
+    </div>
+    <div class="rule sec__foot"></div>
+  </section>
+
+  <section class="sec" id="kalorisiyle" aria-labelledby="kalorisiyle-h">
+    <h2 class="h h2" id="kalorisiyle-h">Kalorisi yanında.</h2>
+    <div class="sec__visual pair">
+      <figure class="phone">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8560-440.avif 440w, /assets/v1/screens/8560-660.avif 660w, /assets/v1/screens/8560-880.avif 880w">
+          <img src="/assets/v1/screens/8560-660.webp" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8560-440.webp 440w, /assets/v1/screens/8560-660.webp 660w, /assets/v1/screens/8560-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Haftalık Market listesinin üstünde kalori özeti: 19 üründen yaklaşık 19.289 kcal. En yüksek Zeytinyağı, en düşük Maydanoz. Altında her ürün kalorisiyle listeleniyor.">
+        </picture>
+      </figure>
+      <figure class="phone">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8561-440.avif 440w, /assets/v1/screens/8561-660.avif 660w, /assets/v1/screens/8561-880.avif 880w">
+          <img src="/assets/v1/screens/8561-660.webp" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8561-440.webp 440w, /assets/v1/screens/8561-660.webp 660w, /assets/v1/screens/8561-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Sepet Detayı ekranı: 20 ürün, yaklaşık 19.289 kcal, yüzde 71’i mevsiminde. Kategorilere göre kalori dağılımı ve öne çıkanlar: en çok protein Tavuk göğsü, en çok yağ Zeytinyağı, en çok lif Patates.">
+        </picture>
+      </figure>
+    </div>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Her ürünün kalorisi listede görünür. List-em+ ile sepetin toplamını; protein, yağ ve lif dağılımını da görürsün.</p>
+    </div>
+    <div class="rule sec__foot"></div>
+  </section>
+
+  <section class="sec sec--band" id="mevsimiyle" aria-labelledby="mevsimiyle-h">
+    <div class="band">
+      <picture class="band__photo">
+        <source type="image/avif" sizes="(max-width: 760px) 760px, 100vw" srcset="/assets/v1/film/l2-1008.avif 1008w, /assets/v1/film/l2-1344.avif 1344w, /assets/v1/film/l2-1680.avif 1680w, /assets/v1/film/l2-2016.avif 2016w, /assets/v1/film/l2-2688.avif 2688w">
+        <img src="/assets/v1/film/l2-1344.webp" sizes="(max-width: 760px) 760px, 100vw" srcset="/assets/v1/film/l2-1008.webp 1008w, /assets/v1/film/l2-1344.webp 1344w, /assets/v1/film/l2-1680.webp 1680w, /assets/v1/film/l2-2016.webp 2016w, /assets/v1/film/l2-2688.webp 2688w" width="2688" height="1520" loading="lazy" decoding="async" alt="Manavda tahta kasalar içinde mandalina, nar, ıspanak, maydanoz, limon ve domates.">
+      </picture>
+      <div class="band__line"></div>
+      <h2 class="h h2" id="mevsimiyle-h">Mevsimi gelen öne çıkar.</h2>
+      <figure class="band__shot shot">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 440px, 92vw" srcset="/assets/v1/screens/8550-season-440.avif 440w, /assets/v1/screens/8550-season-660.avif 660w, /assets/v1/screens/8550-season-880.avif 880w">
+          <img src="/assets/v1/screens/8550-season-660.webp" sizes="(min-width: 860px) 440px, 92vw" srcset="/assets/v1/screens/8550-season-440.webp 440w, /assets/v1/screens/8550-season-660.webp 660w, /assets/v1/screens/8550-season-880.webp 880w" width="1320" height="528" loading="lazy" decoding="async" alt="List-em’de Meyve reyonu: Mandalina ve Nar, adlarının yanında yeşil Mevsiminde rozetiyle.">
+        </picture>
+      </figure>
+    </div>
+    <div class="sec__body">
+      <p>Mandalina, nar, hamsi… Mevsiminde olan ürünler listende işaretlenir. Sepetinin ne kadarının mevsiminde olduğunu da görürsün.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="reyon" aria-labelledby="reyon-h">
+    <h2 class="h h2" id="reyon-h">Markette reyon sırasıyla.</h2>
+    <div class="sec__visual">
+      <figure class="phone">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8551-440.avif 440w, /assets/v1/screens/8551-660.avif 660w, /assets/v1/screens/8551-880.avif 880w">
+          <img src="/assets/v1/screens/8551-660.webp" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8551-440.webp 440w, /assets/v1/screens/8551-660.webp 660w, /assets/v1/screens/8551-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Reyonlara göre dizilmiş liste: Fırın’da Beyaz ekmek, Et ve Tavuk’ta Tavuk göğsü, Balık ve Deniz Ürünleri’nde Hamsi, Süt Ürünleri’nde Süt, Yoğurt ve Beyaz peynir, Kahvaltılık’ta Yumurta.">
+        </picture>
+      </figure>
+    </div>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Liste marketteki reyonlara göre dizilir. Aynı koridora iki kez dönmezsin.</p>
+    </div>
+    <div class="rule sec__foot"></div>
+  </section>
+
+  <section class="sec" id="gecmis" aria-labelledby="gecmis-h">
+    <h2 class="h h2" id="gecmis-h">Her alışveriş takviminde.</h2>
+    <div class="sec__visual">
+      <figure class="phone">
+        <picture>
+          <source type="image/avif" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8567-440.avif 440w, /assets/v1/screens/8567-660.avif 660w, /assets/v1/screens/8567-880.avif 880w">
+          <img src="/assets/v1/screens/8567-660.webp" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8567-440.webp 440w, /assets/v1/screens/8567-660.webp 660w, /assets/v1/screens/8567-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Sepet Geçmişi ekranında Ekim 2026 takvimi; alışveriş yapılan günler işaretli. Ayın özeti: 6 alışveriş, 62 ürün, yaklaşık 53.319 kcal, yüzde 71’i mevsiminde. Öne çıkanlarda en sık alınan Muz, en yüksek kalorili Şeker.">
+        </picture>
+      </figure>
+    </div>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Tamamlanan her alışveriş Sepet Geçmişi’ne düşer. Ay ay ne aldığını ve sepetinin nasıl değiştiğini görürsün. List-em+ ile.</p>
+    </div>
+    <div class="rule sec__foot"></div>
+  </section>
+
+  <section class="sec sec--text" id="paylasim" aria-labelledby="paylasim-h">
+    <h2 class="h h2" id="paylasim-h">Paylaş, uygulamasız açılsın.</h2>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Listeni bir bağlantıyla gönderirsin. Karşı taraf uygulamayı indirmeden tarayıcıda açar.</p>
+    </div>
+  </section>
+
+  <section class="sec sec--text" id="temalar" aria-labelledby="temalar-h">
+    <h2 class="h h2" id="temalar-h">Yedi bölge, yedi tema.</h2>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Taze Bahçe ücretsiz. İstanbul Sisi’nden Baharat Yolu’na, Türkiye’nin yedi bölgesinden yedi tema List-em+ ile açılır.</p>
+    </div>
+    <ul class="themes" tabindex="0" aria-label="Listelerim ekranı sekiz temada">
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8559-440.avif 440w, /assets/v1/screens/8559-660.avif 660w, /assets/v1/screens/8559-880.avif 880w">
+            <img src="/assets/v1/screens/8559-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8559-440.webp 440w, /assets/v1/screens/8559-660.webp 660w, /assets/v1/screens/8559-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Taze Bahçe temasında.">
+          </picture>
+        </figure>
+        <p>Taze Bahçe</p>
+      </li>
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8586-440.avif 440w, /assets/v1/screens/8586-660.avif 660w, /assets/v1/screens/8586-880.avif 880w">
+            <img src="/assets/v1/screens/8586-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8586-440.webp 440w, /assets/v1/screens/8586-660.webp 660w, /assets/v1/screens/8586-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, İstanbul Sisi temasında.">
+          </picture>
+        </figure>
+        <p>İstanbul Sisi</p>
+      </li>
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8587-440.avif 440w, /assets/v1/screens/8587-660.avif 660w, /assets/v1/screens/8587-880.avif 880w">
+            <img src="/assets/v1/screens/8587-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8587-440.webp 440w, /assets/v1/screens/8587-660.webp 660w, /assets/v1/screens/8587-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Ege Kıyısı temasında.">
+          </picture>
+        </figure>
+        <p>Ege Kıyısı</p>
+      </li>
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8588-440.avif 440w, /assets/v1/screens/8588-660.avif 660w, /assets/v1/screens/8588-880.avif 880w">
+            <img src="/assets/v1/screens/8588-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8588-440.webp 440w, /assets/v1/screens/8588-660.webp 660w, /assets/v1/screens/8588-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Akdeniz Güneşi temasında.">
+          </picture>
+        </figure>
+        <p>Akdeniz Güneşi</p>
+      </li>
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8589-440.avif 440w, /assets/v1/screens/8589-660.avif 660w, /assets/v1/screens/8589-880.avif 880w">
+            <img src="/assets/v1/screens/8589-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8589-440.webp 440w, /assets/v1/screens/8589-660.webp 660w, /assets/v1/screens/8589-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Karadeniz Yaylası temasında.">
+          </picture>
+        </figure>
+        <p>Karadeniz Yaylası</p>
+      </li>
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8590-440.avif 440w, /assets/v1/screens/8590-660.avif 660w, /assets/v1/screens/8590-880.avif 880w">
+            <img src="/assets/v1/screens/8590-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8590-440.webp 440w, /assets/v1/screens/8590-660.webp 660w, /assets/v1/screens/8590-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Bozkır Altını temasında.">
+          </picture>
+        </figure>
+        <p>Bozkır Altını</p>
+      </li>
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8591-440.avif 440w, /assets/v1/screens/8591-660.avif 660w, /assets/v1/screens/8591-880.avif 880w">
+            <img src="/assets/v1/screens/8591-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8591-440.webp 440w, /assets/v1/screens/8591-660.webp 660w, /assets/v1/screens/8591-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Dağların Moru temasında.">
+          </picture>
+        </figure>
+        <p>Dağların Moru</p>
+      </li>
+      <li>
+        <figure class="phone">
+          <picture>
+            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8592-440.avif 440w, /assets/v1/screens/8592-660.avif 660w, /assets/v1/screens/8592-880.avif 880w">
+            <img src="/assets/v1/screens/8592-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8592-440.webp 440w, /assets/v1/screens/8592-660.webp 660w, /assets/v1/screens/8592-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Baharat Yolu temasında.">
+          </picture>
+        </figure>
+        <p>Baharat Yolu</p>
+      </li>
+    </ul>
+  </section>
+
+  <section class="sec sec--text" id="kapanis" aria-labelledby="kapanis-h">
+    <h2 class="h h2" id="kapanis-h">Çok yakında App Store’da.</h2>
+    <div class="rule"></div>
+    <div class="sec__body">
+      <p>Çıktığı gün haberin olsun: X’te <a href="https://x.com/listemapp">@listemapp</a>, Instagram’da <a href="https://instagram.com/listem.app">listem.app</a>.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="rule"></div>
+  <div class="foot__in">
+    <a href="#top" aria-label="List-em, sayfanın başına dön"><svg aria-hidden="true" focusable="false"><use href="#lockup"/></svg></a>
+    <ul>
+      <li><a href="mailto:contact@list-em.app">Destek</a></li>
+      <li><a href="/gizlilik">Gizlilik</a></li>
+      <li><a href="/kosullar">Koşullar</a></li>
+      <li><a href="https://x.com/listemapp">X</a></li>
+      <li><a href="https://instagram.com/listem.app">Instagram</a></li>
+    </ul>
+    <p class="foot__copy">© 2026 List-em</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var d = document, root = d.documentElement;
+  var film = d.getElementById('film');
+  var frames = [].slice.call(film.querySelectorAll('.film__frame'));
+  var imgs = frames.map(function (f) { return f.querySelector('img'); });
+  var word = film.querySelector('.film__word');
+  var logo = film.querySelector('.film__logo');
+  var soon = film.querySelector('.film__soon');
+  var WORDS = ['Market listen', 'mevsimiyle,', 'kalorisiyle,', 'gramıyla.'];
+  var EASE = 'cubic-bezier(.2,.7,.2,1)';
+  var HOLD = 2000;
+  var FINAL = frames.length - 1;
+
+  // Layout uses the file's real pixel size, not an assumed aspect ratio. naturalWidth on a
+  // srcset image is density-corrected and rounded, so read the chosen file on its own.
+  function fit(img) {
+    if (!img.currentSrc) return;
+    var file = new Image();
+    file.onload = function () {
+      img.style.setProperty('--iw', file.naturalWidth);
+      img.style.setProperty('--ih', file.naturalHeight);
+    };
+    file.src = img.currentSrc;
+  }
+  imgs.forEach(function (img) { img.addEventListener('load', function () { fit(img); }); fit(img); });
+
+  // Where the font's baseline really sits in a 1em line box, so words land on the horizon in every engine.
+  function measureBaseline() {
+    var probe = d.createElement('span');
+    probe.style.cssText = 'position:absolute;left:-9999px;top:0;display:block;font:600 100px/1 Fraunces;visibility:hidden';
+    probe.innerHTML = 'H<i style="display:inline-block;width:0;height:0;vertical-align:baseline"></i>';
+    d.body.appendChild(probe);
+    var asc = (probe.lastChild.getBoundingClientRect().top - probe.getBoundingClientRect().top) / 100;
+    probe.remove();
+    if (asc > .5 && asc < 1.2) root.style.setProperty('--asc', asc.toFixed(4));
+  }
+  var fontReady = d.fonts && d.fonts.load ? d.fonts.load('600 100px Fraunces', 'Hğ') : Promise.resolve();
+  var fontOrTimeout = Promise.race([fontReady, new Promise(function (r) { setTimeout(r, 1500); })]);
+  fontReady.then(measureBaseline, function () {});
+
+  function loaded(i) {
+    var img = imgs[i];
+    var wait = img.complete && img.naturalWidth ? Promise.resolve() : new Promise(function (res) {
+      img.addEventListener('load', res, { once: true });
+      img.addEventListener('error', res, { once: true });
+    });
+    return wait.then(function () { return img.decode ? img.decode().catch(function () {}) : null; });
+  }
+
+  // Frames 2-5 are fetched later so they never compete with the first frame and the font.
+  function wakeRest(finalOnly) {
+    (finalOnly ? frames.slice(FINAL) : frames).forEach(function (f) {
+      [].forEach.call(f.querySelectorAll('[data-srcset]'), function (el) {
+        el.setAttribute('srcset', el.getAttribute('data-srcset'));
+        el.removeAttribute('data-srcset');
+        if (el.hasAttribute('data-src')) { el.setAttribute('src', el.getAttribute('data-src')); el.removeAttribute('data-src'); }
+      });
+    });
+  }
+
+  function remember() { try { sessionStorage.setItem('listem-film', '1'); } catch (e) {} }
+
+  // Solid top bar once the film has scrolled away.
+  var bar = d.getElementById('top-bar');
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (e) { bar.classList.toggle('is-solid', !e[0].isIntersecting); }, { rootMargin: '-60px 0px 0px 0px' }).observe(film);
+  }
+
+  if (root.classList.contains('film-final')) { wakeRest(true); return; }
+
+  var done = false, timers = [], anims = [];
+  var SKIP = ['pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll'];
+
+  function later(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function run(el, keys, opts) { if (el.animate) anims.push(el.animate(keys, opts)); }
+  function reveal(el, delay, tracking) {
+    var from = { opacity: 0, filter: 'blur(12px)' }, to = { opacity: 1, filter: 'blur(0px)' };
+    if (tracking) { from.letterSpacing = '.05em'; to.letterSpacing = '-.01em'; }
+    run(el, [from, to], { duration: 700, delay: delay, easing: EASE, fill: 'both' });
+  }
+  function show(i) {
+    frames.forEach(function (f, j) { f.classList.toggle('is-on', j === i); });
+    run(imgs[i], [{ transform: 'scale(1)' }, { transform: 'scale(1.04)' }], { duration: HOLD, easing: i === FINAL ? 'cubic-bezier(.3,0,.3,1)' : 'linear', fill: 'forwards' });
+  }
+  function stopListening() { SKIP.forEach(function (t) { removeEventListener(t, skip, true); }); }
+  function end() { done = true; stopListening(); remember(); root.classList.add('film-final'); }
+
+  function play(i) {
+    loaded(i).then(function () {
+      if (done) return;
+      show(i);
+      // the other frames download once the first word is on screen
+      if (i === 0) later(900, wakeRest);
+      if (i < FINAL) {
+        word.textContent = WORDS[i];
+        reveal(word, 100, true);
+        later(HOLD, function () { play(i + 1); });
+      } else {
+        word.textContent = '';
+        reveal(logo, 100);
+        reveal(soon, 1000);
+        later(1700, end);
+      }
+    });
+  }
+
+  // Any touch, click, scroll or key jumps straight to the final frame.
+  function skip() {
+    if (done) return;
+    done = true;
+    stopListening();
+    timers.forEach(clearTimeout);
+    remember();
+    wakeRest();
+    loaded(FINAL).then(function () {
+      anims.forEach(function (a) { a.cancel(); });
+      root.classList.add('film-final');
+    });
+  }
+  SKIP.forEach(function (t) { addEventListener(t, skip, { capture: true, passive: true }); });
+
+  fontOrTimeout.then(function () { play(0); });
+})();
+</script>
+</body>
+</html>
