@@ -11,6 +11,7 @@
  * sayfa elle güncellenmez.
  */
 const LZString = require('lz-string');
+const site = require('./_site');
 const QRCode = require('qrcode');
 const catalog = require('../public/data/catalog.json');
 const { rowText } = require('../public/js/row-text.js');
@@ -186,7 +187,6 @@ function buildModel(payload, lang) {
 const SPROUT_STEM = 'M567.45 438.04Q568.43 407.02 573.45 381.63Q575.96 368.91 579.76 356.3L609.51 294.18L632.23 351.66Q624.51 371.22 620.61 390.94Q616.47 411.89 615.55 438.04Z';
 const SPROUT_LEFT = 'M579.76 356.3C517.61 359.84 472.39 307.87 451.81 255.76C505.43 239.91 573.91 243.49 609.51 294.18Z';
 const SPROUT_RIGHT = 'M609.51 294.18C639.34 219.85 723.9 198.21 793.19 204.62C776.77 277.75 723.76 357.66 632.23 351.66Z';
-const LOGO_PATH = 'M231.1 332.12H292.73Q314.61 332.12 329.49 344.71Q344.05 357.03 348.02 378.21L360.32 438.04H567.45Q568.43 407.02 573.45 381.63Q575.96 368.91 579.76 356.3C517.61 359.84 472.39 307.87 451.81 255.76C505.43 239.91 573.91 243.49 609.51 294.18C639.34 219.85 723.9 198.21 793.19 204.62C776.77 277.75 723.76 357.66 632.23 351.66Q624.51 371.22 620.61 390.94Q616.47 411.89 615.55 438.04H753.03Q765.42 438.04 770.74 444.18Q776.16 450.44 774.21 463.08L756.88 572.86Q751.1 609.45 712.59 609.45H395.58L403.5 647.97H672.14Q678.27 647.97 683.93 650.32Q689.6 652.66 693.93 657Q698.26 661.33 700.61 666.99Q702.96 672.66 702.96 678.79Q702.96 684.91 700.61 690.58Q698.26 696.24 693.93 700.57Q689.6 704.91 683.93 707.25Q678.27 709.6 672.14 709.6H402.51Q379.66 709.6 364 697.07Q348.12 684.37 343.44 661.88L288.29 393.75H231.1Q224.97 393.75 219.31 391.4Q213.65 389.06 209.31 384.72Q204.98 380.39 202.63 374.73Q200.29 369.06 200.29 362.93Q200.29 356.8 202.63 351.14Q204.98 345.48 209.31 341.14Q213.65 336.81 219.31 334.46Q224.97 332.12 231.1 332.12ZM389.03 780.86C389.03 755.33 409.72 734.64 435.25 734.64C460.78 734.64 481.47 755.33 481.47 780.86C481.47 806.39 460.78 827.08 435.25 827.08C409.72 827.08 389.03 806.39 389.03 780.86ZM593.18 780.86C593.18 755.33 613.87 734.64 639.4 734.64C664.93 734.64 685.62 755.33 685.62 780.86C685.62 806.39 664.93 827.08 639.4 827.08C613.87 827.08 593.18 806.39 593.18 780.86Z';
 
 const ICON = {
   check: '<svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.6l3.9 3.9L18 8.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
@@ -230,38 +230,6 @@ function rowHtml(it, t) {
 }
 
 const CSS = `
-:root{
-  --bg:#F8F7F4;--surface:#EFEDE8;--border:#D8D5CE;--text:#0F0F0D;--text2:#6B6B63;--muted:#807D76;--disabled:#948F89;
-  --accent:#2D8B75;--accent-muted:rgba(45,139,117,.082);--success:#3FA672;--emoji-bg:rgba(0,0,0,.04);--track:#DCD8CF;
-  --land-bg:#D7E1DA;--land-ink:#236C5B;--sea-bg:#D4E1E0;--sea-ink:#136A7C;--qr-tile:#FFFFFF;--leaf-light:#7DC4A5;
-  --hair:1px;color-scheme:light;
-  --std:cubic-bezier(0,0,.2,1);--move:cubic-bezier(.4,0,.2,1);
-}
-@media (min-resolution:2dppx){:root{--hair:.5px}}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#121210;--surface:#1E1D1A;--border:#2C2A26;--text:#EDEBE6;--text2:#8C8780;--muted:#6D6862;--disabled:#5A5A5A;
-  --accent:#3AAF95;--accent-muted:rgba(58,175,149,.082);--success:#4FC486;--emoji-bg:rgba(255,255,255,.06);--track:#2C2A26;
-  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;--leaf-light:#2E8A70;color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#121210;--surface:#1E1D1A;--border:#2C2A26;--text:#EDEBE6;--text2:#8C8780;--muted:#6D6862;--disabled:#5A5A5A;
-  --accent:#3AAF95;--accent-muted:rgba(58,175,149,.082);--success:#4FC486;--emoji-bg:rgba(255,255,255,.06);--track:#2C2A26;
-  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;--leaf-light:#2E8A70;color-scheme:dark}
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
-  -webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
-button{font:inherit;color:inherit}
-a{color:inherit}
-.wrap{max-width:1080px;margin:0 auto;padding:0 16px 40px}
-.bar{display:flex;align-items:center;justify-content:space-between;height:52px}
-.brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--accent);font-weight:600;font-size:17px;letter-spacing:-.2px}
-.brand-tile{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center}
-.brand-tile svg{width:19px;height:19px;fill:var(--bg)}
-.tools{display:flex;gap:8px}
-.tool{width:44px;height:44px;border-radius:12px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);text-decoration:none}
-.tool svg{width:18px;height:18px}
-.tool.lang{font-size:13px;font-weight:600;letter-spacing:.3px;color:var(--text)}
-.tool:active{opacity:.6}
 .head{display:flex;align-items:center;gap:12px;padding:12px 0 0}
 .face{flex:none;width:44px;height:44px;border-radius:12px;background:var(--accent-muted);display:flex;align-items:center;justify-content:center;font-size:20px}
 .head h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.4px;line-height:1.1;overflow-wrap:anywhere}
@@ -332,9 +300,6 @@ ul{list-style:none;margin:0;padding:0}
 @keyframes squash{0%{transform:scale(1);animation-timing-function:cubic-bezier(0,0,.2,1)}50%{transform:scale(.92);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:scale(1)}}
 .nofx,.nofx *{transition:none!important;animation:none!important}
 .side{display:none}
-.foot{margin:40px 0 0;font-size:13px;line-height:1.4;color:var(--text2);display:flex;flex-direction:column;gap:6px}
-.foot a{color:var(--accent);text-decoration:none;font-weight:600}
-.foot .made{color:var(--text)}
 .toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;
   display:flex;align-items:center;gap:12px;padding:10px 10px 10px 16px;border-radius:12px;background:var(--text);color:var(--bg);font-size:14px;font-weight:500;
   transition:transform 250ms var(--std),opacity 250ms var(--std);max-width:calc(100% - 32px);z-index:5}
@@ -342,8 +307,6 @@ ul{list-style:none;margin:0;padding:0}
 .toast button{border:0;border-radius:8px;min-height:36px;padding:8px 10px;background:transparent;color:var(--bg);font-weight:700;cursor:pointer;text-decoration:underline}
 .toast button[hidden]{display:none}
 @media (min-width:900px){
-  .wrap{padding:0 40px 56px}
-  .bar{height:64px}
   .layout{display:grid;grid-template-columns:minmax(0,640px) 300px;justify-content:center;gap:64px;align-items:start}
   .head{padding-top:24px}
   .head h1{font-size:34px}
@@ -359,10 +322,8 @@ ul{list-style:none;margin:0;padding:0}
   .act svg{width:18px;height:18px;color:var(--accent)}
   .act:active{opacity:.6}
 }
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 @media print{
-  :root,:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--border:#ccc;--text:#000;--text2:#444;--disabled:#666;--accent:#000;--accent-muted:#fff;--emoji-bg:#f2f2f2;--track:#ddd;color-scheme:light}
-  .bar .tools,.side,.toast,.prog,.note{display:none!important}
+  .side,.toast,.prog,.note{display:none!important}
   .done-sec.closed ul{display:block}
   .row{break-inside:avoid}
   .layout{display:block}
@@ -664,62 +625,6 @@ const CLIENT_JS = `
 })();
 `;
 
-const THEME_JS = `
-(function(){
-  /* Görünüm: sistem → açık → koyu. Seçim bu tarayıcıda saklanır, sitenin her sayfasında geçerli. */
-  var root = document.documentElement, btn = document.getElementById('theme');
-  if (!btn) return;
-  var modes = ['system', 'light', 'dark'];
-  var icons = JSON.parse(btn.getAttribute('data-icons'));
-  var labels = JSON.parse(btn.getAttribute('data-labels'));
-  function set(m, save){
-    if (m === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', m);
-    if (save) { try { if (m === 'system') localStorage.removeItem('listem-theme'); else localStorage.setItem('listem-theme', m); } catch(e){} }
-    btn.innerHTML = icons[m];
-    btn.setAttribute('aria-label', labels[m]);
-    btn.setAttribute('data-mode', m);
-  }
-  set(root.getAttribute('data-theme') || 'system', false);
-  btn.addEventListener('click', function(){ set(modes[(modes.indexOf(btn.getAttribute('data-mode')) + 1) % 3], true); });
-})();
-`;
-
-/* Görünüm seçimi ilk boyamadan önce uygulanır: gece açılan sayfa bir an bile parlamaz. */
-const THEME_BOOT = "(function(){try{var m=localStorage.getItem('listem-theme');if(m==='light'||m==='dark')document.documentElement.setAttribute('data-theme',m);}catch(e){}})();";
-
-function pageShell({ lang, title, ogTitle, ogDescription, host, body, inlineData }) {
-  return '<!doctype html>\n<html lang="' + lang + '">\n<head>\n' +
-    '<meta charset="utf-8">\n' +
-    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +
-    '<meta name="color-scheme" content="light dark">\n' +
-    '<meta name="theme-color" content="#F8F7F4" media="(prefers-color-scheme: light)">\n' +
-    '<meta name="theme-color" content="#121210" media="(prefers-color-scheme: dark)">\n' +
-    '<script>' + THEME_BOOT + '</script>\n' +
-    '<title>' + esc(title) + '</title>\n' +
-    '<meta property="og:title" content="' + esc(ogTitle) + '">\n' +
-    '<meta property="og:description" content="' + esc(ogDescription) + '">\n' +
-    '<meta property="og:image" content="https://' + esc(host) + '/og-image.png">\n' +
-    '<meta property="og:type" content="website">\n' +
-    '<meta name="twitter:card" content="summary_large_image">\n' +
-    '<meta name="robots" content="noindex">\n' +
-    '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n' +
-    '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n' +
-    '<style>' + CSS + '</style>\n' +
-    '</head>\n<body>\n' + body + '\n' +
-    '<script>' + THEME_JS + '</script>\n' +
-    (inlineData ? '<script type="application/json" id="share-data">' + inlineData + '</script>\n<script>' + CLIENT_JS + '</script>\n' : '') +
-    '</body>\n</html>';
-}
-
-function topBar(t, lang, langHref) {
-  return '<header class="bar">' +
-    '<a class="brand" href="https://list-em.app"><span class="brand-tile"><svg viewBox="180 180 640 660" aria-hidden="true"><path d="' + LOGO_PATH + '"/></svg></span>List-em</a>' +
-    '<div class="tools">' +
-    '<a class="tool lang" href="' + esc(langHref) + '" hreflang="' + (lang === 'tr' ? 'en' : 'tr') + '" aria-label="' + esc(t.otherLangLabel) + '">' + t.otherLang + '</a>' +
-    '<button type="button" class="tool" id="theme" aria-label="' + esc(t.themeSystem) + '" data-icons="' + esc(JSON.stringify({ system: ICON.system, light: ICON.light, dark: ICON.dark })) + '" data-labels="' + esc(JSON.stringify({ system: t.themeSystem, light: t.themeLight, dark: t.themeDark })) + '">' + ICON.system + '</button>' +
-    '</div></header>';
-}
-
 function hashKey(s) {
   let h = 5381;
   for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
@@ -768,7 +673,7 @@ function renderShareHTML(data, host, opts) {
 
   const body =
     '<div class="wrap">' +
-    topBar(t, lang, langHref) +
+    site.header(lang, langHref, null) +
     '<div class="layout"><main class="main">' +
     '<div class="head"><span class="face" aria-hidden="true">' + esc(model.icon) + '</span><div>' +
     '<h1>' + esc(model.name) + '</h1>' +
@@ -783,9 +688,7 @@ function renderShareHTML(data, host, opts) {
     '<section class="done-sec" id="done-sec" hidden>' +
     '<button type="button" class="done-h" aria-expanded="true"><span class="done-title"></span>' + ICON.chevronDown + '</button>' +
     '<ul></ul></section></div>' +
-    '<footer class="foot"><span class="made">' + esc(t.madeWith) + ' <a href="https://list-em.app">list-em.app</a></span>' +
-    '<span><a href="/gizlilik">' + esc(t.privacy) + '</a></span></footer>' +
-    '</main>' + side + '</div></div>' +
+    '</main>' + side + '</div>' + site.footer(lang, esc(t.madeWith)) + '</div>' +
     '<div class="toast" id="toast" role="status"><span></span><button type="button" hidden>' + esc(t.undo) + '</button></div>';
 
   const inlineData = JSON.stringify({
@@ -803,21 +706,23 @@ function renderShareHTML(data, host, opts) {
     },
   }).replace(/</g, '\\u003c');
 
-  return pageShell({
+  return site.pageShell({
     lang,
     title: model.name + ' · List-em',
     ogTitle: model.icon + ' ' + model.name + (total ? ' (' + t.items(total) + ')' : ''),
     ogDescription: t.ogList(model.name, total),
     host,
+    css: CSS,
     body,
-    inlineData,
+    scripts: '<script type="application/json" id="share-data">' + inlineData + '</script>\n<script>' + CLIENT_JS + '</script>\n',
+    index: false,
   });
 }
 
 /* Durum sayfaları — uygulamanın boş hâl kuralı: blok, üst çubuğun altında kalan alanın optik
    merkezine (%38) oturur; ikon 36×36 yeşil kutucukta çizgi ikon (sistem işareti, emoji değil).
    "Yok" ile "bakamadık" ayrı sayfalardır (durum kanunu 3): biri kalıcı, öbürü yeniden denenebilir. */
-const STATE_CSS = '.state{position:relative;min-height:calc(100svh - 52px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}' +
+const STATE_CSS = '.state{position:relative;min-height:calc(100svh - 56px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}' +
   '.state-in{position:absolute;left:0;right:0;top:38%;transform:translateY(-50%);max-width:400px;margin:0 auto;padding:0 8px;text-align:center;display:flex;flex-direction:column;align-items:center}' +
   '.state-ic{width:36px;height:36px;border-radius:12px;background:var(--accent-muted);color:var(--accent);display:flex;align-items:center;justify-content:center}' +
   '.state-ic svg{width:20px;height:20px}' +
@@ -826,7 +731,7 @@ const STATE_CSS = '.state{position:relative;min-height:calc(100svh - 52px - env(
   '.state .go{margin-top:20px;font-size:15px;font-weight:600;color:var(--accent);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}' +
   '.state .btn{margin-top:20px;min-height:44px;padding:0 20px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:600;cursor:pointer}' +
   '.state .btn:active,.state .go:active{opacity:.6}' +
-  '@media (min-width:900px){.state{min-height:calc(100svh - 64px)}}';
+  '@media (min-width:900px){.state{min-height:calc(100svh - 68px)}}';
 
 function statePage(host, opts, kind) {
   opts = opts || {};
@@ -837,13 +742,13 @@ function statePage(host, opts, kind) {
   const action = expired
     ? '<a class="go" href="https://list-em.app">' + esc(t.expiredLink) + '</a>'
     : '<button type="button" class="btn" onclick="location.reload()">' + esc(t.retry) + '</button>';
-  const body = '<style>' + STATE_CSS + '</style><div class="wrap">' + topBar(t, lang, '?lang=' + (lang === 'tr' ? 'en' : 'tr')) +
+  const body = '<div class="wrap">' + site.header(lang, '?lang=' + (lang === 'tr' ? 'en' : 'tr'), null) +
     '<main class="state"><div class="state-in">' +
     '<span class="state-ic">' + (expired ? ICON.hourglass : ICON.cloudOff) + '</span>' +
     '<h1>' + esc(title) + '</h1>' +
     '<p>' + esc(expired ? t.expiredBody : t.downBody) + '</p>' + action +
-    '</div></main></div>';
-  return pageShell({ lang, title: title + ' · List-em', ogTitle: 'List-em', ogDescription: title, host, body, inlineData: null });
+    '</div></main>' + site.footer(lang, '') + '</div>';
+  return site.pageShell({ lang, title: title + ' · List-em', ogTitle: 'List-em', ogDescription: title, host, css: STATE_CSS, body, index: false });
 }
 
 function renderExpiredHTML(host, opts) { return statePage(host, opts, 'expired'); }
@@ -881,7 +786,7 @@ async function qrSvgFor(url) {
     if (L > 0) {
       /* ortadaki işaret: tek renk, kutucuksuz; temizlenen alan zaten beyaz */
       const x = s0 + m, pad = L * 0.04;
-      logo = '<svg x="' + (x + pad).toFixed(2) + '" y="' + (x + pad).toFixed(2) + '" width="' + (L - 2 * pad).toFixed(2) + '" height="' + (L - 2 * pad).toFixed(2) + '" viewBox="180 180 640 660"><path fill="' + ink + '" d="' + LOGO_PATH + '"/></svg>';
+      logo = '<svg x="' + (x + pad).toFixed(2) + '" y="' + (x + pad).toFixed(2) + '" width="' + (L - 2 * pad).toFixed(2) + '" height="' + (L - 2 * pad).toFixed(2) + '" viewBox="180 180 640 660"><path fill="' + ink + '" d="' + site.LOGO_PATH + '"/></svg>';
     }
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + S + ' ' + S + '">' +
       '<rect width="' + S + '" height="' + S + '" fill="#FFFFFF"/>' +
