@@ -26,7 +26,7 @@ const T = {
     yearRound: 'Yıl boyu bulunanlar',
     yearRoundNote: 'Bunların belirli bir mevsimi yok; yılın her ayı bulunur.',
     monthsLabel: 'Ay', filterLabel: 'Tür',
-    starting: 'Bu ay başlayanlar', ending: 'Son ayında',
+    starting: 'Bu ay başlayanlar', ending: 'Son ayında', more: '+{n} daha',
     noneStart: 'Bu ay mevsimi başlayan ürün yok.', noneEnd: 'Bu ay mevsimi biten ürün yok.',
     explain: 'Her şerit, ürünün yıl içinde mevsiminde olduğu ayları gösterir; dikey bant seçtiğin ay.', legendOn: 'Mevsiminde', legendSel: 'Seçili ay',
     chart: 'Mevsim çizelgesi', poster: 'Ekim pazarı: nar, ayva, Trabzon hurması, mandalina, kestane ve hamsi; düz çizim bir afiş.',
@@ -34,7 +34,7 @@ const T = {
   },
   en: {
     title: 'Seasonal Calendar',
-    lead: 'See, month by month, which fruit, vegetables and fish are in season in Turkey.',
+    lead: 'See, month by month, which fruit, vegetables and fish are in season in Türkiye.',
     months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
     short: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     inMonth: ['In January,', 'In February,', 'In March,', 'In April,', 'In May,', 'In June,', 'In July,', 'In August,', 'In September,', 'In October,', 'In November,', 'In December,'],
@@ -46,11 +46,11 @@ const T = {
     yearRound: 'Available all year',
     yearRoundNote: 'These have no particular season; you can find them every month.',
     monthsLabel: 'Month', filterLabel: 'Kind',
-    starting: 'Just in this month', ending: 'In their last month',
+    starting: 'Just in this month', ending: 'In their last month', more: '+{n} more',
     noneStart: 'Nothing comes into season this month.', noneEnd: 'Nothing goes out of season this month.',
     explain: 'Each bar shows the months a product is in season; the vertical band is the month you picked.', legendOn: 'In season', legendSel: 'Selected month',
     chart: 'Season chart', poster: 'An October market: pomegranates, quinces, persimmons, tangerines, chestnuts and anchovies, drawn as a flat poster.',
-    metaDesc: 'Which fruit, vegetables and fish are in season in Turkey, month by month — what has just arrived and what is in its last month.',
+    metaDesc: 'Which fruit, vegetables and fish are in season in Türkiye, month by month — what has just arrived and what is in its last month.',
   },
 };
 
@@ -89,6 +89,17 @@ function build(lang) {
 }
 
 
+/* Sayfanın sağ üstünde, açılınca yukarıdan aşağı uzayan bir asma dalı; yapraklar sırayla açar. */
+const VINE = '<svg class="vine" viewBox="0 0 240 420" aria-hidden="true">' +
+  '<path class="vine-stem" pathLength="1" d="M176 -6 C150 50 212 92 188 150 S126 228 150 288 S208 352 180 426"/>' +
+  '<g transform="translate(178 40) rotate(-38)"><image class="lf" style="--d:250ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
+  '<g transform="translate(197 104) rotate(38)"><image class="lf" style="--d:480ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
+  '<g transform="translate(171 170) rotate(-62)"><image class="lf" style="--d:700ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
+  '<g transform="translate(147 232) rotate(28)"><image class="lf" style="--d:900ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
+  '<g transform="translate(163 300) rotate(-42)"><image class="lf" style="--d:1100ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
+  '<g transform="translate(193 362) rotate(34)"><image class="lf" style="--d:1280ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
+  '</svg>';
+
 /* Ürün işaretleri: çizimi olanlar çizimle, diğerleri uygulamadaki emojiyle. Çizim seti büyüdükçe buraya eklenir. */
 const PIECE = { nar: 'nar', ayva: 'ayva', 'trabzon-hurmasi': 'hurma', mandalina: 'mandalina', hamsi: 'hamsi' };
 const icon = (id, emoji) => PIECE[id] ? '<span class="ico"><img src="/img/pazar/' + PIECE[id] + '.webp" alt="" loading="lazy"></span>' : '<span class="ico" aria-hidden="true">' + esc(emoji) + '</span>';
@@ -97,17 +108,28 @@ const GRAIN = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/
 const DARK = (sel) => '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) ' + sel + '}\n:root[data-theme="dark"] ' + sel + '\n';
 
 const CSS = `
-:root{--tile:rgba(255,255,255,.6);--gridline:rgba(43,33,24,.06);--paper:#F7E8CE;--ink:#2B2118;--ink2:#6A5D4E;--ink3:#4A3F33;--rule:rgba(43,33,24,.1);--band:rgba(45,139,117,.13);--chip:rgba(255,255,255,.55);--c-Fruit:#E0703A;--c-Vegetables:#4C8A55;--c-Fish:#3C6893;--namew:118px}
+:root{--vine:#3F6E48;--tile:rgba(255,255,255,.6);--gridline:rgba(43,33,24,.06);--paper:#F7E8CE;--ink:#2B2118;--ink2:#6A5D4E;--ink3:#4A3F33;--rule:rgba(43,33,24,.1);--band:rgba(45,139,117,.13);--chip:rgba(255,255,255,.55);--c-Fruit:#E0703A;--c-Vegetables:#4C8A55;--c-Fish:#3C6893;--namew:118px}
 body.paper{background:var(--paper)}
 body.paper::before{content:"";position:fixed;inset:0;background-image:${GRAIN};opacity:.16;mix-blend-mode:multiply;pointer-events:none;z-index:30}
-${DARK('.cal{--tile:var(--surface);--gridline:rgba(255,255,255,.05);--ink:var(--text);--ink2:var(--text2);--ink3:var(--text2);--rule:rgba(255,255,255,.08);--band:rgba(56,182,150,.16);--chip:var(--surface);--c-Fruit:#F0864E;--c-Vegetables:#63A36C;--c-Fish:#5A8CBF}')}
+${DARK('.cal{--vine:#4E8B5A;--tile:var(--surface);--gridline:rgba(255,255,255,.05);--ink:var(--text);--ink2:var(--text2);--ink3:var(--text2);--rule:rgba(255,255,255,.08);--band:rgba(56,182,150,.16);--chip:var(--surface);--c-Fruit:#F0864E;--c-Vegetables:#63A36C;--c-Fish:#5A8CBF}')}
 ${DARK('body.paper{background:var(--bg)}')}
 ${DARK('body.paper::before{display:none}')}
 .cal [hidden]{display:none!important}
 .cal{padding:4px 0 24px;color:var(--ink)}
 .cal-hero{display:grid;gap:20px;padding:16px 0 0}
-.eyebrow{margin:0;display:inline-flex;align-items:center;min-height:28px;padding:0 12px;border-radius:999px;background:rgba(45,139,117,.12);color:var(--accent);font-size:13px;font-weight:600}
-.cal h1{margin:14px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(64px,8vw,148px);line-height:.92;letter-spacing:-.035em}
+.kicker{margin:0;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.cal-hero{position:relative}
+.vine{position:absolute;top:2px;right:-4px;width:92px;height:auto;pointer-events:none;overflow:visible;z-index:0}
+.vine-stem{fill:none;stroke:var(--vine);stroke-width:3.2;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:0}
+.vine .lf{transform-box:fill-box;transform-origin:33% 97%}
+.vine.grow .vine-stem{animation:vine-draw 1.6s cubic-bezier(.3,.7,.2,1) both}
+.vine.grow .lf{animation:leaf-in .5s cubic-bezier(.34,1.5,.64,1) both;animation-delay:var(--d)}
+@keyframes vine-draw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@keyframes leaf-in{from{opacity:0;transform:scale(.2) rotate(-25deg)}to{opacity:1;transform:none}}
+.more{display:inline-flex;align-items:center;min-height:34px;padding:0 13px;border-radius:999px;border:1px dashed var(--rule);background:transparent;color:var(--accent);font:700 14px/1 inherit;font-family:inherit;cursor:pointer}
+.sc:not(.open) li:nth-child(n+11):not(.mli){display:none}
+.sc.open .mli{display:none}
+.cal h1{margin:10px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(64px,8vw,148px);line-height:.92;letter-spacing:-.035em}
 .lead{margin:14px 0 0;font-size:clamp(17px,1.2vw,22px);line-height:1.45;color:var(--ink3);max-width:36ch;text-wrap:pretty}
 .months{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:28px -16px 0;padding:2px 16px;scroll-padding-inline:16px}
 .months::-webkit-scrollbar{display:none}
@@ -167,6 +189,7 @@ ${DARK('.grid-h{background:var(--bg)}')}
 .yr li[data-k="Fruit"]{--c:var(--c-Fruit)}.yr li[data-k="Vegetables"]{--c:var(--c-Vegetables)}.yr li[data-k="Fish"]{--c:var(--c-Fish)}
 @media (min-width:900px){
   .cal{--namew:clamp(200px,16vw,280px)}
+  .vine{top:6px;right:2%;width:clamp(160px,15vw,250px)}
   .cal-hero{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:center;gap:clamp(24px,3vw,72px);padding-top:clamp(16px,4vh,64px)}
   .cal-hero.solo{grid-template-columns:1fr}
   .months{margin:40px 0 0;padding:2px 0;flex-wrap:wrap;overflow:visible}
@@ -182,7 +205,7 @@ ${DARK('.grid-h{background:var(--bg)}')}
   .explain{font-size:16px}
   .sr i b{height:14px}
 }
-@media (max-width:899px){.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
+@media (max-width:899px){.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:24px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.cal h1{font-size:72px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
 @media (hover:hover){.sr:hover{background:var(--chip)}}
 `;
 
@@ -197,8 +220,10 @@ const CLIENT = `
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function pills(list, none){
     if (!list.length) return '<p class="none">' + esc(none) + '</p>';
-    return '<ul>' + list.map(function(x){ return '<li>' + x.i + esc(x.n) + '</li>'; }).join('') + '</ul>';
+    return '<ul>' + list.map(function(x){ return '<li>' + x.i + esc(x.n) + '</li>'; }).join('') +
+      (list.length > 10 ? '<li class="mli"><button type="button" class="more">' + esc(D.t.more.replace('{n}', list.length - 10)) + '</button></li>' : '') + '</ul>';
   }
+  document.querySelector('.show').addEventListener('click', function(e){ var b = e.target.closest('.more'); if (!b) return; b.closest('.sc').classList.add('open'); });
   function apply(push){
     var total = 0;
     tabs.forEach(function(b){ b.setAttribute('aria-selected', +b.getAttribute('data-m') === month ? 'true' : 'false'); });
@@ -224,6 +249,7 @@ const CLIENT = `
       total += shown;
     });
     var items = D.items.filter(function(x){ return kind === 'all' || x.c === kind; });
+    document.querySelectorAll('.sc').forEach(function(x){ x.classList.remove('open'); });
     $('sc-start').innerHTML = pills(items.filter(function(x){ return x.s.indexOf(month) >= 0; }), D.t.noneStart);
     $('sc-end').innerHTML = pills(items.filter(function(x){ return x.e.indexOf(month) >= 0; }), D.t.noneEnd);
     $('mname').textContent = D.t.months[month - 1];
@@ -271,6 +297,7 @@ function render(lang, host, q) {
     '<button type="button" class="kind" data-k="' + k + '" aria-pressed="' + (k === kind) + '"' + (k !== 'all' ? ' style="--c:var(--c-' + k + ')"' : '') + '>' +
     (k !== 'all' ? '<span class="dot"></span>' : '') + esc(label) + '</button>').join('');
   const pill = (x) => '<li>' + icon(x.id, x.emoji) + esc(x.name) + '</li>';
+  const pills = (list, none) => list.length ? '<ul>' + list.map(pill).join('') + (list.length > 10 ? '<li class="mli"><button type="button" class="more">' + esc(t.more.replace('{n}', list.length - 10)) + '</button></li>' : '') + '</ul>' : '<p class="none">' + esc(none) + '</p>';
   const starting = visible.filter((x) => x.starts.includes(month)), ending = visible.filter((x) => x.ends.includes(month));
   const groups = GROUPS.map((g) => {
     const items = data.seasonal.filter((x) => x.cat === g);
@@ -287,18 +314,18 @@ function render(lang, host, q) {
     '<span data-m="' + (i + 1) + '"' + (i + 1 === month ? ' class="sel"' : '') + '><span class="l">' + esc(s) + '</span><span class="s1">' + esc(s.charAt(0)) + '</span></span>').join('') + '</div>';
   const payload = {
     month, kind,
-    t: { fresh: t.fresh, last: t.last, noneStart: t.noneStart, noneEnd: t.noneEnd, months: t.months, count: countTxt },
+    t: { fresh: t.fresh, last: t.last, noneStart: t.noneStart, noneEnd: t.noneEnd, months: t.months, count: countTxt, more: t.more },
     items: data.seasonal.map((x) => ({ n: x.name, c: x.cat, s: x.starts, e: x.ends, i: icon(x.id, x.emoji) })),
   };
   const body = '<div class="wrap">' + site.header(lang, '/mevsim?lang=' + (lang === 'tr' ? 'en' : 'tr'), 'season') +
     '<main class="cal">' +
-    '<section class="cal-hero solo"><div><p class="eyebrow">' + esc(t.title) + '</p>' +
+    '<section class="cal-hero solo">' + VINE.replace('class="vine"', 'class="vine grow"') + '<div style="position:relative;z-index:1"><p class="kicker">' + esc(t.title) + '</p>' +
     '<h1 id="mname">' + esc(t.months[month - 1]) + '</h1>' +
     '<p class="lead" id="count">' + esc(countTxt[month - 1].replace('{n}', visible.length)) + '</p></div></section>' +
     '<nav class="months" role="tablist" aria-label="' + esc(t.monthsLabel) + '">' + tabs + '</nav>' +
     '<div class="kinds" role="group" aria-label="' + esc(t.filterLabel) + '">' + kinds + '</div>' +
-    '<section class="show"><div class="sc"><h2>' + esc(t.starting) + '</h2><div id="sc-start">' + (starting.length ? '<ul>' + starting.map(pill).join('') + '</ul>' : '<p class="none">' + esc(t.noneStart) + '</p>') + '</div></div>' +
-    '<div class="sc"><h2>' + esc(t.ending) + '</h2><div id="sc-end">' + (ending.length ? '<ul>' + ending.map(pill).join('') + '</ul>' : '<p class="none">' + esc(t.noneEnd) + '</p>') + '</div></div></section>' +
+    '<section class="show"><div class="sc"><h2>' + esc(t.starting) + '</h2><div id="sc-start">' + pills(starting, t.noneStart) + '</div></div>' +
+    '<div class="sc"><h2>' + esc(t.ending) + '</h2><div id="sc-end">' + pills(ending, t.noneEnd) + '</div></div></section>' +
     '<section class="chart" aria-label="' + esc(t.chart) + '"><h2>' + esc(t.chart) + '</h2><p class="explain">' + esc(t.explain) + '</p>' +
     '<ul class="legend" aria-hidden="true"><li><span class="lb"></span>' + esc(t.legendOn) + '</li><li><span class="lband"></span>' + esc(t.legendSel) + '</li></ul>' + head + groups +
     '<p class="empty" id="empty"' + (visible.length ? ' hidden' : '') + '>—</p></section>' +

@@ -26,7 +26,7 @@ const T = {
   },
   en: {
     eyebrow: 'Coming soon to the App Store',
-    title: 'A grocery list made for Turkey',
+    title: 'A grocery list made for Türkiye',
     body: 'It knows products by weight, calories and season; it puts your list in aisle order; and anyone can open a shared list without the app.',
     follow: 'Don’t miss the launch:', ig: 'List-em on Instagram', x: 'List-em on X',
     inSeason: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m) => 'In season in ' + m),
@@ -34,7 +34,7 @@ const T = {
     list: 'October market', season: 'In season', search: 'Quick search & add...', fruit: 'Fruit', fish: 'Fish & Seafood',
     done: (n) => 'Completed (' + n + ')', clear: 'Clear', add: 'Add item', left: (n) => n + ' left', progress: (a, b) => a + ' / ' + b + ' done',
     stage: 'The October market list in the app: satsuma tangerines, persimmons, quinces, Hicaz pomegranates and anchovies, with the pomegranates ticked; beside it, a market stall drawn from them.',
-    meta: 'List-em: a grocery list made for Turkey. It knows products by weight, calories and season. Coming soon to the App Store.',
+    meta: 'List-em: a grocery list made for Türkiye. It knows products by weight, calories and season. Coming soon to the App Store.',
   },
 };
 
@@ -191,15 +191,13 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 .now-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
 .now h2{margin:0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(28px,2.6vw,48px);letter-spacing:-.02em;line-height:1.05;color:var(--paper-ink)}
 .now .all{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:600;text-decoration:none;font-size:clamp(15px,1vw,18px)}
-.now-list{list-style:none;margin:20px -16px 0;padding:0 16px 8px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(136px,1fr);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;scrollbar-width:none}
-.now-list::-webkit-scrollbar{display:none}
-.now-list li{scroll-snap-align:start}
+.now-list{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 10px}
 .now-list a{display:flex;flex-direction:column;text-decoration:none;color:var(--paper-ink)}
 .now-list .pic{display:grid;place-items:center;aspect-ratio:1;border-radius:20px;background:rgba(255,255,255,.45)}
 .now-list img{width:72%;height:72%;object-fit:contain}
 .now-list .emo{font-size:52px}
-.now-list .nm{margin-top:10px;font-size:clamp(16px,1.1vw,20px);font-weight:600}
-.now-list .rng{margin-top:2px;font-size:clamp(13px,.9vw,16px);color:var(--paper-2)}
+.now-list .nm{margin-top:8px;font-size:clamp(15px,1.1vw,20px);font-weight:600;line-height:1.2}
+.now-list .rng{margin-top:3px;font-size:clamp(12.5px,.9vw,16px);color:var(--paper-2)}
 @media (hover:hover){.now-list a:hover .pic{background:rgba(255,255,255,.75)}}
 
 /* sahne: telefonda önce tezgâh, altında uygulama; masaüstünde uygulama solda, tezgâh sağda */
@@ -308,6 +306,14 @@ ${DARK('.now,.home .site-foot{border-top-color:var(--border)}')}
   .eyebrow{font-size:clamp(13px,.9vw,16px);min-height:clamp(28px,2vw,36px);padding:0 clamp(12px,.9vw,16px)}
 }
 @media (min-width:1700px){.hero{grid-template-columns:minmax(0,6fr) minmax(0,7fr)}}
+@media (max-width:899px){
+  .hero-copy{display:contents}
+  .eyebrow{order:0;justify-self:start;margin-top:12px}
+  .stage{order:1;margin-top:14px}
+  .hero h1{order:2;margin-top:40px}
+  .hero p.body{order:3}
+  .follow{order:4}
+}
 @media (prefers-reduced-motion:reduce){.stage.play *{animation:none!important}}
 .stage.play.wait *{animation-play-state:paused!important}
 `;

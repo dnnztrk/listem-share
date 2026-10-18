@@ -19,7 +19,7 @@ const SITE = {
     home: 'Ana sayfa',
   },
   en: {
-    tagline: 'A grocery list made for Turkey',
+    tagline: 'A grocery list made for Türkiye',
     nav: { season: 'Seasonal Calendar', seasonShort: 'Calendar' },
     legal: 'Legal', soon: 'Coming soon to the App Store', langGroup: 'Language',
     themeSystem: 'Appearance: system', themeLight: 'Appearance: light', themeDark: 'Appearance: dark',
@@ -109,22 +109,23 @@ body.home,body.paper{--page:#F7E8CE}
 @media (hover:hover){.nav a:hover,.tool:hover{background:var(--chip-chrome);color:var(--text)}.langs a:hover{color:var(--text)}}
 @media (max-width:440px){.nav .long{display:none}.nav .short{display:inline}.nav a{padding:0 11px}.bar-right{gap:2px}}
 /* alt bilgi: sayfanın sonunu belirleyen ayrı bir zemin */
-.site-foot{position:relative;z-index:0;margin-top:clamp(64px,9vw,128px);padding:clamp(40px,5vw,72px) 0 8px;display:grid;gap:clamp(32px,4vw,56px);font-size:14px;line-height:1.45;color:var(--text2)}
+.site-foot{position:relative;z-index:0;margin-top:clamp(64px,9vw,128px);padding:clamp(36px,5vw,72px) 0 8px;display:grid;gap:clamp(24px,4vw,56px);font-size:14px;line-height:1.45;color:var(--text2)}
 .site-foot::before{content:"";position:absolute;top:0;bottom:-40px;left:calc(50% - 50vw);right:calc(50% - 50vw);z-index:-1;background:var(--foot-bg);box-shadow:0 -1px 0 var(--rule-chrome)}
 .site-foot .lead{margin:0;color:var(--text);font-size:15px}
 .site-foot .lead a{color:var(--accent);font-weight:600;text-decoration:none}
-.foot-main{display:grid;gap:36px}
-.foot-brand{display:inline-flex;align-items:baseline;gap:.3em;font-size:30px;color:var(--accent);text-decoration:none}
+.foot-main{display:grid;gap:22px}
+.foot-brand{display:inline-flex;align-items:baseline;gap:.3em;font-size:26px;color:var(--accent);text-decoration:none}
 .foot-brand svg{height:1.12em;width:auto;fill:currentColor}
-.foot-tag{margin:10px 0 0;color:var(--text);font-size:16px;font-weight:500}
+.foot-tag{margin:8px 0 0;color:var(--text);font-size:15px;font-weight:500}
 .foot-soon{margin:4px 0 0;color:var(--text2);font-size:14px}
-.foot-soc{display:flex;gap:8px;margin-top:18px}
+.foot-soc{display:flex;gap:8px;margin-top:14px}
 .soc-i{display:grid;place-items:center;width:44px;height:44px;border-radius:999px;background:var(--chip-chrome);color:var(--text);text-decoration:none;transition:background-color .2s ease}
 .soc-i svg{width:20px;height:20px}
 .soc-i:active{opacity:.6}
 @media (hover:hover){.soc-i:hover{background:var(--rule-chrome)}}
-.foot-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 24px}
-.foot-cols h2{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
+.foot-cols{display:flex;flex-wrap:wrap;gap:0 22px}
+.foot-cols > div{display:contents}
+.foot-cols h2{display:none;margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
 .foot-cols a{display:flex;align-items:center;min-height:36px;color:var(--text);text-decoration:none;font-size:15px;font-weight:500}
 .foot-cols a:active{opacity:.6}
 @media (hover:hover){.foot-cols a:hover{color:var(--accent)}}
@@ -135,7 +136,12 @@ body.home,body.paper{--page:#F7E8CE}
   .bar{height:72px}
   .site-foot::before{bottom:-56px}
   .foot-main{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start}
-  .foot-cols{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .foot-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 24px}
+  .foot-cols > div{display:block}
+  .foot-cols h2{display:block}
+  .foot-main{gap:36px}
+  .foot-tag{font-size:16px;margin-top:10px}
+  .foot-soc{margin-top:18px}
   .foot-brand{font-size:34px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
