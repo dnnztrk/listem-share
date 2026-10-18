@@ -352,7 +352,7 @@ ul{list-style:none;margin:0;padding:0}
   .side h2{margin:0;font-size:16px;font-weight:600;line-height:21px}
   .side p{margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--text2)}
   .qr{margin:16px 0 0;background:var(--qr-tile);border-radius:12px;padding:18px;display:flex;justify-content:center}
-  .qr svg{display:block;width:100%;height:auto;max-width:196px}
+  .qr>svg{display:block;width:100%;height:auto;max-width:196px}
   .side .note{margin-top:12px}
   .actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
   .act{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:.5px solid var(--border);border-radius:12px;background:var(--bg);font-size:15px;font-weight:600;color:var(--text);cursor:pointer}
