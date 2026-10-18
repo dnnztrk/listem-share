@@ -340,7 +340,7 @@ const INTRO_JS = '(function(){var s=document.querySelector(".stage");if(!s)retur
   'tm.push(setTimeout(function(){put(String(at.length-1),pg)},ck));' +
   's.addEventListener("pointerdown",end);addEventListener("keydown",end);tm.push(setTimeout(function(){s.classList.remove("play");s.removeEventListener("pointerdown",end);removeEventListener("keydown",end)},ck+2300))}' +
   'if(!("IntersectionObserver" in window))return go();' +
-  'var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go()}},{threshold:.6});io.observe(s.querySelector(".ap-foot")||s)})();';
+  'var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go()}},{threshold:.1});io.observe(s)})();';
 
 function render(lang, host) {
   const t = T[lang];

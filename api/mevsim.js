@@ -109,7 +109,7 @@ ${DARK('body.paper::before{display:none}')}
 @property --grow{syntax:'<length>';inherits:false;initial-value:0px}
 .cal{position:relative}
 .ivy{display:none}
-.ivy-top{position:absolute;top:-4px;right:-16px;width:min(82vw,380px);height:auto;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));transition:--grow 1.6s cubic-bezier(.2,.7,.2,1)}
+.ivy-top{position:absolute;top:-2px;right:-16px;width:min(66vw,330px);height:auto;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));transition:--grow 1.6s cubic-bezier(.2,.7,.2,1)}
 .kicker{margin:0;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .cal-hero{position:relative}
 .more{display:inline-flex;align-items:center;min-height:34px;padding:0 13px;border-radius:999px;border:1px dashed var(--rule);background:transparent;color:var(--accent);font:700 14px/1 inherit;font-family:inherit;cursor:pointer}
@@ -176,8 +176,9 @@ ${DARK('.grid-h{background:var(--bg)}')}
 @media (min-width:900px){
   .cal{--namew:clamp(200px,16vw,280px)}
   .cal{--ivy-w:clamp(150px,12vw,250px);padding-right:max(0px,calc(var(--ivy-w) - (50vw - 50%) + 28px))}
-  .ivy{display:block;position:absolute;top:0;bottom:0;right:calc(50% - 50vw);width:var(--ivy-w);background:url(/img/sarmasik-dikey.webp) right top/100% auto repeat-y;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 260px),transparent var(--grow));mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 260px),transparent var(--grow));transition:--grow 1.2s cubic-bezier(.2,.7,.2,1)}
-  .ivy-top{display:none}
+  .ivy{display:block;position:absolute;top:0;bottom:-110px;right:calc(50% - 50vw);width:var(--ivy-w);background:url(/img/sarmasik-dikey.webp) right top/100% auto repeat-y;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 260px),transparent var(--grow)),linear-gradient(to top,transparent 0,#000 320px);-webkit-mask-composite:source-in;mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 260px),transparent var(--grow)),linear-gradient(to top,transparent 0,#000 320px);mask-composite:intersect;transition:--grow 1.2s cubic-bezier(.2,.7,.2,1)}
+  .ivy-top{top:0;right:calc(50% - 50vw + var(--ivy-w) * .5);width:clamp(420px,38vw,760px)}
+  .cal-hero,.months,.kinds,.show,.chart,.yr{position:relative;z-index:1}
   .cal-hero{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:center;gap:clamp(24px,3vw,72px);padding-top:clamp(16px,4vh,64px)}
   .cal-hero.solo{grid-template-columns:1fr}
   .months{margin:40px 0 0;padding:2px 0;flex-wrap:wrap;overflow:visible}
@@ -193,7 +194,7 @@ ${DARK('.grid-h{background:var(--bg)}')}
   .explain{font-size:16px}
   .sr i b{height:14px}
 }
-@media (max-width:899px){.cal-hero{padding-top:64px}.cal h1{font-size:68px;margin-top:12px}.lead{margin-top:12px}.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:36px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.kinds{margin-top:16px}.show{margin-top:48px;gap:36px}.chart{margin-top:72px}.yr{margin-top:64px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
+@media (max-width:899px){.cal-hero{padding-top:92px}.cal h1{font-size:68px;margin-top:12px}.lead{margin-top:12px}.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:36px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.kinds{margin-top:16px}.show{margin-top:48px;gap:36px}.chart{margin-top:72px}.yr{margin-top:64px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
 @media (hover:hover){.sr:hover{background:var(--chip)}}
 `;
 
@@ -314,8 +315,8 @@ function render(lang, host, q) {
     items: data.seasonal.map((x) => ({ n: x.name, c: x.cat, s: x.starts, e: x.ends, i: icon(x.id, x.emoji) })),
   };
   const body = '<div class="wrap">' + site.header(lang, '/mevsim?lang=' + (lang === 'tr' ? 'en' : 'tr'), 'season') +
-    '<main class="cal"><div class="ivy" aria-hidden="true"></div>' +
-    '<section class="cal-hero solo"><img class="ivy-top" src="/img/sarmasik-sarkan.webp" width="900" height="586" alt="" aria-hidden="true"><div style="position:relative;z-index:1"><p class="kicker">' + esc(t.title) + '</p>' +
+    '<main class="cal"><div class="ivy" aria-hidden="true"></div><img class="ivy-top" src="/img/sarmasik-sarkan.webp" width="1100" height="700" alt="" aria-hidden="true">' +
+    '<section class="cal-hero solo"><div style="position:relative;z-index:1"><p class="kicker">' + esc(t.title) + '</p>' +
     '<h1 id="mname">' + esc(t.months[month - 1]) + '</h1>' +
     '<p class="lead" id="count">' + esc(countTxt[month - 1].replace('{n}', visible.length)) + '</p></div></section>' +
     '<nav class="months" role="tablist" aria-label="' + esc(t.monthsLabel) + '">' + tabs + '</nav>' +
