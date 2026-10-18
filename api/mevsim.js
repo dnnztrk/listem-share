@@ -28,6 +28,7 @@ const T = {
     monthsLabel: 'Ay', filterLabel: 'Tür',
     starting: 'Bu ay başlayanlar', ending: 'Son ayında',
     noneStart: 'Bu ay mevsimi başlayan ürün yok.', noneEnd: 'Bu ay mevsimi biten ürün yok.',
+    explain: 'Her şerit, ürünün yıl içinde mevsiminde olduğu ayları gösterir; dikey bant seçtiğin ay.', legendOn: 'Mevsiminde', legendSel: 'Seçili ay',
     chart: 'Mevsim çizelgesi', poster: 'Ekim pazarı: nar, ayva, Trabzon hurması, mandalina, kestane ve hamsi; düz çizim bir afiş.',
     metaDesc: 'Türkiye’de meyve, sebze ve balığın mevsimi, ay ay. Hangi ürün ne zaman mevsiminde, hangisi yeni başladı, hangisi son ayında.',
   },
@@ -47,6 +48,7 @@ const T = {
     monthsLabel: 'Month', filterLabel: 'Kind',
     starting: 'Just in this month', ending: 'In their last month',
     noneStart: 'Nothing comes into season this month.', noneEnd: 'Nothing goes out of season this month.',
+    explain: 'Each bar shows the months a product is in season; the vertical band is the month you picked.', legendOn: 'In season', legendSel: 'Selected month',
     chart: 'Season chart', poster: 'An October market: pomegranates, quinces, persimmons, tangerines, chestnuts and anchovies, drawn as a flat poster.',
     metaDesc: 'Which fruit, vegetables and fish are in season in Turkey, month by month — what has just arrived and what is in its last month.',
   },
@@ -72,11 +74,11 @@ function build(lang) {
   catalog.products.forEach((p) => {
     if (!p.season) return;
     const name = lang === 'en' ? p.nameEn : p.nameTr;
-    if (p.season.yearRound) { yearRound.push({ name, emoji: p.emoji, cat: p.category }); return; }
+    if (p.season.yearRound) { yearRound.push({ id: p.id, name, emoji: p.emoji, cat: p.category }); return; }
     if (!GROUPS.includes(p.category)) return;
     const e = edges(p.season.months);
     seasonal.push({
-      name, emoji: p.emoji, cat: p.category, months: p.season.months.slice().sort((a, b) => a - b),
+      id: p.id, name, emoji: p.emoji, cat: p.category, months: p.season.months.slice().sort((a, b) => a - b),
       label: lang === 'en' ? p.season.labelEn : p.season.labelTr, kind: p.season.kind, starts: e.starts, ends: e.ends,
     });
   });
@@ -87,17 +89,18 @@ function build(lang) {
 }
 
 
-/* Takvimin afişleri: şimdilik yalnız ekim; her ayın afişi geldikçe buraya eklenir. */
-const POSTERS = { 10: { light: '/img/ekim-afis-dar.webp', dark: '/img/ekim-afis-koyu-dar.webp' } };
+/* Ürün işaretleri: çizimi olanlar çizimle, diğerleri uygulamadaki emojiyle. Çizim seti büyüdükçe buraya eklenir. */
+const PIECE = { nar: 'nar', ayva: 'ayva', 'trabzon-hurmasi': 'hurma', mandalina: 'mandalina', hamsi: 'hamsi' };
+const icon = (id, emoji) => PIECE[id] ? '<span class="ico"><img src="/img/pazar/' + PIECE[id] + '.webp" alt="" loading="lazy"></span>' : '<span class="ico" aria-hidden="true">' + esc(emoji) + '</span>';
 
 const GRAIN = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .12 0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
 const DARK = (sel) => '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) ' + sel + '}\n:root[data-theme="dark"] ' + sel + '\n';
 
 const CSS = `
-:root{--paper:#F7E8CE;--ink:#2B2118;--ink2:#6A5D4E;--ink3:#4A3F33;--rule:rgba(43,33,24,.1);--band:rgba(45,139,117,.13);--chip:rgba(255,255,255,.55);--c-Fruit:#E0703A;--c-Vegetables:#4C8A55;--c-Fish:#3C6893;--namew:118px}
+:root{--tile:rgba(255,255,255,.6);--gridline:rgba(43,33,24,.06);--paper:#F7E8CE;--ink:#2B2118;--ink2:#6A5D4E;--ink3:#4A3F33;--rule:rgba(43,33,24,.1);--band:rgba(45,139,117,.13);--chip:rgba(255,255,255,.55);--c-Fruit:#E0703A;--c-Vegetables:#4C8A55;--c-Fish:#3C6893;--namew:118px}
 body.paper{background:var(--paper)}
 body.paper::before{content:"";position:fixed;inset:0;background-image:${GRAIN};opacity:.16;mix-blend-mode:multiply;pointer-events:none;z-index:30}
-${DARK('.cal{--ink:var(--text);--ink2:var(--text2);--ink3:var(--text2);--rule:rgba(255,255,255,.08);--band:rgba(56,182,150,.16);--chip:var(--surface);--c-Fruit:#F0864E;--c-Vegetables:#63A36C;--c-Fish:#5A8CBF}')}
+${DARK('.cal{--tile:var(--surface);--gridline:rgba(255,255,255,.05);--ink:var(--text);--ink2:var(--text2);--ink3:var(--text2);--rule:rgba(255,255,255,.08);--band:rgba(56,182,150,.16);--chip:var(--surface);--c-Fruit:#F0864E;--c-Vegetables:#63A36C;--c-Fish:#5A8CBF}')}
 ${DARK('body.paper{background:var(--bg)}')}
 ${DARK('body.paper::before{display:none}')}
 .cal [hidden]{display:none!important}
@@ -106,11 +109,6 @@ ${DARK('body.paper::before{display:none}')}
 .eyebrow{margin:0;display:inline-flex;align-items:center;min-height:28px;padding:0 12px;border-radius:999px;background:rgba(45,139,117,.12);color:var(--accent);font-size:13px;font-weight:600}
 .cal h1{margin:14px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(64px,8vw,148px);line-height:.92;letter-spacing:-.035em}
 .lead{margin:14px 0 0;font-size:clamp(17px,1.2vw,22px);line-height:1.45;color:var(--ink3);max-width:36ch;text-wrap:pretty}
-.ch-art{margin:0}
-.ch-art img{display:block;width:100%;height:auto;border-radius:18px;box-shadow:0 1px 0 rgba(43,33,24,.06),0 22px 48px rgba(70,45,20,.14)}
-.ch-art .dk{display:none}
-${DARK('.ch-art .lt{display:none}')}
-${DARK('.ch-art .dk{display:block;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 22px 48px rgba(0,0,0,.5)}')}
 .months{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:28px -16px 0;padding:2px 16px;scroll-padding-inline:16px}
 .months::-webkit-scrollbar{display:none}
 .mo{position:relative;flex:none;min-height:44px;min-width:58px;padding:0 14px;border-radius:999px;border:1px solid var(--rule);background:var(--chip);color:var(--ink);font:600 15px/1 inherit;font-family:inherit;cursor:pointer}
@@ -122,16 +120,24 @@ ${DARK('.ch-art .dk{display:block;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 2
 ${DARK('.kind[aria-pressed="true"]{color:var(--bg)}')}
 .kind .dot{width:8px;height:8px}
 .dot{display:inline-block;flex:none;width:9px;height:9px;border-radius:50%;background:var(--c,var(--ink2))}
+.ico{display:grid;place-items:center;flex:none;width:30px;height:30px;border-radius:9px;background:var(--tile);font-size:17px;line-height:1}
+.ico img{width:86%;height:86%;object-fit:contain}
+.sc li .ico,.yr li .ico{width:24px;height:24px;border-radius:7px;font-size:14px;background:transparent}
 .show{display:grid;gap:24px;margin-top:36px}
 .sc h2{margin:0 0 10px;font-size:14px;font-weight:600;color:var(--ink2)}
 .sc ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.sc li{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:0 12px 0 10px;border-radius:999px;background:var(--chip);font-size:14px;font-weight:600}
-@media (min-width:900px){.sc li{min-height:38px;padding:0 14px 0 12px;font-size:15px;gap:8px}}
+.sc li{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px 0 5px;border-radius:999px;background:var(--chip);font-size:14px;font-weight:600}
+@media (min-width:900px){.sc li{min-height:40px;padding:0 14px 0 6px;font-size:15px;gap:7px}}
 .sc .none{font-size:15px;color:var(--ink2)}
 .chart{margin-top:44px}
+.explain{margin:8px 0 0;max-width:52ch;font-size:15px;line-height:1.45;color:var(--ink3)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:12px 0 0;padding:0;list-style:none;font-size:13px;font-weight:600;color:var(--ink2)}
+.legend li{display:inline-flex;align-items:center;gap:8px}
+.legend .lb{width:26px;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--c-Fruit) 0 33%,var(--c-Vegetables) 33% 66%,var(--c-Fish) 66%)}
+.legend .lband{width:14px;height:18px;border-radius:4px;background:var(--band)}
 .chart > h2{margin:0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(28px,2.6vw,48px);letter-spacing:-.02em}
 .grid-h,.sr{display:grid;grid-template-columns:var(--namew) repeat(12,minmax(0,1fr))}
-.grid-h{position:sticky;top:0;z-index:2;margin-top:16px;padding:8px 0;background:var(--paper);border-bottom:1px solid var(--rule)}
+.grid-h{position:sticky;top:60px;z-index:2;margin-top:16px;padding:8px 0;background:var(--paper);border-bottom:1px solid var(--rule)}
 ${DARK('.grid-h{background:var(--bg)}')}
 .grid-h span{display:grid;place-items:center;min-height:24px;font-size:12px;font-weight:600;color:var(--ink2);border-radius:6px}
 .grid-h span.sel{background:var(--band);color:var(--accent)}
@@ -141,10 +147,11 @@ ${DARK('.grid-h{background:var(--bg)}')}
 .grp > h3 .n{font-size:14px;font-weight:600;color:var(--ink2)}
 .grp[data-k="Fruit"]{--c:var(--c-Fruit)}.grp[data-k="Vegetables"]{--c:var(--c-Vegetables)}.grp[data-k="Fish"]{--c:var(--c-Fish)}
 .sr{min-height:46px;border-top:1px solid var(--rule)}
-.sr .nm{display:flex;flex-direction:column;justify-content:center;padding:6px 10px 6px 0;min-width:0}
+.sr .nm{display:flex;align-items:center;gap:10px;padding:6px 10px 6px 0;min-width:0}
+.sr .tx{display:flex;flex-direction:column;min-width:0}
 .sr .nm b{font-size:clamp(14px,1vw,17px);font-weight:600;line-height:1.2}
 .flag{margin-top:3px;font-size:11px;font-weight:700;letter-spacing:.01em;color:var(--accent)}
-.sr i{display:flex;align-items:center}
+.sr i{display:flex;align-items:center;box-shadow:inset 1px 0 0 var(--gridline)}
 .sr i.sel{background:var(--band)}
 .sr i b{display:block;width:100%;height:12px}
 .sr i.on b{background:var(--c)}
@@ -156,7 +163,7 @@ ${DARK('.grid-h{background:var(--bg)}')}
 .yr h2{margin:0;font-size:clamp(18px,1.3vw,22px);font-weight:700}
 .yr p{margin:6px 0 14px;color:var(--ink2);font-size:15px}
 .yr ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.yr li{display:inline-flex;align-items:center;gap:8px;min-height:36px;padding:0 13px 0 11px;border-radius:999px;background:var(--chip);font-size:14px;font-weight:600}
+.yr li{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 13px 0 5px;border-radius:999px;background:var(--chip);font-size:14px;font-weight:600}
 .yr li[data-k="Fruit"]{--c:var(--c-Fruit)}.yr li[data-k="Vegetables"]{--c:var(--c-Vegetables)}.yr li[data-k="Fish"]{--c:var(--c-Fish)}
 @media (min-width:900px){
   .cal{--namew:clamp(200px,16vw,280px)}
@@ -168,10 +175,15 @@ ${DARK('.grid-h{background:var(--bg)}')}
   .chart{margin-top:64px}
   .grid-h .l{display:inline}.grid-h .s1{display:none}
   .grid-h span{font-size:13px}
-  .sr{min-height:50px}
+  .sr{min-height:54px}
+  .grid-h{top:72px}
+  .sr .nm{gap:12px}
+  .ico{width:34px;height:34px;font-size:19px}
+  .explain{font-size:16px}
   .sr i b{height:14px}
 }
-@media (max-width:899px){.grid-h .l{display:none}}
+@media (max-width:899px){.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
+@media (hover:hover){.sr:hover{background:var(--chip)}}
 `;
 
 const CLIENT = `
@@ -185,7 +197,7 @@ const CLIENT = `
   function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function pills(list, none){
     if (!list.length) return '<p class="none">' + esc(none) + '</p>';
-    return '<ul>' + list.map(function(x){ return '<li style="--c:var(--c-' + x.c + ')"><span class="dot"></span>' + esc(x.n) + '</li>'; }).join('') + '</ul>';
+    return '<ul>' + list.map(function(x){ return '<li>' + x.i + esc(x.n) + '</li>'; }).join('') + '</ul>';
   }
   function apply(push){
     var total = 0;
@@ -216,8 +228,6 @@ const CLIENT = `
     $('sc-end').innerHTML = pills(items.filter(function(x){ return x.e.indexOf(month) >= 0; }), D.t.noneEnd);
     $('mname').textContent = D.t.months[month - 1];
     $('count').textContent = D.t.count[month - 1].replace('{n}', total);
-    var art = $('ch-art'), hero = document.querySelector('.cal-hero');
-    if (art) { art.hidden = month !== D.posterMonth; hero.classList.toggle('solo', art.hidden); }
     $('empty').hidden = total > 0;
     if (push) {
       var u = new URL(location.href);
@@ -260,7 +270,7 @@ function render(lang, host, q) {
   const kinds = [['all', t.all]].concat(GROUPS.map((g) => [g, t.group[g]])).map(([k, label]) =>
     '<button type="button" class="kind" data-k="' + k + '" aria-pressed="' + (k === kind) + '"' + (k !== 'all' ? ' style="--c:var(--c-' + k + ')"' : '') + '>' +
     (k !== 'all' ? '<span class="dot"></span>' : '') + esc(label) + '</button>').join('');
-  const pill = (x) => '<li style="--c:var(--c-' + x.cat + ')"><span class="dot"></span>' + esc(x.name) + '</li>';
+  const pill = (x) => '<li>' + icon(x.id, x.emoji) + esc(x.name) + '</li>';
   const starting = visible.filter((x) => x.starts.includes(month)), ending = visible.filter((x) => x.ends.includes(month));
   const groups = GROUPS.map((g) => {
     const items = data.seasonal.filter((x) => x.cat === g);
@@ -270,32 +280,30 @@ function render(lang, host, q) {
         const on = x.months.includes(month) && inKind(g);
         const flag = x.starts.includes(month) ? t.fresh : x.ends.includes(month) ? t.last : '';
         return '<div class="sr" data-m="' + x.months.join(',') + '" data-s="' + x.starts.join(',') + '" data-e="' + x.ends.join(',') + '"' + (on ? '' : ' hidden') +
-          ' aria-label="' + esc(x.name + ': ' + x.label) + '"><span class="nm"><b>' + esc(x.name) + '</b><span class="flag"' + (flag ? '' : ' hidden') + '>' + esc(flag) + '</span></span>' + cells(x.months, month) + '</div>';
+          ' aria-label="' + esc(x.name + ': ' + x.label) + '"><span class="nm">' + icon(x.id, x.emoji) + '<span class="tx"><b>' + esc(x.name) + '</b><span class="flag"' + (flag ? '' : ' hidden') + '>' + esc(flag) + '</span></span></span>' + cells(x.months, month) + '</div>';
       }).join('') + '</div>';
   }).join('');
   const head = '<div class="grid-h" aria-hidden="true"><span></span>' + t.short.map((s, i) =>
     '<span data-m="' + (i + 1) + '"' + (i + 1 === month ? ' class="sel"' : '') + '><span class="l">' + esc(s) + '</span><span class="s1">' + esc(s.charAt(0)) + '</span></span>').join('') + '</div>';
-  const poster = POSTERS[month] || POSTERS[10];
-  const posterMonth = 10;
-  const art = '<figure class="ch-art" id="ch-art"' + (month === posterMonth ? '' : ' hidden') + '><img class="lt" src="' + poster.light + '" width="900" height="675" alt="' + esc(t.poster) + '"><img class="dk" src="' + poster.dark + '" width="900" height="675" alt=""></figure>';
   const payload = {
-    month, kind, posterMonth,
+    month, kind,
     t: { fresh: t.fresh, last: t.last, noneStart: t.noneStart, noneEnd: t.noneEnd, months: t.months, count: countTxt },
-    items: data.seasonal.map((x) => ({ n: x.name, c: x.cat, s: x.starts, e: x.ends })),
+    items: data.seasonal.map((x) => ({ n: x.name, c: x.cat, s: x.starts, e: x.ends, i: icon(x.id, x.emoji) })),
   };
-  const body = '<div class="wrap">' + site.header(lang, '/mevsim?lang=' + (lang === 'tr' ? 'en' : 'tr'), 'mevsim') +
+  const body = '<div class="wrap">' + site.header(lang, '/mevsim?lang=' + (lang === 'tr' ? 'en' : 'tr'), 'season') +
     '<main class="cal">' +
-    '<section class="cal-hero' + (month === posterMonth ? '' : ' solo') + '"><div><p class="eyebrow">' + esc(t.title) + '</p>' +
+    '<section class="cal-hero solo"><div><p class="eyebrow">' + esc(t.title) + '</p>' +
     '<h1 id="mname">' + esc(t.months[month - 1]) + '</h1>' +
-    '<p class="lead" id="count">' + esc(countTxt[month - 1].replace('{n}', visible.length)) + '</p></div>' + art + '</section>' +
+    '<p class="lead" id="count">' + esc(countTxt[month - 1].replace('{n}', visible.length)) + '</p></div></section>' +
     '<nav class="months" role="tablist" aria-label="' + esc(t.monthsLabel) + '">' + tabs + '</nav>' +
     '<div class="kinds" role="group" aria-label="' + esc(t.filterLabel) + '">' + kinds + '</div>' +
     '<section class="show"><div class="sc"><h2>' + esc(t.starting) + '</h2><div id="sc-start">' + (starting.length ? '<ul>' + starting.map(pill).join('') + '</ul>' : '<p class="none">' + esc(t.noneStart) + '</p>') + '</div></div>' +
     '<div class="sc"><h2>' + esc(t.ending) + '</h2><div id="sc-end">' + (ending.length ? '<ul>' + ending.map(pill).join('') + '</ul>' : '<p class="none">' + esc(t.noneEnd) + '</p>') + '</div></div></section>' +
-    '<section class="chart" aria-label="' + esc(t.chart) + '"><h2>' + esc(t.chart) + '</h2>' + head + groups +
+    '<section class="chart" aria-label="' + esc(t.chart) + '"><h2>' + esc(t.chart) + '</h2><p class="explain">' + esc(t.explain) + '</p>' +
+    '<ul class="legend" aria-hidden="true"><li><span class="lb"></span>' + esc(t.legendOn) + '</li><li><span class="lband"></span>' + esc(t.legendSel) + '</li></ul>' + head + groups +
     '<p class="empty" id="empty"' + (visible.length ? ' hidden' : '') + '>—</p></section>' +
     '<section class="yr"><h2>' + esc(t.yearRound) + '</h2><p>' + esc(t.yearRoundNote) + '</p><ul>' +
-    data.yearRound.map((x) => '<li data-k="' + esc(x.cat) + '"><span class="dot"></span>' + esc(x.name) + '</li>').join('') + '</ul></section>' +
+    data.yearRound.map((x) => '<li>' + icon(x.id, x.emoji) + esc(x.name) + '</li>').join('') + '</ul></section>' +
     '</main>' + site.footer(lang, '') + '</div>' +
     '<script type="application/json" id="cal-data">' + JSON.stringify(payload).replace(/</g, '\\u003c') + '</script>' +
     '<script>' + CLIENT + '</script>';

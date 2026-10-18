@@ -3,7 +3,7 @@
  * Ana sayfa (list-em.app) — ilk ekran ve bu ayın mevsim şeridi.
  * Açılış "listeden pazara": uygulamanın liste kartına satırlar tek tek düşer, her satırla o
  * ürünün çizimi kartın yanındaki tezgâha konar, sonunda ilk ürün işaretlenir. Yaklaşık 2,6 sn;
- * dışarıdan gelen her ziyarette ve yenilemede oynar, site içinde dolaşırken oynamaz; dokunuş/kaydırma/tuşla anında son hâline geçer, "hareketi azalt"
+ * dışarıdan gelen her ziyarette ve yenilemede, sahne ekrana girince oynar; site içinde dolaşırken oynamaz; dokunuş/kaydırma/tuşla anında son hâline geçer, "hareketi azalt"
  * açıksa ve betik yoksa doğrudan son hâli görünür. Yalnız transform ve opacity oynar.
  * Görsel dil: mevsim afişi (düz çizim, risograf dokusu, krem kâğıt). Şimdilik ekim.
  */
@@ -145,7 +145,7 @@ const CSS = `
 body.home{background:var(--paper)}
 body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};opacity:.16;mix-blend-mode:multiply;pointer-events:none;z-index:30}
 .hero{display:grid;gap:8px;padding-bottom:8px}
-.hero-copy{padding:40px 0 0}
+.hero-copy{padding:20px 0 0}
 .eyebrow{margin:0;display:inline-flex;align-items:center;min-height:28px;padding:0 12px;border-radius:999px;background:rgba(45,139,117,.12);color:var(--accent);font-size:13px;font-weight:600}
 .hero h1{text-wrap:balance;margin:20px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:40px;line-height:1.03;letter-spacing:-.025em;color:var(--paper-ink)}
 .hero p.body{margin:16px 0 0;font-size:17px;line-height:1.5;color:var(--paper-body);max-width:34ch;text-wrap:pretty}
@@ -173,7 +173,7 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 @media (hover:hover){.now-list a:hover .pic{background:rgba(255,255,255,.75)}}
 
 /* sahne: telefonda önce tezgâh, altında kart; masaüstünde kart solda, tezgâh sağda */
-.stage{position:relative;font-size:clamp(13px,3.6vw,15px);margin:6px 0 0}
+.stage{position:relative;font-size:clamp(13px,3.6vw,15px);margin:40px 0 0}
 .pile{position:relative;aspect-ratio:1.55;margin:0 -4px}
 .pc{position:absolute;left:var(--mx);top:var(--my);width:var(--mw);height:auto;transform:rotate(var(--r)) scaleX(var(--f));transform-origin:50% 60%}
 .app-card{position:relative;z-index:10;margin:-8% 0 0;background:var(--card);border-radius:22px;padding:.9em .95em .35em;box-shadow:0 18px 44px rgba(70,45,20,.16),0 2px 6px rgba(70,45,20,.08)}
@@ -249,6 +249,7 @@ ${DARK('.now,.home .site-foot{border-top-color:var(--border)}')}
 }
 @media (min-width:1700px){.hero{grid-template-columns:minmax(0,6fr) minmax(0,7fr)}}
 @media (prefers-reduced-motion:reduce){.stage.play *{animation:none!important}}
+.stage.play.wait *{animation-play-state:paused!important}
 `;
 
 /* Açılış: oturumda bir kez; dokunuş, kaydırma ya da tuşla anında son hâline geçer. */
@@ -256,17 +257,18 @@ const INTRO_JS = '(function(){var s=document.querySelector(".stage");if(!s)retur
   'var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches,inside=false,reload=false;' +
   'try{inside=!!document.referrer&&new URL(document.referrer).host===location.host}catch(e){}' +
   'try{var n=performance.getEntriesByType("navigation")[0];reload=!!n&&n.type==="reload"}catch(e){}' +
-  'if(rm||(inside&&!reload))return;s.classList.add("play");' +
-  'function end(){s.classList.remove("play");["pointerdown","keydown","wheel","touchstart"].forEach(function(t){removeEventListener(t,end,true)})}' +
-  '["pointerdown","keydown","wheel","touchstart"].forEach(function(t){addEventListener(t,end,{capture:true,passive:true})});' +
-  'setTimeout(function(){["pointerdown","keydown","wheel","touchstart"].forEach(function(t){removeEventListener(t,end,true)})},3200)})();';
+  'if(rm||(inside&&!reload))return;s.classList.add("play","wait");' +
+  'function end(){s.classList.remove("play","wait");s.removeEventListener("pointerdown",end);removeEventListener("keydown",end)}' +
+  'function go(){s.classList.remove("wait");s.addEventListener("pointerdown",end);addEventListener("keydown",end);setTimeout(function(){s.removeEventListener("pointerdown",end);removeEventListener("keydown",end)},3200)}' +
+  'if(!("IntersectionObserver" in window))return go();' +
+  'var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go()}},{threshold:.35});io.observe(s)})();';
 
 function render(lang, host) {
   const t = T[lang];
   const q = lang === 'en' ? '?lang=en' : '';
   const month = istanbulMonth();
   const body = '<div class="wrap">' + site.header(lang, '/?lang=' + (lang === 'tr' ? 'en' : 'tr'), null) +
-    '<main class="hero">' + stage(lang) +
+    '<main class="hero">' +
     '<div class="hero-copy">' +
     '<p class="eyebrow">' + esc(t.eyebrow) + '</p>' +
     '<h1>' + esc(t.title) + '</h1>' +
@@ -274,7 +276,7 @@ function render(lang, host) {
     '<div class="follow"><span class="follow-label">' + esc(t.follow) + '</span><div class="soc-row">' +
     '<a class="soc" href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.ig) + '">' + site.SOCIAL.instagram + '<span>Instagram</span></a>' +
     '<a class="soc" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.x) + '">' + site.SOCIAL.x + '<span>X</span></a></div></div>' +
-    '</div></main>' + nowSection(lang, month, q) + site.footer(lang, '') + '</div>' +
+    '</div>' + stage(lang) + '</main>' + nowSection(lang, month, q) + site.footer(lang, '') + '</div>' +
     '<script>' + INTRO_JS + '</script>';
   return site.pageShell({ lang, title: 'List-em · ' + t.title, description: t.meta, ogTitle: 'List-em', ogDescription: t.meta, host, css: CSS, body, bodyClass: 'home', index: true });
 }

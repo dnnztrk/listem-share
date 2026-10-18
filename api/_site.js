@@ -11,7 +11,8 @@ const LOGO_PATH = 'M231.1 332.12H292.73Q314.61 332.12 329.49 344.71Q344.05 357.0
 const SITE = {
   tr: {
     tagline: 'Türkiye’ye özel market alışveriş listesi',
-    nav: { season: 'Mevsim Takvimi' },
+    nav: { season: 'Mevsim Takvimi', seasonShort: 'Takvim' },
+    legal: 'Yasal', soon: 'Çok yakında App Store’da', langGroup: 'Dil',
     themeSystem: 'Görünüm: sistem', themeLight: 'Görünüm: açık', themeDark: 'Görünüm: koyu',
     otherLang: 'EN', otherLangLabel: 'Show in English',
     privacy: 'Gizlilik', terms: 'Koşullar', contact: 'İletişim',
@@ -19,7 +20,8 @@ const SITE = {
   },
   en: {
     tagline: 'A grocery list made for Turkey',
-    nav: { season: 'Seasonal Calendar' },
+    nav: { season: 'Seasonal Calendar', seasonShort: 'Calendar' },
+    legal: 'Legal', soon: 'Coming soon to the App Store', langGroup: 'Language',
     themeSystem: 'Appearance: system', themeLight: 'Appearance: light', themeDark: 'Appearance: dark',
     otherLang: 'TR', otherLangLabel: 'Türkçe göster',
     privacy: 'Privacy', terms: 'Terms', contact: 'Contact',
@@ -78,42 +80,69 @@ button{font:inherit;color:inherit}
 a{color:inherit}
 .wrap{max-width:1320px;margin:0 auto;padding:0 16px 40px}
 .serif{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-optical-sizing:auto}
-.bar{display:flex;align-items:center;justify-content:space-between;gap:8px;height:56px}
-.lockup{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--accent);min-height:44px}
-.lockup svg{width:clamp(26px,1.7vw,34px);height:clamp(26px,1.7vw,34px);fill:currentColor;flex:none}
-.wordmark{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(21px,1.4vw,28px);letter-spacing:-.01em;line-height:1}
-.bar-right{display:flex;align-items:center;gap:4px}
-.nav{display:flex;align-items:center;gap:4px;margin-right:4px}
-.nav a{display:flex;align-items:center;min-height:44px;padding:0 10px;border-radius:10px;font-size:clamp(14px,.95vw,17px);font-weight:600;color:var(--text2);text-decoration:none}
-.nav a[aria-current="page"]{color:var(--text)}
+body{--page:var(--bg);--chip-chrome:rgba(43,33,24,.06);--rule-chrome:rgba(43,33,24,.11);--foot-bg:color-mix(in srgb,var(--page),#2B2118 5%);overflow-x:clip}
+body.home,body.paper{--page:#F7E8CE}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body{--page:var(--bg);--chip-chrome:rgba(255,255,255,.08);--rule-chrome:rgba(255,255,255,.09);--foot-bg:color-mix(in srgb,var(--bg),#fff 4%)}}
+:root[data-theme="dark"] body{--page:var(--bg);--chip-chrome:rgba(255,255,255,.08);--rule-chrome:rgba(255,255,255,.09);--foot-bg:color-mix(in srgb,var(--bg),#fff 4%)}
+/* başlık: ekranın üstüne yapışık; kaydırınca buzlu cam, yazı kaybolur, işaret kalır */
+.bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;justify-content:space-between;gap:8px;height:60px}
+.bar::before{content:"";position:absolute;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);z-index:-1;background:color-mix(in srgb,var(--page) 84%,transparent);-webkit-backdrop-filter:saturate(1.4) blur(16px);backdrop-filter:saturate(1.4) blur(16px);box-shadow:0 1px 0 var(--rule-chrome);opacity:0;transition:opacity .25s ease}
+.bar.scrolled::before{opacity:1}
+.lockup{align-self:center;display:flex;align-items:baseline;gap:.3em;font-size:clamp(23px,1.55vw,30px);text-decoration:none;color:var(--accent);padding:6px 0}
+.lockup svg{height:1.12em;width:auto;fill:currentColor;flex:none;transform-origin:50% 100%;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.wordmark{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:1em;letter-spacing:-.012em;line-height:1;transition:opacity .2s ease,transform .35s cubic-bezier(.2,.8,.2,1)}
+.bar.scrolled .wordmark{opacity:0;transform:translateX(-.35em);pointer-events:none}
+.bar.scrolled .lockup svg{transform:scale(1.08)}
+.bar-right{display:flex;align-items:center;gap:6px}
+.nav{display:flex;align-items:center}
+.nav a{display:flex;align-items:center;min-height:40px;padding:0 13px;border-radius:999px;font-size:clamp(14px,.95vw,16px);font-weight:600;color:var(--text2);text-decoration:none;transition:background-color .2s ease,color .2s ease}
+.nav a[aria-current="page"]{color:var(--text);background:var(--chip-chrome)}
 .nav a:active{opacity:.6}
-.tool{width:44px;height:44px;border-radius:12px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);text-decoration:none}
+.nav .short{display:none}
+.langs{display:flex;align-items:center;gap:2px;height:40px;padding:4px;border-radius:999px;background:var(--chip-chrome)}
+.langs a,.langs span{display:grid;place-items:center;min-width:34px;height:32px;padding:0 7px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--text2);text-decoration:none}
+.langs span[aria-current]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.langs a:active{opacity:.6}
+.tool{width:40px;height:40px;border-radius:999px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);text-decoration:none;transition:background-color .2s ease}
 .tool svg{width:18px;height:18px}
-.tool.lang{font-size:13px;font-weight:600;letter-spacing:.3px;color:var(--text)}
 .tool:active{opacity:.6}
-.site-foot{margin-top:56px;padding-top:24px;border-top:var(--hair) solid var(--border);display:grid;gap:14px;font-size:13px;line-height:1.45;color:var(--text2)}
-.site-foot .lead{color:var(--text);font-size:14px}
+@media (hover:hover){.nav a:hover,.tool:hover{background:var(--chip-chrome);color:var(--text)}.langs a:hover{color:var(--text)}}
+@media (max-width:440px){.nav .long{display:none}.nav .short{display:inline}.nav a{padding:0 11px}.bar-right{gap:2px}}
+/* alt bilgi: sayfanın sonunu belirleyen ayrı bir zemin */
+.site-foot{position:relative;z-index:0;margin-top:clamp(64px,9vw,128px);padding:clamp(40px,5vw,72px) 0 8px;display:grid;gap:clamp(32px,4vw,56px);font-size:14px;line-height:1.45;color:var(--text2)}
+.site-foot::before{content:"";position:absolute;top:0;bottom:-40px;left:calc(50% - 50vw);right:calc(50% - 50vw);z-index:-1;background:var(--foot-bg);box-shadow:0 -1px 0 var(--rule-chrome)}
+.site-foot .lead{margin:0;color:var(--text);font-size:15px}
 .site-foot .lead a{color:var(--accent);font-weight:600;text-decoration:none}
-.foot-brand{display:flex;align-items:center;gap:10px;color:var(--accent);text-decoration:none}
-.foot-brand svg{width:22px;height:22px;fill:currentColor}
-.foot-brand .wordmark{font-size:18px}
-.foot-tag{color:var(--text2);font-size:13px}
-.foot-links{display:flex;flex-wrap:wrap;gap:4px 18px}
-.foot-links a{color:var(--text);text-decoration:none;font-weight:500;min-height:32px;display:inline-flex;align-items:center}
-.foot-links a:active{opacity:.6}
-.foot-copy{color:var(--muted);font-size:12px}
-@media (max-width:380px){.nav a{padding:0 6px;font-size:13px}}
+.foot-main{display:grid;gap:36px}
+.foot-brand{display:inline-flex;align-items:baseline;gap:.3em;font-size:30px;color:var(--accent);text-decoration:none}
+.foot-brand svg{height:1.12em;width:auto;fill:currentColor}
+.foot-tag{margin:10px 0 0;color:var(--text);font-size:16px;font-weight:500}
+.foot-soon{margin:4px 0 0;color:var(--text2);font-size:14px}
+.foot-soc{display:flex;gap:8px;margin-top:18px}
+.soc-i{display:grid;place-items:center;width:44px;height:44px;border-radius:999px;background:var(--chip-chrome);color:var(--text);text-decoration:none;transition:background-color .2s ease}
+.soc-i svg{width:20px;height:20px}
+.soc-i:active{opacity:.6}
+@media (hover:hover){.soc-i:hover{background:var(--rule-chrome)}}
+.foot-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:28px 24px}
+.foot-cols h2{margin:0 0 8px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text2)}
+.foot-cols a{display:flex;align-items:center;min-height:36px;color:var(--text);text-decoration:none;font-size:15px;font-weight:500}
+.foot-cols a:active{opacity:.6}
+@media (hover:hover){.foot-cols a:hover{color:var(--accent)}}
+.foot-bottom{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding-top:20px;border-top:1px solid var(--rule-chrome);font-size:13px;color:var(--text2)}
 @media (min-width:1700px){.wrap{max-width:1640px}}
 @media (min-width:900px){
   .wrap{padding:0 clamp(40px,4vw,72px) 56px}
-  .bar{height:clamp(68px,5vw,88px)}
-  .site-foot{grid-template-columns:1fr auto;align-items:end}
-  .site-foot .lead,.site-foot .foot-copy{grid-column:1/-1}
+  .bar{height:72px}
+  .site-foot::before{bottom:-56px}
+  .foot-main{grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);align-items:start}
+  .foot-cols{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .foot-brand{font-size:34px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 @media print{
   :root,:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--border:#ccc;--text:#000;--text2:#444;--disabled:#666;--accent:#000;--accent-muted:#fff;--emoji-bg:#f2f2f2;--track:#ddd;color-scheme:light}
-  .bar-right,.site-foot .foot-links{display:none!important}
+  .bar-right,.foot-cols,.foot-soc{display:none!important}
+  .bar{position:static}
 }
 `;
 
@@ -137,10 +166,17 @@ const THEME_JS = `
   set(root.getAttribute('data-theme') || 'system', false);
   btn.addEventListener('click', function(){ set(modes[(modes.indexOf(btn.getAttribute('data-mode')) + 1) % 3], true); });
 })();
+(function(){
+  /* Başlık: sayfa kayınca buzlu cam zemin; yazı kaybolur, sepet işareti kalır. */
+  var bar = document.getElementById('bar'); if (!bar) return;
+  var on = null;
+  function u(){ var s = (window.scrollY || 0) > 24; if (s !== on) { on = s; bar.classList.toggle('scrolled', s); } }
+  u(); addEventListener('scroll', u, { passive: true });
+})();
 `;
 
 function lockupSvg() {
-  return '<svg viewBox="180 180 640 660" aria-hidden="true"><path d="' + LOGO_PATH + '"/></svg>';
+  return '<svg viewBox="200 203 594 625" aria-hidden="true"><path d="' + LOGO_PATH + '"/></svg>';
 }
 
 /* Başlık: solda tek renk marka, sağda menü, dil ve görünüm. current: 'season' | null */
@@ -148,35 +184,37 @@ function header(lang, langHref, current) {
   const t = SITE[lang];
   const homeHref = lang === 'en' ? '/?lang=en' : '/';
   const seasonHref = '/mevsim' + (lang === 'en' ? '?lang=en' : '');
-  return '<header class="bar">' +
-    '<a class="lockup" href="' + homeHref + '" aria-label="List-em, ' + esc(t.home) + '">' + lockupSvg() + '<span class="wordmark">List-em</span></a>' +
+  const other = lang === 'tr' ? 'en' : 'tr';
+  const langs = ['tr', 'en'].map((l) => l === lang
+    ? '<span aria-current="true">' + l.toUpperCase() + '</span>'
+    : '<a href="' + esc(langHref) + '" hreflang="' + other + '" lang="' + other + '" aria-label="' + esc(t.otherLangLabel) + '">' + l.toUpperCase() + '</a>').join('');
+  return '<header class="bar" id="bar">' +
+    '<a class="lockup" href="' + homeHref + '" aria-label="List-em, ' + esc(t.home) + '">' + lockupSvg() + '<span class="wordmark" aria-hidden="true">List-em</span></a>' +
     '<div class="bar-right">' +
-    '<nav class="nav" aria-label="List-em"><a href="' + seasonHref + '"' + (current === 'season' ? ' aria-current="page"' : '') + '>' + esc(t.nav.season) + '</a></nav>' +
-    '<a class="tool lang" href="' + esc(langHref) + '" hreflang="' + (lang === 'tr' ? 'en' : 'tr') + '" aria-label="' + esc(t.otherLangLabel) + '">' + t.otherLang + '</a>' +
+    '<nav class="nav" aria-label="List-em"><a href="' + seasonHref + '"' + (current === 'season' ? ' aria-current="page"' : '') + '><span class="long">' + esc(t.nav.season) + '</span><span class="short" aria-hidden="true">' + esc(t.nav.seasonShort) + '</span></a></nav>' +
+    '<div class="langs" role="group" aria-label="' + esc(t.langGroup) + '">' + langs + '</div>' +
     '<button type="button" class="tool" id="theme" aria-label="' + esc(t.themeSystem) + '" data-icons="' + esc(JSON.stringify(ICON)) + '" data-labels="' + esc(JSON.stringify({ system: t.themeSystem, light: t.themeLight, dark: t.themeDark })) + '">' + ICON.system + '</button>' +
     '</div></header>';
 }
-
 /* Alt bilgi. lead: sayfaya özel ilk satır (HTML, çağıran kaçışlar). */
 function footer(lang, lead) {
   const t = SITE[lang];
   const q = lang === 'en' ? '?lang=en' : '';
   return '<footer class="site-foot">' +
-    (lead ? '<p class="lead" style="margin:0">' + lead + '</p>' : '') +
-    '<div><a class="foot-brand" href="/' + q + '">' + lockupSvg() + '<span class="wordmark">List-em</span></a>' +
-    '<p class="foot-tag" style="margin:6px 0 0">' + esc(t.tagline) + '</p></div>' +
-    '<nav class="foot-links" aria-label="' + esc(t.contact) + '">' +
-    '<a href="/mevsim' + q + '">' + esc(t.nav.season) + '</a>' +
-    '<a href="/gizlilik">' + esc(t.privacy) + '</a>' +
-    '<a href="/kosullar">' + esc(t.terms) + '</a>' +
-    '<a href="mailto:contact@list-em.app">' + esc(t.contact) + '</a>' +
-    '<a href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer">Instagram</a>' +
-    '<a href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer">X</a>' +
-    '</nav>' +
-    '<p class="foot-copy" style="margin:0">© ' + new Date().getFullYear() + ' List-em</p>' +
+    (lead ? '<p class="lead">' + lead + '</p>' : '') +
+    '<div class="foot-main"><div class="foot-id">' +
+    '<a class="foot-brand" href="/' + q + '" aria-label="List-em, ' + esc(t.home) + '">' + lockupSvg() + '<span class="wordmark" aria-hidden="true">List-em</span></a>' +
+    '<p class="foot-tag">' + esc(t.tagline) + '</p><p class="foot-soon">' + esc(t.soon) + '</p>' +
+    '<div class="foot-soc"><a class="soc-i" href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">' + SOCIAL.instagram + '</a>' +
+    '<a class="soc-i" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="X">' + SOCIAL.x + '</a></div></div>' +
+    '<nav class="foot-cols" aria-label="List-em">' +
+    '<div><h2>List-em</h2><a href="/' + q + '">' + esc(t.home) + '</a><a href="/mevsim' + q + '">' + esc(t.nav.season) + '</a></div>' +
+    '<div><h2>' + esc(t.legal) + '</h2><a href="/gizlilik">' + esc(t.privacy) + '</a><a href="/kosullar">' + esc(t.terms) + '</a></div>' +
+    '<div><h2>' + esc(t.contact) + '</h2><a href="mailto:contact@list-em.app">contact@list-em.app</a></div>' +
+    '</nav></div>' +
+    '<div class="foot-bottom"><span>© ' + new Date().getFullYear() + ' List-em</span></div>' +
     '</footer>';
 }
-
 /**
  * pageShell({ lang, title, description, ogTitle, ogDescription, host, css, body, scripts, index })
  *   css     — sayfaya özel stil
