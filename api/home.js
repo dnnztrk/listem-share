@@ -5,6 +5,8 @@
  * Söz önce gelir; reyon sırası tek başına öne çıkarılmaz. Gerçek ana sayfanın geri kalanı
  * (oynanabilir liste, Neden, paylaşım) site turunda bu ekranın altına eklenecek.
  */
+const fs = require('fs');
+const path = require('path');
 const site = require('./_site');
 const catalog = require('../public/data/catalog.json');
 const { esc } = site;
@@ -14,7 +16,7 @@ const T = {
     eyebrow: 'Çok yakında App Store’da',
     title: 'Türkiye’ye özel market alışveriş listesi',
     body: 'Ürünleri gramıyla, kalorisiyle ve mevsimiyle bilen; markette reyon sırasına dizilen; uygulaması olmayanın da açabildiği bir alışveriş listesi.',
-    ig: 'Instagram’da takip et', x: 'X’te takip et',
+    follow: 'Lansmanı kaçırma:', ig: 'Instagram’da List-em', x: 'X’te List-em',
     inSeason: ['Ocak’ta', 'Şubat’ta', 'Mart’ta', 'Nisan’da', 'Mayıs’ta', 'Haziran’da', 'Temmuz’da', 'Ağustos’ta', 'Eylül’de', 'Ekim’de', 'Kasım’da', 'Aralık’ta'].map((m) => m + ' mevsiminde'),
     all: 'Takvimin tamamı',
     art: 'Ekim pazarı: nar, ayva, hurma, mandalina, kestane ve hamsi; düz çizim bir afiş.',
@@ -24,13 +26,16 @@ const T = {
     eyebrow: 'Coming soon to the App Store',
     title: 'A grocery list made for Turkey',
     body: 'It knows products by weight, calories and season; it puts your list in aisle order; and anyone can open a shared list without the app.',
-    ig: 'Follow on Instagram', x: 'Follow on X',
+    follow: 'Don’t miss the launch:', ig: 'List-em on Instagram', x: 'List-em on X',
     inSeason: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'].map((m) => 'In season in ' + m),
     all: 'The whole calendar',
     art: 'An October market: pomegranates, quinces, persimmons, mandarins, chestnuts and anchovies, drawn as a flat poster.',
     meta: 'List-em: a grocery list made for Turkey. It knows products by weight, calories and season. Coming soon to the App Store.',
   },
 };
+
+/* Koyu tema için afişin koyu kâğıtlı ikizi; dosya yoksa koyu temada kısık kart gösterilir. */
+const DARK_ART = fs.existsSync(path.join(__dirname, '..', 'public', 'img', 'ekim-afis-koyu-dar.webp'));
 
 /* Afişteki ürünler önce; ay değişince katalog ne diyorsa o. */
 const FEATURED = ['nar', 'ayva', 'trabzon-hurmasi', 'mandalina', 'hamsi'];
@@ -64,7 +69,12 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 .eyebrow{margin:0;display:inline-flex;align-items:center;min-height:28px;padding:0 12px;border-radius:999px;background:rgba(45,139,117,.12);color:var(--accent);font-size:13px;font-weight:600}
 .hero h1{margin:16px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:40px;line-height:1.03;letter-spacing:-.025em;color:var(--paper-ink)}
 .hero p.body{margin:14px 0 0;font-size:17px;line-height:1.5;color:#5E5245}
-.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
+.follow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:26px}
+.follow-label{font-size:clamp(14px,.95vw,17px);font-weight:600;color:#5E5245;margin-right:2px}
+.soc{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:0 18px 0 14px;border-radius:999px;border:1px solid rgba(43,33,24,.2);background:rgba(255,255,255,.4);color:var(--paper-ink);font-size:clamp(15px,1vw,18px);font-weight:600;text-decoration:none}
+.soc svg{width:20px;height:20px;flex:none}
+.soc:active{opacity:.6}
+@media (hover:hover){.soc:hover{background:rgba(255,255,255,.7)}}
 .btn{display:inline-flex;align-items:center;min-height:48px;padding:0 20px;border-radius:12px;font-size:16px;font-weight:600;text-decoration:none}
 .btn.primary{background:var(--accent);color:#fff}
 .btn.secondary{border:1px solid rgba(43,33,24,.18);background:rgba(255,255,255,.35);color:var(--paper-ink)}
@@ -89,14 +99,28 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 :root[data-theme="dark"] .hero p.body,:root[data-theme="dark"] .season h2{color:var(--text2)}
 :root[data-theme="dark"] .btn.secondary,:root[data-theme="dark"] .season li a{background:var(--surface);border-color:var(--border)}
 @media (min-width:900px){
-  .hero{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;gap:24px;min-height:calc(100svh - 68px - 40px);padding:8px 0 24px}
+  .hero{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;gap:clamp(24px,3vw,72px);min-height:calc(100svh - clamp(68px,5vw,88px) - 40px);padding:8px 0 24px}
   .hero-copy{order:1;padding:0}
-  .hero-art{order:2;margin:0 -40px 0 0}
-  .hero h1{font-size:62px}
-  .hero p.body{font-size:19px;max-width:30em}
+  .hero-art{order:2;margin:0 calc(-1 * clamp(40px,4vw,72px)) 0 0}
+  .hero h1{font-size:clamp(56px,4.4vw,96px)}
+  .hero p.body{font-size:clamp(19px,1.3vw,25px);max-width:30em}
+  .eyebrow{font-size:clamp(13px,.9vw,16px);min-height:clamp(28px,2vw,36px);padding:0 clamp(12px,.9vw,16px)}
+  .season h2{font-size:clamp(13px,.9vw,16px)}
+  .season li a{font-size:clamp(14px,.95vw,17px);min-height:clamp(36px,2.5vw,44px)}
+  .season .all{font-size:clamp(16px,1vw,19px)}
 }
+@media (min-width:1700px){.hero{grid-template-columns:minmax(0,6fr) minmax(0,7fr)}}
 @media (min-width:900px){:root[data-theme="dark"] .hero-art{margin:0}}
 @media (min-width:900px) and (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero-art{margin:0}}
+.hero-art .art-dark{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero-art.has-dark .art-light{display:none}
+  :root:not([data-theme="light"]) .hero-art.has-dark .art-dark{display:block;border-radius:0;filter:none}}
+:root[data-theme="dark"] .hero-art.has-dark .art-light{display:none}
+:root[data-theme="dark"] .hero-art.has-dark .art-dark{display:block;border-radius:0;filter:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .soc{background:var(--surface);border-color:var(--border);color:var(--text)}
+  :root:not([data-theme="light"]) .follow-label{color:var(--text2)}}
+:root[data-theme="dark"] .soc{background:var(--surface);border-color:var(--border);color:var(--text)}
+:root[data-theme="dark"] .follow-label{color:var(--text2)}
 `;
 
 function render(lang, host) {
@@ -107,15 +131,17 @@ function render(lang, host) {
     '<li><a href="/mevsim' + (q ? q + '&' : '?') + 'ay=' + month + '"><span aria-hidden="true">' + esc(p.emoji) + '</span>' + esc(p.name) + '</a></li>').join('');
   const body = '<div class="wrap">' + site.header(lang, '/?lang=' + (lang === 'tr' ? 'en' : 'tr'), null) +
     '<main class="hero">' +
-    '<figure class="hero-art" style="margin-bottom:0"><picture>' +
-    '<source media="(min-width: 900px)" srcset="/img/ekim-afis-dar.webp" type="image/webp">' +
-    '<img src="/img/ekim-afis-dar.webp" width="900" height="675" alt="' + esc(t.art) + '" fetchpriority="high"></picture></figure>' +
+    '<figure class="hero-art' + (DARK_ART ? ' has-dark' : '') + '" style="margin-bottom:0">' +
+    '<img class="art-light" src="/img/ekim-afis-dar.webp" width="900" height="675" alt="' + esc(t.art) + '" fetchpriority="high">' +
+    (DARK_ART ? '<img class="art-dark" src="/img/ekim-afis-koyu-dar.webp" width="900" height="675" alt="" aria-hidden="true">' : '') +
+    '</figure>' +
     '<div class="hero-copy">' +
     '<p class="eyebrow">' + esc(t.eyebrow) + '</p>' +
     '<h1>' + esc(t.title) + '</h1>' +
     '<p class="body">' + esc(t.body) + '</p>' +
-    '<div class="cta"><a class="btn primary" href="https://www.instagram.com/listem.app/" rel="noopener">' + esc(t.ig) + '</a>' +
-    '<a class="btn secondary" href="https://x.com/listemapp" rel="noopener">' + esc(t.x) + '</a></div>' +
+    '<div class="follow"><span class="follow-label">' + esc(t.follow) + '</span>' +
+    '<a class="soc" href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.ig) + '">' + site.SOCIAL.instagram + '<span>Instagram</span></a>' +
+    '<a class="soc" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.x) + '">' + site.SOCIAL.x + '<span>X</span></a></div>' +
     (chips ? '<section class="season"><h2>' + esc(t.inSeason[month - 1]) + '</h2><ul>' + chips + '</ul>' +
       '<a class="all" href="/mevsim' + q + '">' + esc(t.all) + ' →</a></section>' : '') +
     '</div></main>' + site.footer(lang, '') + '</div>';

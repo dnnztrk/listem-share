@@ -27,6 +27,11 @@ const SITE = {
   },
 };
 
+const SOCIAL = {
+  instagram: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5.2"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  x: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L2 3h6.4l4.4 5.8L17.8 3zm-1.1 16.2h1.7L7.4 4.7H5.5l11.2 14.5z"/></svg>',
+};
+
 const ICON = {
   system: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.4a8.6 8.6 0 0 1 0 17.2z" fill="currentColor"/></svg>',
   light: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>',
@@ -69,15 +74,15 @@ body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.25 -apple-s
   -webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 button{font:inherit;color:inherit}
 a{color:inherit}
-.wrap{max-width:1080px;margin:0 auto;padding:0 16px 40px}
+.wrap{max-width:1320px;margin:0 auto;padding:0 16px 40px}
 .serif{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-optical-sizing:auto}
 .bar{display:flex;align-items:center;justify-content:space-between;gap:8px;height:56px}
 .lockup{display:flex;align-items:center;gap:7px;text-decoration:none;color:var(--accent);min-height:44px}
-.lockup svg{width:26px;height:26px;fill:currentColor;flex:none}
-.wordmark{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:21px;letter-spacing:-.01em;line-height:1}
+.lockup svg{width:clamp(26px,1.7vw,34px);height:clamp(26px,1.7vw,34px);fill:currentColor;flex:none}
+.wordmark{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(21px,1.4vw,28px);letter-spacing:-.01em;line-height:1}
 .bar-right{display:flex;align-items:center;gap:4px}
 .nav{display:flex;align-items:center;gap:4px;margin-right:4px}
-.nav a{display:flex;align-items:center;min-height:44px;padding:0 10px;border-radius:10px;font-size:14px;font-weight:600;color:var(--text2);text-decoration:none}
+.nav a{display:flex;align-items:center;min-height:44px;padding:0 10px;border-radius:10px;font-size:clamp(14px,.95vw,17px);font-weight:600;color:var(--text2);text-decoration:none}
 .nav a[aria-current="page"]{color:var(--text)}
 .nav a:active{opacity:.6}
 .tool{width:44px;height:44px;border-radius:12px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);text-decoration:none}
@@ -96,9 +101,10 @@ a{color:inherit}
 .foot-links a:active{opacity:.6}
 .foot-copy{color:var(--muted);font-size:12px}
 @media (max-width:380px){.nav a{padding:0 6px;font-size:13px}}
+@media (min-width:1700px){.wrap{max-width:1640px}}
 @media (min-width:900px){
-  .wrap{padding:0 40px 56px}
-  .bar{height:68px}
+  .wrap{padding:0 clamp(40px,4vw,72px) 56px}
+  .bar{height:clamp(68px,5vw,88px)}
   .site-foot{grid-template-columns:1fr auto;align-items:end}
   .site-foot .lead,.site-foot .foot-copy{grid-column:1/-1}
 }
@@ -162,8 +168,8 @@ function footer(lang, lead) {
     '<a href="/gizlilik">' + esc(t.privacy) + '</a>' +
     '<a href="/kosullar">' + esc(t.terms) + '</a>' +
     '<a href="mailto:contact@list-em.app">' + esc(t.contact) + '</a>' +
-    '<a href="https://x.com/listemapp" rel="noopener">X</a>' +
-    '<a href="https://www.instagram.com/listem.app/" rel="noopener">Instagram</a>' +
+    '<a href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer">Instagram</a>' +
+    '<a href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer">X</a>' +
     '</nav>' +
     '<p class="foot-copy" style="margin:0">© ' + new Date().getFullYear() + ' List-em</p>' +
     '</footer>';
@@ -202,4 +208,4 @@ function pageShell(o) {
     '</body>\n</html>';
 }
 
-module.exports = { LOGO_PATH, SITE, esc, header, footer, pageShell };
+module.exports = { LOGO_PATH, SITE, SOCIAL, esc, header, footer, pageShell };

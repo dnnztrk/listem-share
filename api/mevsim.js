@@ -81,7 +81,7 @@ function build(lang) {
 }
 
 const CSS = `
-.cal{max-width:760px;margin:0 auto}
+.cal{max-width:880px;margin:0 auto}
 .cal-head{padding:20px 0 4px}
 .cal-head h1{margin:0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1.05}
 .cal-head p{margin:10px 0 0;font-size:15px;line-height:1.45;color:var(--text2);max-width:34em}
@@ -125,7 +125,7 @@ const CSS = `
 .chip{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;border-radius:999px;background:var(--surface);font-size:13px;font-weight:500}
 @media (min-width:900px){
   .cal-head{padding-top:32px}
-  .cal-head h1{font-size:44px}
+  .cal-head h1{font-size:clamp(44px,3.6vw,76px)}
   .months{display:grid;grid-template-columns:repeat(12,1fr);margin:26px 0 0;padding:0;overflow:visible}
   .mo{min-width:0;padding:0}
 }
