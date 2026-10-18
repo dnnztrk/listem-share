@@ -196,7 +196,7 @@ function pageShell(o) {
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n' +
     '<link rel="preload" href="/fonts/fraunces-latin-soft-normal.woff2" as="font" type="font/woff2" crossorigin>\n' +
     '<style>' + FONT_CSS + TOKENS_CSS + BASE_CSS + (o.css || '') + '</style>\n' +
-    '</head>\n<body>\n' + o.body + '\n' +
+    '</head>\n<body' + (o.bodyClass ? ' class="' + o.bodyClass + '"' : '') + '>\n' + o.body + '\n' +
     '<script>' + THEME_JS + '</script>\n' +
     (o.scripts || '') +
     '</body>\n</html>';
