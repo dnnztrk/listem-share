@@ -51,8 +51,11 @@ const STR = {
     otherLang: 'EN',
     otherLangLabel: 'Show in English',
     privacy: 'Gizlilik',
-    expiredTitle: 'Bu bağlantının süresi doldu',
-    expiredBody: 'Paylaşılan listeler 30 gün açık kalır. Listeyi gönderen kişiden yeni bir bağlantı isteyebilirsin.',
+    expiredTitle: 'Bu liste artık açılmıyor',
+    expiredBody: 'Paylaşılan listeler 30 gün açık kalır. Bağlantı eksik kopyalanmış da olabilir; listeyi gönderen kişiden yeni bir bağlantı isteyebilirsin.',
+    downTitle: 'Liste şu an açılamadı',
+    downBody: 'Bağlantı büyük ihtimalle geçerli; sorun bizim tarafımızda. Birazdan yeniden dene.',
+    retry: 'Yeniden dene',
     expiredLink: 'List-em nedir?',
     ogList: (name, n) => '“' + name + '” listesi' + (n ? ' (' + n + ' ürün)' : '') + ' seninle paylaşıldı',
   },
@@ -87,8 +90,11 @@ const STR = {
     otherLang: 'TR',
     otherLangLabel: 'Türkçe göster',
     privacy: 'Privacy',
-    expiredTitle: 'This link has expired',
-    expiredBody: 'Shared lists stay open for 30 days. You can ask the person who sent it for a new link.',
+    expiredTitle: 'This list can’t be opened anymore',
+    expiredBody: 'Shared lists stay open for 30 days. The link may also have been copied incompletely; you can ask the person who sent it for a new one.',
+    downTitle: 'The list couldn’t be opened right now',
+    downBody: 'The link is most likely fine; the problem is on our side. Try again in a moment.',
+    retry: 'Try again',
     expiredLink: 'What is List-em?',
     ogList: (name, n) => '“' + name + '” list' + (n ? ' (' + n + (n === 1 ? ' item)' : ' items)') : '') + ' shared with you',
   },
@@ -190,6 +196,8 @@ const ICON = {
   chevronDown: '<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9.5l5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   link: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10.2 13.8a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M13.8 10.2a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
   print: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14.5h10v6H7z"/></svg>',
+  hourglass: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5h11M6.5 20.5h11"/><path d="M7.5 3.5v2.2c0 2.2 4.5 4.3 4.5 6.3s-4.5 4.1-4.5 6.3v2.2M16.5 3.5v2.2c0 2.2-4.5 4.3-4.5 6.3s4.5 4.1 4.5 6.3v2.2"/></svg>',
+  cloudOff: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18.5h10.2a3.8 3.8 0 0 0 .6-7.55A5.5 5.5 0 0 0 7.3 9.4 4.6 4.6 0 0 0 7 18.5z"/><path d="M4 4l16 16"/></svg>',
   checkCircle: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor"/><path d="M7.8 12.4l2.8 2.8 5.6-5.8" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 
@@ -806,21 +814,42 @@ function renderShareHTML(data, host, opts) {
   });
 }
 
-function renderExpiredHTML(host, opts) {
+/* Durum sayfaları — uygulamanın boş hâl kuralı: blok, üst çubuğun altında kalan alanın optik
+   merkezine (%38) oturur; ikon 36×36 yeşil kutucukta çizgi ikon (sistem işareti, emoji değil).
+   "Yok" ile "bakamadık" ayrı sayfalardır (durum kanunu 3): biri kalıcı, öbürü yeniden denenebilir. */
+const STATE_CSS = '.state{position:relative;min-height:calc(100svh - 52px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px))}' +
+  '.state-in{position:absolute;left:0;right:0;top:38%;transform:translateY(-50%);max-width:400px;margin:0 auto;padding:0 8px;text-align:center;display:flex;flex-direction:column;align-items:center}' +
+  '.state-ic{width:36px;height:36px;border-radius:12px;background:var(--accent-muted);color:var(--accent);display:flex;align-items:center;justify-content:center}' +
+  '.state-ic svg{width:20px;height:20px}' +
+  '.state h1{margin:16px 0 0;font-size:20px;font-weight:600;letter-spacing:-.4px;line-height:1.25}' +
+  '.state p{margin:8px 0 0;font-size:15px;line-height:1.45;color:var(--text2)}' +
+  '.state .go{margin-top:20px;font-size:15px;font-weight:600;color:var(--accent);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}' +
+  '.state .btn{margin-top:20px;min-height:44px;padding:0 20px;border:0;border-radius:12px;background:var(--accent);color:#fff;font:inherit;font-size:16px;font-weight:600;cursor:pointer}' +
+  '.state .btn:active,.state .go:active{opacity:.6}' +
+  '@media (min-width:900px){.state{min-height:calc(100svh - 64px)}}';
+
+function statePage(host, opts, kind) {
   opts = opts || {};
   const lang = opts.lang === 'en' ? 'en' : 'tr';
   const t = STR[lang];
-  const body = '<div class="wrap">' + topBar(t, lang, '?lang=' + (lang === 'tr' ? 'en' : 'tr')) +
-    '<main style="max-width:520px;margin:0 auto;padding-top:18vh">' +
-    '<span class="face" aria-hidden="true">⏳</span>' +
-    '<h1 style="margin:16px 0 0;font-size:22px;font-weight:700;letter-spacing:-.3px">' + esc(t.expiredTitle) + '</h1>' +
-    '<p class="sub" style="font-size:15px;line-height:1.45;margin-top:8px">' + esc(t.expiredBody) + '</p>' +
-    '<p style="margin-top:20px"><a href="https://list-em.app" style="color:var(--accent);font-weight:600;text-decoration:none">' + esc(t.expiredLink) + '</a></p>' +
-    '</main></div>';
-  return pageShell({ lang, title: t.expiredTitle + ' · List-em', ogTitle: 'List-em', ogDescription: t.expiredTitle, host, body, inlineData: null });
+  const expired = kind === 'expired';
+  const title = expired ? t.expiredTitle : t.downTitle;
+  const action = expired
+    ? '<a class="go" href="https://list-em.app">' + esc(t.expiredLink) + '</a>'
+    : '<button type="button" class="btn" onclick="location.reload()">' + esc(t.retry) + '</button>';
+  const body = '<style>' + STATE_CSS + '</style><div class="wrap">' + topBar(t, lang, '?lang=' + (lang === 'tr' ? 'en' : 'tr')) +
+    '<main class="state"><div class="state-in">' +
+    '<span class="state-ic">' + (expired ? ICON.hourglass : ICON.cloudOff) + '</span>' +
+    '<h1>' + esc(title) + '</h1>' +
+    '<p>' + esc(expired ? t.expiredBody : t.downBody) + '</p>' + action +
+    '</div></main></div>';
+  return pageShell({ lang, title: title + ' · List-em', ogTitle: 'List-em', ogDescription: title, host, body, inlineData: null });
 }
 
-/* QR: birbirine değen yumuşak köşeli modüller (aralarında boşluk bırakmak okunmayı bozuyor), yumuşak köşe gözleri, ortada List-em işareti. Koyu yeşil, beyaz zemin.
+function renderExpiredHTML(host, opts) { return statePage(host, opts, 'expired'); }
+function renderUnavailableHTML(host, opts) { return statePage(host, opts, 'down'); }
+
+/* QR: tek renk (koyu yeşil, beyaz zemin). Birbirine değen yumuşak köşeli modüller (aralarında boşluk bırakmak okunmayı bozuyor), yumuşak köşe gözleri, ortada tek renk List-em işareti.
    Ortadaki işaret yalnız en yüksek hata düzeltmesiyle (H) ve merkezinde hizalama deseni olmayan
    sürümlerde (≤6) konur; uzun adreslerde sade QR'a dönülür. Her değişiklikten sonra bir QR
    çözücüyle okunarak doğrulanmalı. */
@@ -834,7 +863,7 @@ async function qrSvgFor(url) {
     const n = qr.modules.size;
     const m = 1;
     const S = n + 2 * m;
-    const ink = '#17423A', eye = '#2D8B75';
+    const ink = '#17423A';
     const finder = (r, c) => (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
     let L = 0, s0 = 0;
     if (qr.version <= 6) { L = Math.round(n * 0.22); if (L % 2 === 0) L += 1; s0 = (n - L) / 2; }
@@ -847,12 +876,12 @@ async function qrSvgFor(url) {
     }
     const eyeAt = (r0, c0) =>
       '<rect x="' + (c0 + m + 0.5) + '" y="' + (r0 + m + 0.5) + '" width="6" height="6" rx="1.6" fill="none" stroke="' + ink + '" stroke-width="1"/>' +
-      '<rect x="' + (c0 + m + 2) + '" y="' + (r0 + m + 2) + '" width="3" height="3" rx="0.8" fill="' + eye + '"/>';
+      '<rect x="' + (c0 + m + 2) + '" y="' + (r0 + m + 2) + '" width="3" height="3" rx="0.8" fill="' + ink + '"/>';
     let logo = '';
     if (L > 0) {
-      const x = s0 + m, pad = L * 0.16;
-      logo = '<rect x="' + x + '" y="' + x + '" width="' + L + '" height="' + L + '" rx="' + (L * 0.24).toFixed(2) + '" fill="' + eye + '"/>' +
-        '<svg x="' + (x + pad).toFixed(2) + '" y="' + (x + pad).toFixed(2) + '" width="' + (L - 2 * pad).toFixed(2) + '" height="' + (L - 2 * pad).toFixed(2) + '" viewBox="180 180 640 660"><path fill="#F8F7F4" d="' + LOGO_PATH + '"/></svg>';
+      /* ortadaki işaret: tek renk, kutucuksuz; temizlenen alan zaten beyaz */
+      const x = s0 + m, pad = L * 0.04;
+      logo = '<svg x="' + (x + pad).toFixed(2) + '" y="' + (x + pad).toFixed(2) + '" width="' + (L - 2 * pad).toFixed(2) + '" height="' + (L - 2 * pad).toFixed(2) + '" viewBox="180 180 640 660"><path fill="' + ink + '" d="' + LOGO_PATH + '"/></svg>';
     }
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + S + ' ' + S + '">' +
       '<rect width="' + S + '" height="' + S + '" fill="#FFFFFF"/>' +
@@ -866,5 +895,6 @@ async function qrSvgFor(url) {
 module.exports = renderShareHTML;
 module.exports.renderShareHTML = renderShareHTML;
 module.exports.renderExpiredHTML = renderExpiredHTML;
+module.exports.renderUnavailableHTML = renderUnavailableHTML;
 module.exports.qrSvgFor = qrSvgFor;
 module.exports.decode = decode;

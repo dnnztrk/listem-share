@@ -6,7 +6,15 @@ module.exports = async (req, res) => {
   const host = req.headers.host || 'list-em.app';
   const lang = req.query.lang;
 
-  const data = await kv.get(`share:${id}`);
+  let data;
+  try {
+    data = await kv.get(`share:${id}`);
+  } catch (e) {
+    // "Yok" değil "bakamadık": bağlantı geçerli olabilir, yeniden denenebilir.
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(503).send(render.renderUnavailableHTML(host, { lang }));
+  }
 
   if (!data) {
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
