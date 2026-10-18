@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>List-em — Türkiye’ye özel market alışveriş listesi</title>
-<meta name="description" content="Ürün yazmak yok, seçmek var. Kalorisi, gramajı, mevsimi tek bakışta.">
+<meta name="description" content="Market listen mevsimiyle, kalorisiyle, gramıyla. Ürün yazmak yok, seçmek var. Çok yakında App Store’da.">
 <meta name="theme-color" content="#F8F7F4">
 <link rel="canonical" href="https://list-em.app/">
 <meta property="og:type" content="website">
@@ -12,24 +12,18 @@
 <meta property="og:site_name" content="List-em">
 <meta property="og:url" content="https://list-em.app/">
 <meta property="og:title" content="List-em — Türkiye’ye özel market alışveriş listesi">
-<meta property="og:description" content="Ürün yazmak yok, seçmek var. Kalorisi, gramajı, mevsimi tek bakışta.">
-<meta property="og:image" content="https://list-em.app/assets/v1/og.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="List-em logosu, kâğıt market listesinin üst kenarında; üstünde ÇOK YAKINDA yazıyor.">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:description" content="Market listen mevsimiyle, kalorisiyle, gramıyla. Çok yakında App Store’da.">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:site" content="@listemapp">
 <link rel="icon" type="image/svg+xml" href="/assets/v1/icons/icon.svg">
 <link rel="apple-touch-icon" href="/assets/v1/icons/icon-180.png">
 <link rel="manifest" href="/assets/v1/site.webmanifest">
 <link rel="preload" href="/assets/v1/fonts/fraunces-600-latin.woff2" as="font" type="font/woff2" crossorigin>
 <script>
-(function (d) {
-  var r = d.documentElement, seen = false;
+(function (r) {
   r.className = 'js';
-  try { seen = sessionStorage.getItem('listem-film') === '1'; } catch (e) {}
-  if (seen || matchMedia('(prefers-reduced-motion: reduce)').matches) r.classList.add('film-final');
-})(document);
+  try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) r.classList.add('rm'); } catch (e) {}
+})(document.documentElement);
 </script>
 <style>
 @font-face {
@@ -61,86 +55,76 @@
   --green: #2D8B75;
   --ink: #1F2A26;
   --line: rgba(45, 139, 117, .25);
-  --frame: rgba(31, 42, 38, .5);
-  --g: clamp(16px, 4vw, 56px);
-  --half: 600px;
+  /* small / large viewport height units; the layout is drawn against the small one */
+  --s: 1vh;
+  --l: 1vh;
+  /* the page's line: the film's horizon, then the line everything stands on */
+  --T: calc(48 * var(--s));
   /* Fraunces baseline from the top of a 1em line box; refined in JS once the font has loaded */
   --asc: .8615;
+  --bar: 60px;
+  --g: 16px;
+  /* StyleSheet.hairlineWidth: one device pixel. WebKit draws a .5px border and a
+     .34px tall block as one device pixel on 2x and 3x screens (a .34px border vanishes on 3x). */
+  --hair: 1px;
+  --hairb: 1px;
 }
+@supports (height: 1svh) { :root { --s: 1svh; --l: 1lvh; } }
+@media (min-resolution: 2dppx) { :root { --hair: .5px; --hairb: .34px; } }
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
-@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 body {
   margin: 0;
   background: var(--cream);
   color: var(--ink);
-  font: 17px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font: 17px/1.5 -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 p { margin: 0; }
-p + p { margin-top: .75em; }
-img { max-width: 100%; }
-a { color: inherit; text-decoration: underline; text-decoration-color: var(--green); text-decoration-thickness: 1.5px; text-underline-offset: .22em; }
-a:hover { color: var(--green); }
+a { color: inherit; }
 :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; border-radius: 2px; }
+.vh { position: absolute !important; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
-.h {
-  margin: 0;
-  font-family: Fraunces, Georgia, serif;
-  font-weight: 600;
-  font-variation-settings: "SOFT" 100, "opsz" 144;
-  letter-spacing: -.01em;
-  line-height: 1.05;
-  color: var(--green);
-  text-wrap: balance;
-  /* pull the box up so the last line's baseline is the box's bottom edge */
-  margin-bottom: calc(-1em * (1.025 - var(--asc)));
-}
-.h2 { font-size: clamp(2rem, 1.35rem + 2.3vw, 3.5rem); max-width: 11em; }
-.h1 { font-size: clamp(2.5rem, 1.5rem + 3.6vw, 4.75rem); max-width: 12em; }
-
-.skip {
-  position: absolute; left: var(--g); top: 12px; z-index: 30;
-  padding: 8px 12px; background: var(--cream); color: var(--ink);
-  transform: translateY(-200%);
-}
-.skip:focus { transform: none; }
-
-/* Top bar */
+/* ── Top bar ─────────────────────────────────────────────────────────── */
 .top {
-  position: fixed; inset: 0 0 auto; z-index: 20;
+  position: fixed; z-index: 30; left: 0; right: 0; top: 0;
+  height: var(--bar); padding: 0 var(--g);
   display: flex; align-items: center; justify-content: space-between;
-  height: 60px; padding: 0 var(--g);
-  border-bottom: 1px solid transparent;
-  visibility: hidden; opacity: 0;
+  pointer-events: none;
 }
-.film-final .top, .no-js .top { visibility: visible; opacity: 1; transition: opacity .4s; }
-@media (prefers-reduced-motion: reduce) { .film-final .top { transition: none; } }
-.top.is-solid { background: var(--cream); border-bottom-color: var(--line); }
-.top__logo { display: block; padding: 8px 0; color: var(--green); }
-.top__logo svg { display: block; height: 20px; width: calc(20px * 8420.9 / 2134); }
-.top__nav { display: flex; gap: 4px; margin-right: -10px; }
-.top__nav a { padding: 10px; text-decoration: none; font-size: 15px; }
-.top__nav a:hover { text-decoration: underline; text-decoration-color: var(--green); }
+.top a { pointer-events: auto; }
+.top.is-solid { background: var(--cream); box-shadow: 0 1px 0 var(--line); }
+.top__logo { display: block; color: var(--green); padding: 4px 0; }
+.top__logo svg { display: block; height: 40px; width: calc(40px * 8420.9 / 2134); }
+.top__social { display: flex; margin-right: -11px; }
+.top__social a { display: grid; place-items: center; width: 44px; height: 44px; color: var(--ink); }
+.top__social a:hover { color: var(--green); }
+.top__social svg { display: block; width: 21px; height: 21px; fill: currentColor; }
 
-/* Opening film */
+/* ── The story: one pinned stage, scroll drives everything on it ─────── */
+.story { position: relative; height: calc(14 * 100 * var(--s) + 100 * var(--l)); }
+.stage {
+  position: sticky; top: 0;
+  height: calc(100 * var(--l));
+  overflow: hidden;
+  background: var(--cream);
+}
+.no-js .story { height: auto; }
+.no-js .stage { position: relative; height: calc(100 * var(--s)); }
+
+/* Film */
 .film {
-  position: relative; overflow: hidden; isolation: isolate;
-  height: 100vh; height: 100svh;
+  position: absolute; inset: 0; z-index: 1;
   container-type: size;
-  background: #C1B8A7;
-  --T: 48cqh;
-  --fs: min(8.4cqh, 11.4cqw);
+  --fs: min(8.4 * var(--s), 11.4cqw);
   --logo-h: calc(1.25 * var(--fs));
   --soon-fs: calc(var(--logo-h) * 520 / 2134); /* 26% of the wordmark's 2000-unit em */
 }
-.film__frame { position: absolute; inset: 0; visibility: hidden; }
-.film__frame.is-on { visibility: visible; }
-.film-final .film__frame, .no-js .film__frame { visibility: hidden; }
-.film-final .f5, .no-js .f5.nojs { visibility: visible; }
-.film__frame img {
+.frame { position: absolute; inset: 0; visibility: hidden; --iw: 1520; --ih: 2688; }
+.frame.is-on, .no-js .f-kapak { visibility: visible; }
+.frame img {
   /* Cover the screen with the photo's surface edge (L) pinned to the horizon (T). */
-  --hr: max(100cqw * var(--ih) / var(--iw), 48cqh / var(--L), 52cqh / (1 - var(--L)));
+  --hr: max(100cqw * var(--ih) / var(--iw), var(--T) / var(--L), (100cqh - var(--T)) / (1 - var(--L)));
   position: absolute; max-width: none;
   height: var(--hr);
   width: calc(var(--hr) * var(--iw) / var(--ih));
@@ -148,451 +132,417 @@ a:hover { color: var(--green); }
   top: calc(var(--T) - var(--L) * var(--hr));
   transform-origin: 50% calc(var(--L) * 100%);
 }
-.film__frame { --iw: 1520; --ih: 2688; }
-.f1 { --L: .5457; } .f2 { --L: .4732; } .f3 { --L: .4694; } .f4 { --L: .4836; } .f5 { --L: .5457; }
+/* Horizon of each frame as a share of the photo's height. The cover and the final
+   are temporary frames (scripts/build-w2-frames.mjs): a real frame drawn with its
+   horizon on the same row replaces the files and keeps these values. */
+.f-kapak, .f-final { --L: .47991; }
+.f-manav { --L: .4732; } .f-reyon { --L: .4694; } .f-kasa { --L: .4836; }
 @media (min-aspect-ratio: 1/1) {
-  .film__frame { --iw: 2688; --ih: 1520; }
-  .f1 { --L: .4492; } .f2 { --L: .4256; } .f3 { --L: .4389; } .f4 { --L: .4286; } .f5 { --L: .4492; }
+  .frame { --iw: 2688; --ih: 1520; }
+  .f-kapak, .f-final { --L: .44013; }
+  .f-manav { --L: .4256; } .f-reyon { --L: .4389; } .f-kasa { --L: .4286; }
 }
-.film__word, .film__soon {
+.frame img:not([src]) { visibility: hidden; }
+/* only the frame on screen gets its own layer: the push-in stays on the GPU */
+.frame.is-on img { will-change: transform; }
+.f-final.is-on picture, .f-final.is-on .fblur { will-change: opacity; }
+.frame .fblur { filter: blur(22px); opacity: 0; }
+.word, .soon {
   position: absolute; left: 0; right: 0; margin: 0;
   font-family: Fraunces, Georgia, serif; font-weight: 600;
   font-variation-settings: "SOFT" 100, "opsz" 144;
   line-height: 1; text-align: center; white-space: nowrap;
   color: var(--green); mix-blend-mode: multiply;
 }
-.film__word {
+.word {
   font-size: var(--fs); letter-spacing: -.01em;
+  /* baseline 1px above the horizon */
   top: calc(var(--T) - 1px - var(--asc) * var(--fs));
-  opacity: 0;
 }
-.film__logo {
-  position: absolute; left: 50%; margin-left: calc(var(--logo-h) * 8420.9 / 2134 / -2);
-  height: var(--logo-h); width: calc(var(--logo-h) * 8420.9 / 2134);
-  top: calc(var(--T) - var(--logo-h) * 2100 / 2134);
-  color: var(--green); mix-blend-mode: multiply; overflow: visible;
-  opacity: 0;
-}
-.film__soon {
+.js .word:not(.is-static) { opacity: 0; }
+.js .word.is-split { opacity: 1; }
+.wl { position: absolute; top: 0; left: 50%; height: 1em; }
+.wl span { position: absolute; top: 0; opacity: 0; }
+.soon {
   font-size: var(--soon-fs); letter-spacing: .22em; padding-left: .22em;
-  top: calc(var(--T) - var(--logo-h) * 2100 / 2134 - var(--logo-h) / 2 - var(--asc) * var(--soon-fs));
-  opacity: 0;
+  top: calc(var(--T) - 1px - var(--logo-h) * 2100 / 2134 - var(--logo-h) / 2 - var(--asc) * var(--soon-fs));
 }
-.film-final .film__logo, .film-final .film__soon, .no-js .film__logo, .no-js .film__soon { opacity: 1; }
-.film-final .film__word { visibility: hidden; }
-
-/* Sections: heading and pictures stand on one full-width line */
-.sec {
-  display: grid;
-  grid-template-columns: [full-start] minmax(var(--g), 1fr) [c-start] minmax(0, var(--half)) [mid] minmax(0, var(--half)) [c-end] minmax(var(--g), 1fr) [full-end];
-  padding-top: clamp(96px, 11vw, 168px);
+.js .soon:not(.is-split) { opacity: 0; }
+.flogo {
+  position: absolute; left: 50%;
+  height: var(--logo-h); width: calc(var(--logo-h) * 8420.9 / 2134);
+  margin-left: calc(var(--logo-h) * 8420.9 / 2134 / -2);
+  top: calc(var(--T) - 1px - var(--logo-h) * 2100 / 2134);
+  color: var(--green); mix-blend-mode: multiply; overflow: visible;
 }
-.sec > .h { grid-area: 1 / c-start / 2 / mid; align-self: end; padding-right: 32px; }
-.sec__visual { grid-area: 1 / mid / 2 / c-end; align-self: end; display: flex; align-items: flex-end; gap: 24px; }
-.rule { grid-column: full; grid-row: 2; height: 1px; background: var(--line); }
-.sec__body { grid-area: 3 / c-start / 4 / mid; padding-top: 28px; max-width: 34em; }
-.sec__foot { display: none; }
-.sec--text > .h, .sec--text .sec__body { grid-column: c-start / c-end; }
-#giris { padding-top: clamp(112px, 13vw, 184px); }
-#giris .sec__body { font-size: 19px; }
+.js .flogo { opacity: 0; }
+.note {
+  position: absolute; left: var(--g); right: var(--g);
+  bottom: calc(100% - 100 * var(--s) + 64px);
+  margin: 0 auto; max-width: 23em;
+  font-size: 15px; line-height: 1.45; text-align: center; color: var(--ink);
+}
+.cue {
+  position: absolute; left: 50%; bottom: calc(100% - 100 * var(--s) + 22px);
+  width: 1px; height: 26px; margin-left: -.5px; background: var(--green);
+}
+.cue::after {
+  content: ""; position: absolute; left: -3.5px; bottom: 0;
+  width: 7px; height: 7px; border: solid var(--green); border-width: 0 1px 1px 0;
+  transform: rotate(45deg); transform-origin: 70% 70%;
+}
 
+/* The page line */
+.hline { position: absolute; z-index: 2; left: 0; right: 0; top: var(--T); height: 1px; background: var(--line); opacity: 0; }
+
+/* Phone: frameless card on phones, a plain frame from tablets up */
+.stage {
+  --hh: 84px;   /* heading above the card */
+  --dh: 30px;   /* progress dots below it */
+  --pt: calc(var(--bar) + var(--hh) + 10px);
+  --ph: calc(100 * var(--s) - var(--pt) - var(--dh));
+  --pw: 0px;
+}
+/* On a phone the card is as wide as the phone, so the app lays out exactly as it
+   would on that phone (a narrower card wraps rows the device itself does not). */
 .phone {
-  --pw: clamp(220px, 22vw, 300px);
-  flex: none; margin: 0;
-  width: var(--pw);
-  padding: calc(var(--pw) * .03);
-  border: 1px solid var(--frame);
-  border-radius: calc(var(--pw) * .1475);
-  background: var(--cream);
+  position: absolute; z-index: 4;
+  left: 0; right: 0; top: var(--pt); height: var(--ph);
+  border-radius: 24px;
+  background: #F8F7F4;
+  box-shadow: 0 0 0 1px rgba(31, 42, 38, .1), 0 26px 60px -28px rgba(31, 42, 38, .4);
+  visibility: hidden;
 }
-.phone img { display: block; width: 100%; height: auto; border-radius: calc(var(--pw) * .1175); }
-.pair .phone { --pw: clamp(150px, 18.5vw, 270px); }
-.paper-pair .phone { --pw: clamp(150px, 16.5vw, 240px); }
-.paper {
-  flex: none; margin: 0; display: block;
-  /* same height as the phone beside it */
-  height: calc((var(--pw) * .94 - 2px) * 2718 / 1320 + var(--pw) * .06 + 2px);
-  aspect-ratio: 840 / 1218;
-}
-.paper img { display: block; width: 100%; height: 100%; }
-.paper-pair { --pw: clamp(150px, 16.5vw, 240px); }
+.screen { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; transform: translateZ(0); }
+.phone .a { --it: 10px; --ib: 12px; }
+.no-js .phone, .no-js .mh, .no-js .dots, .no-js .cue { display: none; }
 
-/* Season band: the market photo's own horizon is the line */
-.sec--band { container-type: inline-size; }
-.band {
-  grid-column: full; grid-row: 1; position: relative; overflow: hidden;
-  --bw: max(100cqw, 760px);
-  --bh: calc(var(--bw) * 1520 / 2688);
-  --hy: calc(var(--bh) * .4256);
-  --A: min(var(--hy), 320px);
-  --B: min(var(--bh) - var(--hy), 280px);
-  height: calc(var(--A) + var(--B));
-}
-.band__photo img {
-  position: absolute; max-width: none;
-  width: var(--bw); height: var(--bh);
-  left: calc(50% - var(--bw) / 2);
-  top: calc(var(--A) - var(--hy));
-}
-.band__line { position: absolute; left: 0; right: 0; top: var(--A); height: 1px; background: var(--line); }
-.band .h {
-  position: absolute; margin: 0;
-  left: max(var(--g), 50% - var(--half));
-  bottom: calc(var(--B) - 1em * (1.025 - var(--asc)));
-  width: calc(min(var(--half), 50% - var(--g)) - 32px);
-  mix-blend-mode: multiply;
-}
-.band__shot {
-  position: absolute; margin: 0;
-  left: 50%; bottom: var(--B);
-  width: clamp(300px, 32vw, 440px);
-}
-.shot { border: 1px solid var(--frame); border-radius: 18px; overflow: hidden; background: #F7F6F3; }
-.shot img { display: block; width: 100%; height: auto; }
-.sec--band .sec__body { grid-row: 2; }
+.mh { position: absolute; z-index: 3; left: var(--g); right: var(--g); top: calc(var(--bar) + 2px); height: var(--hh); }
+.mh__s { position: absolute; left: 0; right: 0; bottom: 0; opacity: 0; }
+.mh__h, .mh__w, .mh__t { margin: 0; font-family: Fraunces, Georgia, serif; font-weight: 600; font-variation-settings: "SOFT" 100; }
+.mh__h { font-size: clamp(21px, 6.4vw, 26px); line-height: 1.12; color: var(--ink); text-wrap: balance; }
+.mh__w { font-size: clamp(25px, 7.4vw, 30px); line-height: 1.05; color: var(--green); letter-spacing: -.01em; font-variation-settings: "SOFT" 100, "opsz" 144; }
+.mh__t { margin-top: 6px; font-size: clamp(16px, 4.7vw, 19px); line-height: 1.25; color: var(--ink); }
+.dots { position: absolute; z-index: 3; left: 0; right: 0; top: calc(var(--pt) + var(--ph) + 12px); display: flex; justify-content: center; gap: 9px; opacity: 0; }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(31, 42, 38, .18); }
+.dots i.is-on { background: var(--green); }
 
-/* Themes: eight screens on one line, scrolls sideways on small screens */
-.themes {
-  grid-column: full; grid-row: 4;
-  --tw: clamp(150px, (100vw - 2 * var(--g) - 7 * 16px) / 8, 210px);
-  --ph: calc((var(--tw) * .94 - 2px) * 2718 / 1320 + var(--tw) * .06 + 2px);
-  display: grid; grid-auto-flow: column; grid-auto-columns: var(--tw); gap: 16px;
-  justify-content: safe center;
-  margin: 72px 0 0; padding: 0 var(--g) 8px; list-style: none;
-  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;
-  scroll-padding-inline: var(--g);
-  background: linear-gradient(var(--line), var(--line)) 0 var(--ph) / 100% 1px no-repeat local;
-}
-.themes li { scroll-snap-align: start; }
-.themes .phone { --pw: var(--tw); }
-.themes p { margin-top: 12px; font-size: 15px; }
+.toc, .say { display: none; }
 
-@media (max-width: 859px) {
-  .sec { grid-template-columns: [full-start] var(--g) [c-start] minmax(0, 1fr) [c-end] var(--g) [full-end]; }
-  .sec > .h, .sec__body { grid-column: c-start / c-end; padding-right: 0; }
-  .sec__visual { grid-column: c-start / c-end; grid-row: 4; margin-top: 56px; gap: 12px; }
-  .sec__foot { display: block; grid-row: 5; }
-  .phone { --pw: min(64vw, 280px); }
-  .pair .phone { --pw: calc((100vw - 2 * var(--g) - 12px) / 2); }
-  .paper-pair, .paper-pair .phone { --pw: calc((100vw - 2 * var(--g) - 12px) / 2.379); }
-  .band .h { width: auto; right: var(--g); }
-  .band__shot { left: var(--g); bottom: auto; top: calc(var(--A) + 20px); width: min(100% - 2 * var(--g), 380px); }
-  .themes { --tw: min(46vw, 210px); justify-content: start; }
+@media (min-width: 600px) {
+  :root { --bar: 72px; --g: clamp(24px, 4vw, 64px); }
+  .stage {
+    --bz: 9px;      /* frame */
+    --sw: 393px;    /* screen width */
+    --hh: 104px;
+    --pw: calc(var(--sw) + 2 * var(--bz));
+    --ph: min(852px + 2 * var(--bz), 100 * var(--s) - var(--pt) - var(--dh));
+  }
+  .phone {
+    left: 50%; right: auto; width: var(--pw); margin-left: calc(var(--pw) / -2);
+    border: var(--bz) solid #1F2A26; border-radius: 56px;
+    box-shadow: 0 34px 80px -34px rgba(31, 42, 38, .5);
+  }
+  .screen { border-radius: calc(56px - var(--bz)); }
+  .phone .a { --it: 16px; --ib: 16px; }
+  .mh { left: 50%; right: auto; width: var(--pw); margin-left: calc(var(--pw) / -2); }
+  .mh__h { font-size: 28px; }
+  .mh__w { font-size: 32px; }
+  .mh__t { font-size: 19px; }
 }
 
-/* Footer */
-.foot { margin-top: clamp(120px, 14vw, 200px); }
-/* off-screen sections skip rendering, and their lazy images wait, until scrolled near */
-.sec:not(#giris), .foot { content-visibility: auto; contain-intrinsic-size: auto 900px; }
-.foot .rule { height: 1px; background: var(--line); }
-.foot__in {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px;
-  max-width: calc(2 * var(--half)); margin: 0 auto; padding: 28px var(--g) 48px;
-  box-sizing: content-box; font-size: 15px;
+/* Wide: index on the left, the sentence on the right, both standing on the line */
+@media (min-width: 1000px) and (min-height: 520px), (min-width: 740px) and (min-aspect-ratio: 7/5) {
+  .stage {
+    --ph: min(852px + 2 * var(--bz), 100 * var(--s) - var(--bar) - 28px);
+    --pt: calc(var(--bar) + (100 * var(--s) - var(--bar) - var(--ph)) / 2);
+    --gap: clamp(28px, 4.2vw, 80px);
+  }
+  .mh, .dots { display: none; }
+  .toc {
+    display: block; position: absolute; z-index: 3;
+    /* on very wide screens the words stay near the phone */
+    left: max(var(--g), 50% - 760px); right: calc(50% + var(--pw) / 2 + var(--gap));
+    margin: 0; padding: 0; list-style: none;
+    --tfs: clamp(22px, min(3.4vw, 6.4 * var(--s)), 56px);
+    font: 600 var(--tfs)/1 Fraunces, Georgia, serif;
+    font-variation-settings: "SOFT" 100, "opsz" 144;
+    letter-spacing: -.01em;
+    /* the last entry's baseline sits 1px above the line */
+    top: calc(var(--T) - 1px - (var(--asc) + 2 * 1.18) * var(--tfs));
+  }
+  .toc li { height: 1em; margin-bottom: .18em; white-space: nowrap; color: var(--green); opacity: 0; }
+  .toc a { text-decoration: none; }
+  .toc a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .12em; }
+  .say {
+    display: block; position: absolute; z-index: 3;
+    left: calc(50% + var(--pw) / 2 + var(--gap)); right: max(var(--g), 50% - 760px);
+    --sfs: clamp(19px, min(2.3vw, 4.4 * var(--s)), 36px);
+    font: 600 var(--sfs)/1.15 Fraunces, Georgia, serif;
+    font-variation-settings: "SOFT" 100;
+    color: var(--ink);
+    /* last line's baseline 1px above the line: (1.15 + 1) / 2 - asc below the box edge */
+    bottom: calc(100% - var(--T) + 1px - (1.075 - var(--asc)) * var(--sfs));
+    height: 0;
+  }
+  .say p { position: absolute; left: 0; bottom: 0; max-width: 13em; opacity: 0; text-wrap: balance; }
 }
-.foot__in > a { color: var(--green); display: block; padding: 6px 0; }
-.foot__in svg { display: block; height: 18px; width: calc(18px * 8420.9 / 2134); }
+
+/* ── App screen, rebuilt from grocery-list-FIXED: Taze Bahçe, light, Turkish ──
+   Sizes are the app's points (designSystem/tokens.ts) as CSS pixels; colours
+   are the light Taze Bahçe palette (designSystem/themes.ts → ThemeContext). */
+.a {
+  --it: 16px; --ib: 16px;
+  /* Dynamic Type: the app's sizes are the default text size (1); the Vitrin screenshots were taken at x-Small (.823) */
+  --ts: 1;
+  position: relative; width: 100%; height: 100%; overflow: hidden;
+  background: #F8F7F4; color: #0F0F0D;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", system-ui, "Segoe UI", Roboto, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  font-size: calc(16px * var(--ts)); line-height: 1.1935; letter-spacing: 0;
+  -webkit-font-smoothing: antialiased;
+  -webkit-user-select: none; user-select: none; cursor: default;
+}
+/* iOS sizes a text box to the font's line height (1.1935em for SF Pro) rounded up
+   to the device pixel; every element takes its own, from its own font size. */
+.a * { line-height: 1.1935; line-height: round(up, 1.1935em, .33334px); }
+.ic { display: block; flex: none; fill: currentColor; }
+.a-main { position: absolute; inset: 0; display: flex; flex-direction: column; }
+/* AppHeader + the list's own left/right elements (MainListScreen) */
+.a-hd { flex: none; padding: var(--it) 16px 8px; background: #F8F7F4; }
+.a-hdr { display: flex; align-items: center; justify-content: space-between; min-height: 44px; }
+.a-hl { display: flex; align-items: center; flex: 1; min-width: 0; }
+.a-back { flex: none; display: flex; align-items: center; height: 44px; margin-left: -8px; color: #2D8B75; }
+.a-hle { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.a-lf { position: relative; flex: none; }
+.a-face { width: 44px; height: 44px; border-radius: 12px; background: #2D8B7515; display: flex; align-items: center; justify-content: center; font-size: calc(20px * var(--ts)); }
+.a-cnt { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; padding: 0 8px; border-radius: 9px; background: #2D8B75; color: #FFF; font-size: calc(11px * var(--ts)); font-weight: 600; display: flex; align-items: center; justify-content: center; }
+.a-title { flex-shrink: 1; min-width: 0; font-size: calc(20px * var(--ts)); font-weight: 600; letter-spacing: -.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-acts { flex: none; display: flex; align-items: center; gap: 8px; }
+.a-hb { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #6B6B63; }
+.a-lang { font-size: calc(13px * var(--ts)); font-weight: 600; letter-spacing: .3px; color: #0F0F0D; }
+/* ProductSearchBar */
+.a-sa { flex: none; padding: 0 16px 8px; background: #F8F7F4; border-bottom: var(--hair) solid #D8D5CE; }
+.a-sbar { margin-top: 8px; display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 12px; border: var(--hair) solid #D8D5CE; background: #FFF; color: #807D76; }
+.a-ph { flex: 1; min-width: 0; min-height: 24px; display: flex; align-items: center; color: #948F89; white-space: nowrap; overflow: hidden; }
+/* The list */
+.a-list { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.a-lc { position: absolute; left: 0; right: 0; top: 0; padding: 16px 16px calc(var(--ib) + 80px); will-change: transform; }
+.a-cal { background: #EFEDE8; border: .5px solid #D8D5CE; border-radius: 16px; padding: 20px; margin-bottom: 8px; }
+.a-lock { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 0; }
+.a-plus { padding: 4px 14px; border-radius: 20px; background: #C4785A; color: #FFF; font-size: calc(11px * var(--ts)); font-weight: 500; }
+.a-ll { font-size: calc(13px * var(--ts)); font-weight: 500; color: #6B6B63; text-align: center; }
+.a-sec { display: flex; align-items: center; gap: 8px; padding: 24px 0 8px; }
+.a-se { font-size: calc(13px * var(--ts)); }
+.a-sl { font-size: calc(13px * var(--ts)); font-weight: 600; color: #6B6B63; }
+.a-sr { margin-left: auto; display: flex; align-items: center; gap: 8px; color: #948F89; }
+.a-clr { padding: 2px 8px; border-radius: 8px; background: #2D8B7515; color: #2D8B75; font-size: calc(13px * var(--ts)); font-weight: 600; }
+.a-sep { height: var(--hairb); margin-left: 108px; background: #D8D5CE; }
+.a-row { display: flex; align-items: center; min-height: 56px; padding: 16px; background: #EFEDE8; }
+.a-ck { flex: none; width: 24px; height: 24px; margin-right: 16px; border-radius: 50%; border: 1.5px solid #6B6B63; display: flex; align-items: center; justify-content: center; color: #FFF; }
+.a-row.is-done .a-ck { background: #3FA672; border-color: #3FA672; }
+.a-eb { flex: none; width: 36px; height: 36px; margin-right: 16px; border-radius: 8px; background: rgba(0, 0, 0, .04); display: flex; align-items: center; justify-content: center; font-size: calc(16px * var(--ts)); }
+.a-row.is-done .a-eb { opacity: .45; }
+.a-rc { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.a-nr { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.a-nm { position: relative; max-width: 100%; font-size: calc(16px * var(--ts)); font-weight: 600; letter-spacing: -.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-row.is-done .a-nm { color: #948F89; }
+.a-row.is-done .a-nm::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1.5px; margin-top: -.75px; background: #948F89; }
+/* Season badge — colours from designSystem/seasonTone on the row's surface (#EFEDE8) */
+.a-bdg { padding: 1px 8px; border-radius: 4px; background: #D7E1DA; color: #236C5B; font-size: calc(11px * var(--ts)); font-weight: 600; font-style: italic; white-space: nowrap; }
+.a-bdg.is-sea { background: #D4E1E0; color: #136A7C; }
+.a-meta { font-size: calc(11px * var(--ts)); color: #6B6B63; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-row.is-done .a-meta { color: #948F89; }
+.a-qty { flex: none; margin-right: 8px; padding: 2px 8px; border-radius: 999px; background: #2D8B75; color: #FFF; font-size: calc(13px * var(--ts)); font-weight: 600; }
+.a-vm { margin-right: 8px; color: #948F89; }
+.a-chv { color: #948F89; }
+/* Toolbar */
+.a-tb { position: absolute; left: 0; right: 0; bottom: 0; padding: 16px 16px max(var(--ib), 16px); background: #F8F7F4; border-top: var(--hair) solid #D8D5CE; box-shadow: 0 -1px 8px rgba(0, 0, 0, .06); }
+.a-tbr { display: flex; align-items: center; justify-content: space-between; }
+.a-st { font-size: calc(13px * var(--ts)); font-weight: 600; color: #6B6B63; }
+.a-add { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 16px; border-radius: 12px; background: #2D8B75; color: #FFF; font-weight: 600; }
+/* ModalGround: blur + dim */
+.a-gr { position: absolute; inset: 0; background: rgba(0, 0, 0, .2); -webkit-backdrop-filter: blur(2.4px); backdrop-filter: blur(2.4px); opacity: 0; visibility: hidden; }
+/* QuickAddSheet — snap points 68% and 92%. gorhom (v5) makes the sheet as tall as its highest
+   stop and slides it: at 68% its bottom 24% lies below the screen. */
+.a-sheet { position: absolute; left: 0; right: 0; bottom: 0; height: calc((100% - var(--it)) * .92); display: flex; flex-direction: column; background: #F8F7F4; border: var(--hair) solid #D8D5CE; border-bottom: 0; border-radius: 16px 16px 0 0; box-shadow: 0 -6px 40px rgba(0, 0, 0, .28); visibility: hidden; transform: translate3d(0, 110%, 0); will-change: transform; }
+.a-hdl { flex: none; padding: 10px; }
+.a-hdl i { display: block; width: calc((100% + 20px) * .075); height: 4px; margin: 0 auto; border-radius: 4px; background: #D8D5CE; }
+.a-shd { flex: none; padding: 0 16px 8px; background: #F8F7F4; border-bottom: var(--hair) solid #D8D5CE; }
+.a-shr { display: flex; align-items: center; justify-content: space-between; padding: 8px 0 16px; }
+.a-sbk { display: none; width: 32px; height: 32px; margin-right: 8px; align-items: center; justify-content: center; color: #2D8B75; }
+.a-stl { flex: 1; font-weight: 600; }
+.a-scl { color: #948F89; }
+.a-ssr { margin-top: 8px; display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 16px; border: var(--hair) solid #D8D5CE; background: #EFEDE8; color: #807D76; }
+.a-ssp { flex: 1; min-width: 0; color: #948F89; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-hint { display: none; height: 34px; align-items: center; justify-content: center; font-size: calc(13px * var(--ts)); color: #6B6B63; text-align: center; }
+.a-sheet.is-drill .a-sbk, .a-sheet.is-drill .a-hint { display: flex; }
+.a-sbd { position: relative; flex: 1; min-height: 0; overflow: hidden; }
+.a-lay { position: absolute; left: 0; right: 0; top: 0; padding: 16px 16px 0; }
+.a-lay.is-off { opacity: 0; visibility: hidden; }
+.a-home { display: flex; flex-direction: column; gap: 16px; }
+.a-fqh { display: flex; align-items: center; gap: 8px; padding: 8px 0; color: #D4883C; }
+.a-fql { font-size: calc(13px * var(--ts)); font-weight: 600; letter-spacing: .5px; color: #6B6B63; }
+.a-chips { display: flex; gap: 8px; padding-bottom: 8px; overflow: hidden; }
+.a-chip { flex: none; display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 8px 16px; border-radius: 999px; border: var(--hair) solid #D8D5CE; background: #EFEDE8; }
+.a-chip b { font-weight: 400; font-size: calc(16px * var(--ts)); }
+.a-chip span { font-size: calc(13px * var(--ts)); white-space: nowrap; }
+.a-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.a-card { width: calc(50% - 4px); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px; border-radius: 12px; border: .5px solid #D8D5CE; background: #EFEDE8; }
+.a-card b { font-weight: 400; font-size: calc(20px * var(--ts)); }
+.a-card span { font-weight: 600; text-align: center; }
+.a-card i { font-style: normal; font-size: calc(13px * var(--ts)); color: #948F89; }
+.a-drill { will-change: transform; }
+.a-drill .a-fq { margin-bottom: 16px; }
+.a-cr { display: flex; align-items: center; gap: 16px; min-height: 56px; padding: 16px; background: #EFEDE8; border: solid #D8D5CE; border-width: var(--hair) .5px 0; }
+.a-cr.is-first { border-top-width: .5px; border-radius: 12px 12px 0 0; }
+.a-cr.is-last { border-bottom-width: .5px; border-radius: 0 0 12px 12px; }
+.a-pf { flex: none; width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.a-pf b { font-weight: 400; font-size: 19.8px; line-height: 24.75px; }
+.a-ci { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.a-cn { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a-ck2 { font-size: calc(11px * var(--ts)); color: #948F89; }
+.a-cic { color: #948F89; }
+.a-cic.is-in { color: #3FA672; }
+/* Strip (ToastContext → SheetStripSlot) */
+.a-strip { position: absolute; left: 24px; right: 24px; bottom: max(var(--ib), 24px); visibility: hidden; will-change: transform, opacity; }
+.a-stc { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 16px; border: .5px solid #D8D5CE; background: #FFF; box-shadow: 0 -1px 8px rgba(0, 0, 0, .06); }
+.a-stf { flex: none; width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+.a-stf b { font-weight: 400; font-size: 16.2px; line-height: 20.25px; }
+.a-stt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.a-ste { font-size: calc(11px * var(--ts)); font-weight: 500; letter-spacing: .5px; color: #6B6B63; }
+.a-stn { font-weight: 600; }
+/* A finger on the glass — not part of the app */
+.a-touch { position: absolute; left: 0; top: 0; width: 44px; height: 44px; margin: -22px 0 0 -22px; border-radius: 50%; background: rgba(15, 15, 13, .17); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .6); opacity: 0; pointer-events: none; will-change: transform, opacity; }
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.foot { position: relative; z-index: 5; background: var(--cream); border-top: 1px solid var(--line); }
+.foot__in { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; padding: 26px var(--g) 44px; font-size: 15px; }
 .foot ul { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 0; padding: 0; list-style: none; }
-.foot ul a { display: inline-block; padding: 6px 0; }
+.foot a { display: inline-block; padding: 6px 0; text-decoration: underline; text-decoration-color: var(--green); text-underline-offset: .22em; }
 .foot__copy { margin-left: auto; }
-@media (max-width: 859px) { .foot__copy { margin-left: 0; width: 100%; } }
+@media (max-width: 599px) { .foot__copy { margin-left: 0; width: 100%; } }
 </style>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <symbol id="lockup" viewBox="0 -2100 8420.9 2134"><path fill="currentColor" transform="translate(0 0) scale(3.33587) translate(-194.29 -827.08)" d="M231.1 332.12H292.73Q314.61 332.12 329.49 344.71Q344.05 357.03 348.02 378.21L360.32 438.04H567.45Q568.43 407.02 573.45 381.63Q575.96 368.91 579.76 356.3C517.61 359.84 472.39 307.87 451.81 255.76C505.43 239.91 573.91 243.49 609.51 294.18C639.34 219.85 723.9 198.21 793.19 204.62C776.77 277.75 723.76 357.66 632.23 351.66Q624.51 371.22 620.61 390.94Q616.47 411.89 615.55 438.04H753.03Q765.42 438.04 770.74 444.18Q776.16 450.44 774.21 463.08L756.88 572.86Q751.1 609.45 712.59 609.45H395.58L403.5 647.97H672.14Q678.27 647.97 683.93 650.32Q689.6 652.66 693.93 657Q698.26 661.33 700.61 666.99Q702.96 672.66 702.96 678.79Q702.96 684.91 700.61 690.58Q698.26 696.24 693.93 700.57Q689.6 704.91 683.93 707.25Q678.27 709.6 672.14 709.6H402.51Q379.66 709.6 364 697.07Q348.12 684.37 343.44 661.88L288.29 393.75H231.1Q224.97 393.75 219.31 391.4Q213.65 389.06 209.31 384.72Q204.98 380.39 202.63 374.73Q200.29 369.06 200.29 362.93Q200.29 356.8 202.63 351.14Q204.98 345.48 209.31 341.14Q213.65 336.81 219.31 334.46Q224.97 332.12 231.1 332.12ZM396.73 512.19Q391.95 512.19 388.56 515.58Q385.18 518.96 385.18 523.75Q385.18 528.53 388.56 531.92Q391.95 535.3 396.73 535.3H694.4Q699.19 535.3 702.58 531.92Q705.96 528.53 705.96 523.75Q705.96 518.96 702.58 515.58Q699.19 512.19 694.4 512.19ZM389.03 780.86C389.03 755.33 409.72 734.64 435.25 734.64C460.78 734.64 481.47 755.33 481.47 780.86C481.47 806.39 460.78 827.08 435.25 827.08C409.72 827.08 389.03 806.39 389.03 780.86ZM593.18 780.86C593.18 755.33 613.87 734.64 639.4 734.64C664.93 734.64 685.62 755.33 685.62 780.86C685.62 806.39 664.93 827.08 639.4 827.08C613.87 827.08 593.18 806.39 593.18 780.86ZM396.73 560.34Q391.95 560.34 388.56 563.73Q385.18 567.11 385.18 571.9Q385.18 576.68 388.56 580.07Q391.95 583.45 396.73 583.45H616.75Q621.54 583.45 624.92 580.07Q628.31 576.68 628.31 571.9Q628.31 567.11 624.92 563.73Q621.54 560.34 616.75 560.34ZM396.73 464.04Q391.95 464.04 388.56 467.43Q385.18 470.81 385.18 475.6Q385.18 480.39 388.56 483.77Q391.95 487.16 396.73 487.16H545.57Q550.36 487.16 553.74 483.77Q557.12 480.39 557.12 475.6Q557.12 470.81 553.74 467.43Q550.36 464.04 545.57 464.04Z"/><path fill="currentColor" transform="translate(2379.9 0)" d="M584 -1260 535 -1246Q509 -1235 498.0 -1218.0Q487 -1201 487 -1171V-222Q487 -178 507.0 -158.5Q527 -139 566 -139H760Q803 -139 833.0 -152.0Q863 -165 886.0 -196.0Q909 -227 929 -280L970 -388Q985 -425 1007.5 -436.5Q1030 -448 1058 -442Q1088 -436 1100.5 -411.0Q1113 -386 1103 -348L1030 -62Q1017 -12 996.5 11.0Q976 34 938 34Q912 34 890.0 25.5Q868 17 843.5 8.5Q819 0 786 0H133Q97 0 77.5 -17.5Q58 -35 58 -67Q58 -119 108 -140L158 -154Q184 -165 195.0 -182.0Q206 -199 206 -229V-1171Q206 -1201 195.0 -1218.0Q184 -1235 158 -1246L108 -1260Q58 -1281 58 -1333Q58 -1365 77.5 -1382.5Q97 -1400 133 -1400H560Q597 -1400 616.0 -1382.5Q635 -1365 635 -1333Q635 -1282 584 -1260Z M1493.0 -828V-201Q1493.0 -163 1501.0 -147.5Q1509.0 -132 1527.0 -124L1554.0 -115Q1572.0 -105 1581.5 -91.0Q1591.0 -77 1591.0 -56Q1591.0 -29 1575.0 -14.5Q1559.0 0 1530.0 0H1207.0Q1178.0 0 1162.0 -14.5Q1146.0 -29 1146.0 -56Q1146.0 -77 1155.5 -91.0Q1165.0 -105 1183.0 -115L1210.0 -124Q1229.0 -132 1236.5 -147.5Q1244.0 -163 1244.0 -201V-627Q1244.0 -660 1236.0 -673.5Q1228.0 -687 1210.0 -693L1170.0 -697Q1150.0 -707 1141.0 -719.0Q1132.0 -731 1132.0 -749Q1132.0 -769 1145.0 -784.0Q1158.0 -799 1190.0 -812L1335.0 -867Q1374.0 -882 1395.5 -887.0Q1417.0 -892 1436.0 -892Q1464.0 -892 1478.5 -874.5Q1493.0 -857 1493.0 -828ZM1358.0 -1025Q1286.0 -1025 1242.5 -1066.0Q1199.0 -1107 1199.0 -1175Q1199.0 -1243 1242.5 -1284.0Q1286.0 -1325 1358.0 -1325Q1431.0 -1325 1474.0 -1284.0Q1517.0 -1243 1517.0 -1175Q1517.0 -1107 1474.0 -1066.0Q1431.0 -1025 1358.0 -1025Z M1995.0 -86Q2054.0 -86 2085.0 -114.0Q2116.0 -142 2116.0 -184Q2116.0 -212 2104.0 -233.5Q2092.0 -255 2059.5 -274.0Q2027.0 -293 1967.0 -309Q1834.0 -347 1759.0 -390.0Q1684.0 -433 1653.5 -489.5Q1623.0 -546 1623.0 -624Q1623.0 -743 1707.0 -820.5Q1791.0 -898 1960.0 -898Q2018.0 -898 2056.0 -887.0Q2094.0 -876 2119.5 -865.0Q2145.0 -854 2163.0 -854Q2177.0 -854 2185.5 -865.0Q2194.0 -876 2205.0 -887.0Q2216.0 -898 2236.0 -898Q2256.0 -898 2271.0 -885.0Q2286.0 -872 2297.0 -834L2336.0 -713Q2350.0 -666 2344.5 -635.0Q2339.0 -604 2313.0 -593Q2285.0 -582 2257.5 -593.0Q2230.0 -604 2209.0 -636Q2175.0 -693 2138.5 -726.0Q2102.0 -759 2061.5 -774.0Q2021.0 -789 1976.0 -789Q1906.0 -789 1873.5 -758.5Q1841.0 -728 1841.0 -685Q1841.0 -655 1857.0 -629.5Q1873.0 -604 1912.5 -583.0Q1952.0 -562 2023.0 -543Q2127.0 -517 2196.0 -478.0Q2265.0 -439 2299.5 -383.0Q2334.0 -327 2334.0 -248Q2334.0 -167 2293.0 -106.0Q2252.0 -45 2178.5 -10.5Q2105.0 24 2006.0 24Q1941.0 24 1903.5 11.0Q1866.0 -2 1847.0 -14.5Q1828.0 -27 1816.0 -27Q1802.0 -27 1793.5 -14.5Q1785.0 -2 1775.0 11.0Q1765.0 24 1746.0 24Q1727.0 24 1714.5 11.0Q1702.0 -2 1696.0 -33L1665.0 -169Q1655.0 -222 1659.5 -249.5Q1664.0 -277 1694.0 -285Q1720.0 -292 1745.0 -279.0Q1770.0 -266 1794.0 -229Q1837.0 -151 1884.0 -118.5Q1931.0 -86 1995.0 -86Z M2440.0 -746 2401.0 -755Q2376.0 -764 2369.0 -780.0Q2362.0 -796 2362.0 -817Q2362.0 -844 2380.5 -861.0Q2399.0 -878 2428.0 -878H2470.0Q2486.0 -878 2498.5 -888.5Q2511.0 -899 2529.0 -930L2582.0 -1039Q2602.0 -1069 2624.0 -1084.5Q2646.0 -1100 2670.0 -1100Q2695.0 -1100 2710.5 -1084.0Q2726.0 -1068 2726.0 -1034V-284Q2726.0 -226 2749.0 -196.5Q2772.0 -167 2816.0 -167Q2844.0 -167 2863.0 -177.5Q2882.0 -188 2895.5 -202.5Q2909.0 -217 2921.0 -227.5Q2933.0 -238 2945.0 -238Q2959.0 -238 2966.5 -226.5Q2974.0 -215 2974.0 -188Q2974.0 -136 2941.5 -88.0Q2909.0 -40 2852.5 -10.0Q2796.0 20 2724.0 20Q2604.0 20 2540.5 -44.0Q2477.0 -108 2477.0 -243V-676Q2477.0 -706 2471.0 -721.5Q2465.0 -737 2440.0 -746ZM2627.0 -745V-878H2916.0Q2946.0 -878 2962.0 -865.0Q2978.0 -852 2978.0 -828Q2978.0 -792 2948.5 -768.5Q2919.0 -745 2852.0 -745Z M3480.0 -601Q3541.0 -601 3519.0 -536L3501.0 -479Q3491.0 -448 3476.0 -437.5Q3461.0 -427 3435.0 -427H3051.0Q2990.0 -427 3011.0 -492L3030.0 -549Q3041.0 -580 3055.5 -590.5Q3070.0 -601 3096.0 -601Z M4397.0 -563Q4397.0 -497 4362.5 -462.5Q4328.0 -428 4264.0 -428H3747.0V-525H4085.0Q4141.0 -525 4141.0 -581Q4141.0 -669 4099.5 -718.5Q4058.0 -768 3993.0 -768Q3939.0 -768 3897.5 -737.0Q3856.0 -706 3832.0 -648.0Q3808.0 -590 3808.0 -506Q3808.0 -338 3884.5 -251.0Q3961.0 -164 4085.0 -164Q4163.0 -164 4222.0 -199.5Q4281.0 -235 4314.0 -286Q4330.0 -303 4342.0 -309.5Q4354.0 -316 4365.0 -316Q4380.0 -316 4389.0 -304.5Q4398.0 -293 4398.0 -269Q4393.0 -194 4345.5 -128.0Q4298.0 -62 4214.5 -21.0Q4131.0 20 4017.0 20Q3884.0 20 3785.5 -36.5Q3687.0 -93 3633.5 -195.0Q3580.0 -297 3580.0 -431Q3580.0 -565 3632.0 -670.5Q3684.0 -776 3784.5 -837.0Q3885.0 -898 4027.0 -898Q4139.0 -898 4222.0 -854.0Q4305.0 -810 4351.0 -734.0Q4397.0 -658 4397.0 -563Z M4809.0 -828V-201Q4809.0 -161 4816.0 -143.5Q4823.0 -126 4842.0 -118L4870.0 -108Q4901.0 -89 4901.0 -56Q4901.0 0 4845.0 0H4523.0Q4494.0 0 4478.0 -14.5Q4462.0 -29 4462.0 -56Q4462.0 -77 4471.5 -90.5Q4481.0 -104 4499.0 -115L4526.0 -124Q4545.0 -131 4552.5 -147.0Q4560.0 -163 4560.0 -201V-627Q4560.0 -660 4552.0 -673.5Q4544.0 -687 4526.0 -693L4486.0 -697Q4466.0 -707 4457.0 -719.0Q4448.0 -731 4448.0 -749Q4448.0 -769 4461.0 -784.0Q4474.0 -799 4506.0 -812L4651.0 -867Q4690.0 -882 4711.5 -887.0Q4733.0 -892 4752.0 -892Q4780.0 -892 4794.5 -874.5Q4809.0 -857 4809.0 -828ZM4783.0 -598 4732.0 -659 4771.0 -700Q4874.0 -807 4960.5 -852.5Q5047.0 -898 5127.0 -898Q5236.0 -898 5301.0 -825.0Q5366.0 -752 5366.0 -620V-201Q5366.0 -161 5373.0 -143.5Q5380.0 -126 5399.0 -118L5427.0 -108Q5458.0 -89 5458.0 -56Q5458.0 0 5402.0 0H5081.0Q5025.0 0 5025.0 -56Q5025.0 -89 5056.0 -108L5084.0 -118Q5103.0 -126 5110.0 -143.5Q5117.0 -161 5117.0 -201V-556Q5117.0 -633 5083.0 -673.0Q5049.0 -713 4991.0 -713Q4950.0 -713 4905.5 -693.0Q4861.0 -673 4815.0 -628ZM5340.0 -606 5288.0 -667 5329.0 -707Q5429.0 -810 5506.5 -854.0Q5584.0 -898 5659.0 -898Q5765.0 -898 5818.0 -833.5Q5871.0 -769 5885.0 -654L5942.0 -201Q5947.0 -163 5952.5 -147.5Q5958.0 -132 5976.0 -124L6003.0 -115Q6021.0 -104 6031.0 -90.5Q6041.0 -77 6041.0 -56Q6041.0 -29 6025.0 -14.5Q6009.0 0 5980.0 0H5656.0Q5600.0 0 5600.0 -56Q5600.0 -88 5631.0 -108L5660.0 -118Q5679.0 -126 5688.0 -142.0Q5697.0 -158 5692.0 -195L5642.0 -556Q5631.0 -634 5602.5 -673.5Q5574.0 -713 5517.0 -713Q5486.0 -713 5451.0 -695.0Q5416.0 -677 5372.0 -636Z"/></symbol>
+<symbol id="lockup" viewBox="0 -2100 8420.9 2134"><path fill="currentColor" transform="translate(0 0) scale(3.33587) translate(-194.29 -827.08)" d="M231.1 332.12H292.73Q314.61 332.12 329.49 344.71Q344.05 357.03 348.02 378.21L360.32 438.04H567.45Q568.43 407.02 573.45 381.63Q575.96 368.91 579.76 356.3C517.61 359.84 472.39 307.87 451.81 255.76C505.43 239.91 573.91 243.49 609.51 294.18C639.34 219.85 723.9 198.21 793.19 204.62C776.77 277.75 723.76 357.66 632.23 351.66Q624.51 371.22 620.61 390.94Q616.47 411.89 615.55 438.04H753.03Q765.42 438.04 770.74 444.18Q776.16 450.44 774.21 463.08L756.88 572.86Q751.1 609.45 712.59 609.45H395.58L403.5 647.97H672.14Q678.27 647.97 683.93 650.32Q689.6 652.66 693.93 657Q698.26 661.33 700.61 666.99Q702.96 672.66 702.96 678.79Q702.96 684.91 700.61 690.58Q698.26 696.24 693.93 700.57Q689.6 704.91 683.93 707.25Q678.27 709.6 672.14 709.6H402.51Q379.66 709.6 364 697.07Q348.12 684.37 343.44 661.88L288.29 393.75H231.1Q224.97 393.75 219.31 391.4Q213.65 389.06 209.31 384.72Q204.98 380.39 202.63 374.73Q200.29 369.06 200.29 362.93Q200.29 356.8 202.63 351.14Q204.98 345.48 209.31 341.14Q213.65 336.81 219.31 334.46Q224.97 332.12 231.1 332.12ZM396.73 512.19Q391.95 512.19 388.56 515.58Q385.18 518.96 385.18 523.75Q385.18 528.53 388.56 531.92Q391.95 535.3 396.73 535.3H694.4Q699.19 535.3 702.58 531.92Q705.96 528.53 705.96 523.75Q705.96 518.96 702.58 515.58Q699.19 512.19 694.4 512.19ZM389.03 780.86C389.03 755.33 409.72 734.64 435.25 734.64C460.78 734.64 481.47 755.33 481.47 780.86C481.47 806.39 460.78 827.08 435.25 827.08C409.72 827.08 389.03 806.39 389.03 780.86ZM593.18 780.86C593.18 755.33 613.87 734.64 639.4 734.64C664.93 734.64 685.62 755.33 685.62 780.86C685.62 806.39 664.93 827.08 639.4 827.08C613.87 827.08 593.18 806.39 593.18 780.86ZM396.73 560.34Q391.95 560.34 388.56 563.73Q385.18 567.11 385.18 571.9Q385.18 576.68 388.56 580.07Q391.95 583.45 396.73 583.45H616.75Q621.54 583.45 624.92 580.07Q628.31 576.68 628.31 571.9Q628.31 567.11 624.92 563.73Q621.54 560.34 616.75 560.34ZM396.73 464.04Q391.95 464.04 388.56 467.43Q385.18 470.81 385.18 475.6Q385.18 480.39 388.56 483.77Q391.95 487.16 396.73 487.16H545.57Q550.36 487.16 553.74 483.77Q557.12 480.39 557.12 475.6Q557.12 470.81 553.74 467.43Q550.36 464.04 545.57 464.04Z"/><path fill="currentColor" transform="translate(2379.9 0)" d="M584 -1260 535 -1246Q509 -1235 498.0 -1218.0Q487 -1201 487 -1171V-222Q487 -178 507.0 -158.5Q527 -139 566 -139H760Q803 -139 833.0 -152.0Q863 -165 886.0 -196.0Q909 -227 929 -280L970 -388Q985 -425 1007.5 -436.5Q1030 -448 1058 -442Q1088 -436 1100.5 -411.0Q1113 -386 1103 -348L1030 -62Q1017 -12 996.5 11.0Q976 34 938 34Q912 34 890.0 25.5Q868 17 843.5 8.5Q819 0 786 0H133Q97 0 77.5 -17.5Q58 -35 58 -67Q58 -119 108 -140L158 -154Q184 -165 195.0 -182.0Q206 -199 206 -229V-1171Q206 -1201 195.0 -1218.0Q184 -1235 158 -1246L108 -1260Q58 -1281 58 -1333Q58 -1365 77.5 -1382.5Q97 -1400 133 -1400H560Q597 -1400 616.0 -1382.5Q635 -1365 635 -1333Q635 -1282 584 -1260Z M1493.0 -828V-201Q1493.0 -163 1501.0 -147.5Q1509.0 -132 1527.0 -124L1554.0 -115Q1572.0 -105 1581.5 -91.0Q1591.0 -77 1591.0 -56Q1591.0 -29 1575.0 -14.5Q1559.0 0 1530.0 0H1207.0Q1178.0 0 1162.0 -14.5Q1146.0 -29 1146.0 -56Q1146.0 -77 1155.5 -91.0Q1165.0 -105 1183.0 -115L1210.0 -124Q1229.0 -132 1236.5 -147.5Q1244.0 -163 1244.0 -201V-627Q1244.0 -660 1236.0 -673.5Q1228.0 -687 1210.0 -693L1170.0 -697Q1150.0 -707 1141.0 -719.0Q1132.0 -731 1132.0 -749Q1132.0 -769 1145.0 -784.0Q1158.0 -799 1190.0 -812L1335.0 -867Q1374.0 -882 1395.5 -887.0Q1417.0 -892 1436.0 -892Q1464.0 -892 1478.5 -874.5Q1493.0 -857 1493.0 -828ZM1358.0 -1025Q1286.0 -1025 1242.5 -1066.0Q1199.0 -1107 1199.0 -1175Q1199.0 -1243 1242.5 -1284.0Q1286.0 -1325 1358.0 -1325Q1431.0 -1325 1474.0 -1284.0Q1517.0 -1243 1517.0 -1175Q1517.0 -1107 1474.0 -1066.0Q1431.0 -1025 1358.0 -1025Z M1995.0 -86Q2054.0 -86 2085.0 -114.0Q2116.0 -142 2116.0 -184Q2116.0 -212 2104.0 -233.5Q2092.0 -255 2059.5 -274.0Q2027.0 -293 1967.0 -309Q1834.0 -347 1759.0 -390.0Q1684.0 -433 1653.5 -489.5Q1623.0 -546 1623.0 -624Q1623.0 -743 1707.0 -820.5Q1791.0 -898 1960.0 -898Q2018.0 -898 2056.0 -887.0Q2094.0 -876 2119.5 -865.0Q2145.0 -854 2163.0 -854Q2177.0 -854 2185.5 -865.0Q2194.0 -876 2205.0 -887.0Q2216.0 -898 2236.0 -898Q2256.0 -898 2271.0 -885.0Q2286.0 -872 2297.0 -834L2336.0 -713Q2350.0 -666 2344.5 -635.0Q2339.0 -604 2313.0 -593Q2285.0 -582 2257.5 -593.0Q2230.0 -604 2209.0 -636Q2175.0 -693 2138.5 -726.0Q2102.0 -759 2061.5 -774.0Q2021.0 -789 1976.0 -789Q1906.0 -789 1873.5 -758.5Q1841.0 -728 1841.0 -685Q1841.0 -655 1857.0 -629.5Q1873.0 -604 1912.5 -583.0Q1952.0 -562 2023.0 -543Q2127.0 -517 2196.0 -478.0Q2265.0 -439 2299.5 -383.0Q2334.0 -327 2334.0 -248Q2334.0 -167 2293.0 -106.0Q2252.0 -45 2178.5 -10.5Q2105.0 24 2006.0 24Q1941.0 24 1903.5 11.0Q1866.0 -2 1847.0 -14.5Q1828.0 -27 1816.0 -27Q1802.0 -27 1793.5 -14.5Q1785.0 -2 1775.0 11.0Q1765.0 24 1746.0 24Q1727.0 24 1714.5 11.0Q1702.0 -2 1696.0 -33L1665.0 -169Q1655.0 -222 1659.5 -249.5Q1664.0 -277 1694.0 -285Q1720.0 -292 1745.0 -279.0Q1770.0 -266 1794.0 -229Q1837.0 -151 1884.0 -118.5Q1931.0 -86 1995.0 -86Z M2440.0 -746 2401.0 -755Q2376.0 -764 2369.0 -780.0Q2362.0 -796 2362.0 -817Q2362.0 -844 2380.5 -861.0Q2399.0 -878 2428.0 -878H2470.0Q2486.0 -878 2498.5 -888.5Q2511.0 -899 2529.0 -930L2582.0 -1039Q2602.0 -1069 2624.0 -1084.5Q2646.0 -1100 2670.0 -1100Q2695.0 -1100 2710.5 -1084.0Q2726.0 -1068 2726.0 -1034V-284Q2726.0 -226 2749.0 -196.5Q2772.0 -167 2816.0 -167Q2844.0 -167 2863.0 -177.5Q2882.0 -188 2895.5 -202.5Q2909.0 -217 2921.0 -227.5Q2933.0 -238 2945.0 -238Q2959.0 -238 2966.5 -226.5Q2974.0 -215 2974.0 -188Q2974.0 -136 2941.5 -88.0Q2909.0 -40 2852.5 -10.0Q2796.0 20 2724.0 20Q2604.0 20 2540.5 -44.0Q2477.0 -108 2477.0 -243V-676Q2477.0 -706 2471.0 -721.5Q2465.0 -737 2440.0 -746ZM2627.0 -745V-878H2916.0Q2946.0 -878 2962.0 -865.0Q2978.0 -852 2978.0 -828Q2978.0 -792 2948.5 -768.5Q2919.0 -745 2852.0 -745Z M3480.0 -601Q3541.0 -601 3519.0 -536L3501.0 -479Q3491.0 -448 3476.0 -437.5Q3461.0 -427 3435.0 -427H3051.0Q2990.0 -427 3011.0 -492L3030.0 -549Q3041.0 -580 3055.5 -590.5Q3070.0 -601 3096.0 -601Z M4397.0 -563Q4397.0 -497 4362.5 -462.5Q4328.0 -428 4264.0 -428H3747.0V-525H4085.0Q4141.0 -525 4141.0 -581Q4141.0 -669 4099.5 -718.5Q4058.0 -768 3993.0 -768Q3939.0 -768 3897.5 -737.0Q3856.0 -706 3832.0 -648.0Q3808.0 -590 3808.0 -506Q3808.0 -338 3884.5 -251.0Q3961.0 -164 4085.0 -164Q4163.0 -164 4222.0 -199.5Q4281.0 -235 4314.0 -286Q4330.0 -303 4342.0 -309.5Q4354.0 -316 4365.0 -316Q4380.0 -316 4389.0 -304.5Q4398.0 -293 4398.0 -269Q4393.0 -194 4345.5 -128.0Q4298.0 -62 4214.5 -21.0Q4131.0 20 4017.0 20Q3884.0 20 3785.5 -36.5Q3687.0 -93 3633.5 -195.0Q3580.0 -297 3580.0 -431Q3580.0 -565 3632.0 -670.5Q3684.0 -776 3784.5 -837.0Q3885.0 -898 4027.0 -898Q4139.0 -898 4222.0 -854.0Q4305.0 -810 4351.0 -734.0Q4397.0 -658 4397.0 -563Z M4809.0 -828V-201Q4809.0 -161 4816.0 -143.5Q4823.0 -126 4842.0 -118L4870.0 -108Q4901.0 -89 4901.0 -56Q4901.0 0 4845.0 0H4523.0Q4494.0 0 4478.0 -14.5Q4462.0 -29 4462.0 -56Q4462.0 -77 4471.5 -90.5Q4481.0 -104 4499.0 -115L4526.0 -124Q4545.0 -131 4552.5 -147.0Q4560.0 -163 4560.0 -201V-627Q4560.0 -660 4552.0 -673.5Q4544.0 -687 4526.0 -693L4486.0 -697Q4466.0 -707 4457.0 -719.0Q4448.0 -731 4448.0 -749Q4448.0 -769 4461.0 -784.0Q4474.0 -799 4506.0 -812L4651.0 -867Q4690.0 -882 4711.5 -887.0Q4733.0 -892 4752.0 -892Q4780.0 -892 4794.5 -874.5Q4809.0 -857 4809.0 -828ZM4783.0 -598 4732.0 -659 4771.0 -700Q4874.0 -807 4960.5 -852.5Q5047.0 -898 5127.0 -898Q5236.0 -898 5301.0 -825.0Q5366.0 -752 5366.0 -620V-201Q5366.0 -161 5373.0 -143.5Q5380.0 -126 5399.0 -118L5427.0 -108Q5458.0 -89 5458.0 -56Q5458.0 0 5402.0 0H5081.0Q5025.0 0 5025.0 -56Q5025.0 -89 5056.0 -108L5084.0 -118Q5103.0 -126 5110.0 -143.5Q5117.0 -161 5117.0 -201V-556Q5117.0 -633 5083.0 -673.0Q5049.0 -713 4991.0 -713Q4950.0 -713 4905.5 -693.0Q4861.0 -673 4815.0 -628ZM5340.0 -606 5288.0 -667 5329.0 -707Q5429.0 -810 5506.5 -854.0Q5584.0 -898 5659.0 -898Q5765.0 -898 5818.0 -833.5Q5871.0 -769 5885.0 -654L5942.0 -201Q5947.0 -163 5952.5 -147.5Q5958.0 -132 5976.0 -124L6003.0 -115Q6021.0 -104 6031.0 -90.5Q6041.0 -77 6041.0 -56Q6041.0 -29 6025.0 -14.5Q6009.0 0 5980.0 0H5656.0Q5600.0 0 5600.0 -56Q5600.0 -88 5631.0 -108L5660.0 -118Q5679.0 -126 5688.0 -142.0Q5697.0 -158 5692.0 -195L5642.0 -556Q5631.0 -634 5602.5 -673.5Q5574.0 -713 5517.0 -713Q5486.0 -713 5451.0 -695.0Q5416.0 -677 5372.0 -636Z"/></symbol>
+<symbol id="i-chevron-back" viewBox="0 6 512 512"><path d="M322 95L322 95Q322 95 322 95L322 95Q329 93 337 96.5Q345 100 349 107L349 107Q355 118 349 129L349 129Q348 132 283 197L283 197Q283 197 218 262L218 262L283 327Q348 392 349 395L349 395Q353 402 351 410L351 410Q350 419 342.5 425Q335 431 326 430L326 430Q319 429 309 420Q299 411 239 351L239 351Q178 290 169 280Q160 270 160 262Q160 254 168.5 244.5Q177 235 237 175L237 175Q309 102 313.5 99Q318 96 322 95Z"/></symbol>
+<symbol id="i-chevron-forward" viewBox="0 6 512 512"><path d="M179 95L179 95Q179 95 179 95L179 95Q187 93 195 97L195 97Q198 98 273 173L273 173Q335 234 343.5 244Q352 254 352 262Q352 270 343.5 280Q335 290 273 351L273 351Q213 411 203 420Q193 429 186 430L186 430Q177 431 169.5 425Q162 419 161 410L161 410Q159 402 163 395L163 395Q164 392 229 327L229 327Q229 327 294 262L294 262L229 197Q164 132 163 129L163 129Q159 122 161 114L161 114Q163 98 179 95Z"/></symbol>
+<symbol id="i-chevron-down" viewBox="0 6 512 512"><path d="M102 168L102 168Q102 168 102 168L102 168Q113 163 123 169L123 169Q127 171 191 235L191 235Q191 235 256 300L256 300L321 235Q385 171 389 169L389 169Q398 163 409 168L409 168Q426 175 424 192L424 192Q423 199 414 209Q405 219 345 279L345 279Q284 341 274 349.5Q264 358 256 358Q248 358 238 349.5Q228 341 167 279L167 279Q107 219 98 209Q89 199 88 192L88 192Q86 176 102 168Z"/></symbol>
+<symbol id="i-contrast" viewBox="0 6 512 512"><path d="M235 39L235 39Q241 38 258.5 38.5Q276 39 282 40L282 40Q346 47 397 88L397 88Q416 103 430 121L430 121Q454 151 466 184L466 184Q494 260 468 336L468 336Q446 400 391 441.5Q336 483 269 486L269 486Q169 491 98 420L98 420Q52 374 37 310L37 310Q25 253 41 198L41 198Q61 132 113.5 89Q166 46 235 39ZM256 454L256 262L256 262L256 70L251 70Q196 72 151 101L151 101Q135 112 121 126L121 126Q76 171 66 235L66 235Q64 245 64 262Q64 279 66 289L66 289Q71 319 84 347L84 347Q107 393 150.5 422Q194 451 246 454L246 454Q246 454 256 454L256 454Z"/></symbol>
+<symbol id="i-settings-outline" viewBox="0 6 512 512"><path d="M202 35L202 35L207 32L257 33L307 33L311 35Q321 40 324 49L324 49Q325 52 328.5 75.5Q332 99 332 102L332 102Q332 102 339.5 106.5Q347 111 351 113L351 113L356 116L380 107Q404 97 411 97L411 97Q422 97 429 104L429 104Q431 107 453 144Q475 181 478 187L478 187Q484 200 474 213L474 213Q473 216 452 232L452 232L432 248L432 262L432 276L451 291Q470 306 474 310L474 310Q483 321 479 335L479 335Q477 338 455.5 375.5Q434 413 431 417L431 417Q426 424 417 426L417 426Q408 429 379 417L379 417Q357 408 356 408Q355 408 348.5 412Q342 416 337 418.5Q332 421 332 421Q332 421 328.5 446Q325 471 324 475L324 475Q320 484 310 489L310 489L304 492L256 492L208 492L202 489Q191 484 188 475L188 475Q187 472 183.5 448.5Q180 425 180 422L180 422Q180 422 176.5 420Q173 418 164 413L164 413L156 408L132 417Q108 427 101 427L101 427Q90 427 83 420L83 420Q80 417 58 379.5Q36 342 34 337L34 337Q28 323 37 311L37 311Q40 308 60 292L60 292L80 276L80 262L80 248L61 233Q36 214 34 206L34 206Q31 197 33 189L33 189Q35 186 57 147L57 147Q75 115 80.5 108Q86 101 92 99L92 99Q99 96 105 97.5Q111 99 131 107L131 107Q155 116 156 116Q157 116 161.5 113Q166 110 173 106.5Q180 103 180 103Q180 103 183.5 78Q187 53 188 49L188 49Q192 40 202 35ZM294 65L294 65Q294 64 256 64Q218 64 218 65Q218 66 214 89L214 89Q210 118 203 125L203 125Q198 129 192 132.5Q186 136 179 140L179 140Q167 148 158 148L158 148Q150 149 124 138L124 138Q105 131 104 131Q103 131 86 161Q69 191 67 193L67 193L66 196L83 210Q101 224 102 225Q103 226 106 230L106 230Q112 237 112 262L112 262Q112 284 108.5 290.5Q105 297 85 312L85 312Q68 326 67 327Q66 328 84.5 361Q103 394 103.5 394Q104 394 125 386L125 386Q153 375 162 376L162 376Q168 377 179 384L179 384Q185 388 191.5 391.5Q198 395 202 399L202 399Q208 404 209.5 410Q211 416 214 435L214 435Q218 458 218 459Q218 460 256 460L256 460L294 460L295 453Q301 413 303 408L303 408Q308 398 321 391L321 391Q329 387 336 382L336 382Q351 373 363 376L363 376Q367 377 387 385Q407 393 408 393Q409 393 426 363Q443 333 445 331L445 331L446 328L425 311Q404 295 403 293L403 293Q398 288 399 277L399 277Q400 269 400 256L400 256Q400 239 403.5 232.5Q407 226 426 212L426 212Q444 198 445 197Q446 196 427.5 163Q409 130 408.5 130Q408 130 387 138.5Q366 147 361 148L361 148Q349 150 333 140L333 140Q326 135 320 132L320 132Q305 125 301 111L301 111Q301 109 297.5 87.5Q294 66 294 65ZM247 183L247 183Q260 181 273 184L273 184Q295 189 312 205.5Q329 222 334 245L334 245Q336 252 336 263Q336 274 334 279L334 279Q329 301 314 317Q299 333 277 339L277 339Q233 352 200 318L200 318Q184 303 179 282L179 282Q176 274 176 262L176 262Q176 246 182 232L182 232Q193 204 222 190L222 190Q234 184 247 183ZM271 217L271 217Q271 217 271 217L271 217Q257 212 244 216L244 216Q224 221 214 239.5Q204 258 211 278L211 278Q220 303 245.5 308.5Q271 314 289 296L289 296Q300 285 303 271L303 271Q306 254 297 238Q288 222 271 217Z"/></symbol>
+<symbol id="i-search" viewBox="0 6 512 512"><path d="M209 55L209 55Q250 52 285 66L285 66Q328 82 356.5 116.5Q385 151 394 195L394 195Q408 265 369 324L369 324L363 333L411 381Q449 420 455.5 427.5Q462 435 463 441L463 441Q464 450 458 459L458 459Q449 471 435 469L435 469Q429 468 421.5 461.5Q414 455 375 417L375 417L327 369L318 375Q287 396 248 402L248 402Q190 410 138 381Q86 352 63 298L63 298Q38 242 54 183L54 183Q69 130 112 94Q155 58 209 55ZM249 107L249 107Q249 107 249 107L249 107Q226 102 204 105L204 105Q162 112 133 143L133 143Q108 168 101 203L101 203Q95 228 100 252L100 252Q108 289 135 317L135 317Q161 343 199 351L199 351Q207 353 223 353Q239 353 247 351L247 351Q284 343 311 317L311 317Q337 290 345 254L345 254Q347 245 347 228.5Q347 212 345 203L345 203Q337 167 310.5 140.5Q284 114 249 107Z"/></symbol>
+<symbol id="i-layers-outline" viewBox="0 6 512 512"><path d="M246 55L246 55Q269 53 286 59L286 59Q292 61 369 96Q446 131 449 134L449 134Q464 144 463.5 159.5Q463 175 448 184L448 184Q443 186 417.5 198Q392 210 392 210.5Q392 211 419 223Q446 235 449 237L449 237Q471 252 462 273L462 273Q458 281 448 287L448 287Q445 290 419.5 301.5Q394 313 394 313.5Q394 314 421 327.5Q448 341 452 344L452 344Q470 359 462 377L462 377Q458 385 448 392L448 392Q446 393 373 426.5Q300 460 291 464L291 464Q261 476 229 466L229 466Q223 465 146 430Q69 395 64 392L64 392Q55 386 51 376L51 376Q46 366 50.5 355.5Q55 345 67 339L67 339Q72 336 96.5 325.5Q121 315 121 314.5Q121 314 118.5 313Q116 312 112 310.5Q108 309 103 306L103 306Q64 288 58 283L58 283Q53 278 51 273L51 273Q44 259 54 245L54 245Q60 238 94 223L94 223Q101 219 107.5 216.5Q114 214 117.5 212Q121 210 121 210Q121 210 97 199L97 199Q64 184 58 179L58 179Q50 172 49 163L49 163Q45 146 62 134L62 134Q67 131 144.5 95.5Q222 60 225 59L225 59Q234 56 246 55ZM270 87L270 87Q256 84 242 87L242 87Q237 89 161.5 123Q86 157 85 158L85 158Q85 158 90 160.5Q95 163 104 167Q113 171 123 176L123 176Q163 194 169 197L169 197Q229 225 237 227L237 227Q254 233 274 228L274 228Q281 226 340 198L340 198Q344 196 383.5 178.5Q423 161 426 159L426 159L428 158L423 156Q419 154 347.5 121.5Q276 89 270 87ZM226 257Q220 255 194 243.5Q168 232 164 230L164 230L160 228L123 245Q86 261 85 262L85 262L162 298Q173 303 203 317L203 317Q233 330 240 332L240 332Q256 336 272 332L272 332Q281 330 345 300L345 300Q351 297 389 280L389 280Q400 275 408.5 271Q417 267 422 264.5Q427 262 427 262L427 262Q426 261 389.5 244.5Q353 228 352 228Q351 228 321 242Q291 256 285 258L285 258Q255 267 226 257L226 257ZM391 348L391 348Q391 348 391 348L391 348Q355 331 354.5 331Q354 331 323.5 345Q293 359 286 361L286 361Q256 372 225 361L225 361Q218 359 189.5 345.5Q161 332 160 333L160 333Q159 333 122.5 349Q86 365 85 366L85 366Q85 366 120.5 382.5Q156 399 193.5 416Q231 433 236 435L236 435Q242 437 256 437Q270 437 275 436L275 436Q279 434 317 417Q355 400 391 383Q427 366 427 366L427 366Q426 365 391 348Z"/></symbol>
+<symbol id="i-checkmark" viewBox="0 6 512 512"><path d="M411 119L411 119Q411 119 411 119L411 119Q416 117 420 119L420 119Q428 121 431 129L431 129Q434 137 429.5 143Q425 149 313 276.5Q201 404 199 404L199 404Q194 407 188 405L188 405Q184 404 133.5 353.5Q83 303 81 301L81 301Q77 292 83 285L83 285Q91 274 103 280L103 280Q105 281 148 324L148 324Q148 324 191 367L191 367L193 364Q195 362 299.5 242.5Q404 123 406 121.5Q408 120 411 119Z"/></symbol>
+<symbol id="i-add" viewBox="0 6 512 512"><path d="M248 105L248 105Q248 105 248 105L248 105Q253 101 259.5 102.5Q266 104 270 110L270 110Q270 110 272 113L272 113L272 179L272 246L338 246L404 246L408 248Q416 253 416 262Q416 271 408 276L408 276Q408 276 405 278L405 278L339 278L272 278L272 345L272 411L270 414Q265 422 256 422Q247 422 242 414L242 414Q242 414 240 411L240 411L240 345L240 278L173 278L107 278L104 276Q96 271 96 262Q96 253 103 249L103 249Q103 249 107 246L107 246L173 246L240 246L240 179L240 113L242 110Q244 107 248 105Z"/></symbol>
+<symbol id="i-close-circle" viewBox="0 6 512 512"><path d="M242 55L242 55Q312 50 370 88L370 88Q387 100 403 116L403 116Q453 165 463 238L463 238Q464 245 464 262Q464 279 463 286L463 286Q453 359 403 409Q353 459 280 469L280 469Q273 470 256 470Q239 470 232 469L232 469Q159 459 109 409L109 409Q59 359 50 287L50 287Q40 212 82 148L82 148Q110 107 151.5 82.5Q193 58 242 55ZM199 184L199 184Q199 184 199 184L199 184Q193 181 186 184L186 184Q180 186 178 192L178 192Q175 199 178 205L178 205Q179 208 206 235L206 235Q206 235 233 262L233 262L206 289Q179 316 178 319L178 319Q175 325 178 332L178 332Q180 338 186 340L186 340Q192 343 199 340L199 340Q201 340 228 312L228 312Q228 312 256 285L256 285L284 312Q306 335 311.5 339Q317 343 322 342L322 342Q330 341 334 334Q338 327 335 320L335 320Q334 317 306 290L306 290Q306 290 279 262L279 262L306 235Q333 208 334 205L334 205Q337 199 334 192L334 192Q332 186 326 184L326 184Q319 181 313 184L313 184Q310 185 283 212L283 212Q283 212 256 239L256 239L229 212Q202 185 199 184Z"/></symbol>
+<symbol id="i-star" viewBox="0 6 512 512"><path d="M248 40L248 40Q248 40 248 40L248 40Q253 38 259.5 39Q266 40 269 44L269 44Q271 47 300 138L300 138Q300 138 320 198L320 198L402 198Q484 198 488 200L488 200Q495 204 496 212L496 212Q496 220 491 225L491 225Q489 228 424.5 272Q360 316 359.5 316.5Q359 317 384.5 391.5Q410 466 410 470L410 470Q410 478 404 482.5Q398 487 390 485L390 485Q387 485 321.5 437.5Q256 390 256 390Q256 390 190.5 437.5Q125 485 121 486L121 486Q115 487 108.5 482.5Q102 478 102 471L102 471Q102 467 128 392L128 392Q128 392 153 317L153 317L151 315Q149 314 85.5 270Q22 226 19 223L19 223Q15 218 16.5 211Q18 204 23 201L23 201Q23 201 27 198L27 198L110 198L192 198L212 139Q237 62 240.5 52.5Q244 43 248 40Z"/></symbol>
+<symbol id="i-add-circle-outline" viewBox="0 6 512 512"><path d="M241 55L241 55Q256 54 269 55L269 55Q351 60 407 119L407 119Q452 167 462 234L462 234Q464 244 464 262Q464 280 462 290L462 290Q454 345 421 388L421 388Q405 411 382 427L382 427Q339 460 284 468L284 468Q274 470 256 470Q238 470 228 468L228 468Q173 460 130 427L130 427Q107 411 91 388L91 388Q58 345 50 290L50 290Q48 280 48 262Q48 244 50 234L50 234Q58 180 91 136L91 136Q107 114 130 97L130 97Q181 59 241 55ZM284 88L284 88Q278 87 261.5 86.5Q245 86 240 87L240 87Q212 90 193 98L193 98Q149 115 119.5 151Q90 187 82 235L82 235Q81 244 81 262Q81 280 82 289L82 289Q89 332 114 366Q139 400 178 420L178 420Q214 438 256 438Q298 438 334 420L334 420Q372 400 397 366.5Q422 333 430 290L430 290Q431 281 431 262.5Q431 244 430 235L430 235Q420 175 378 135L378 135Q338 98 284 88ZM248 169L248 169Q248 169 248 169L248 169Q253 165 259.5 166.5Q266 168 270 174L270 174Q272 177 272 211L272 211Q272 211 272 246L272 246L306 246L340 246L344 248Q352 253 352 262Q352 271 344 276L344 276Q341 278 307 278L307 278Q307 278 272 278L272 278L272 313Q272 347 270 350L270 350Q265 358 256 358Q247 358 242 350L242 350Q240 347 240 313L240 313Q240 313 240 278L240 278L205 278Q171 278 168 276L168 276Q160 271 160 262Q160 253 167 249L167 249Q167 249 171 246L171 246L205 246L240 246L240 211Q240 177 242 174Q244 171 248 169Z"/></symbol>
+<symbol id="i-checkmark-circle" viewBox="0 6 512 512"><path d="M242 55L242 55Q312 50 370 88L370 88Q387 100 403 116L403 116Q453 165 463 238L463 238Q464 245 464 262Q464 279 463 286L463 286Q453 359 403 409Q353 459 280 469L280 469Q273 470 256 470Q239 470 232 469L232 469Q159 459 109 409L109 409Q59 359 50 287L50 287Q40 212 82 148L82 148Q110 107 151.5 82.5Q193 58 242 55ZM359 168L359 168Q359 168 359 168L359 168Q352 165 345 168L345 168Q342 170 274 250L274 250Q220 314 218.5 316Q217 318 194.5 293Q172 268 168.5 265Q165 262 160.5 262Q156 262 154 263L154 263Q148 265 145 271L145 271Q144 273 144 278Q144 283 146 285L146 285Q148 290 178 322.5Q208 355 210 356L210 356Q214 358 217 358L217 358Q223 358 232 348.5Q241 339 296 273L296 273Q365 192 366 189L366 189Q369 183 367 177Q365 171 359 168Z"/></symbol>
+<symbol id="s-x" viewBox="0 0 24 24"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></symbol>
+<symbol id="s-ig" viewBox="0 0 24 24"><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></symbol>
 </svg>
 
-<a class="skip" href="#giris">İçeriğe geç</a>
-
-<header class="top" id="top-bar">
+<header class="top">
   <a class="top__logo" href="#top" aria-label="List-em, sayfanın başına dön">
     <svg aria-hidden="true" focusable="false"><use href="#lockup"/></svg>
   </a>
-  <nav class="top__nav" aria-label="Sosyal medya">
-    <a href="https://x.com/listemapp">X</a>
-    <a href="https://instagram.com/listem.app">Instagram</a>
+  <nav class="top__social" aria-label="Sosyal medya">
+    <a href="https://x.com/listemapp" aria-label="List-em X’te (@listemapp)"><svg aria-hidden="true" focusable="false"><use href="#s-x"/></svg></a>
+    <a href="https://www.instagram.com/listem.app" aria-label="List-em Instagram’da (listem.app)"><svg aria-hidden="true" focusable="false"><use href="#s-ig"/></svg></a>
   </nav>
 </header>
 
 <main id="top">
-  <div class="film" id="film">
-    <picture class="film__frame f1 is-on">
-      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l1-1008.avif 1008w, /assets/v1/film/l1-1344.avif 1344w, /assets/v1/film/l1-1680.avif 1680w, /assets/v1/film/l1-2016.avif 2016w, /assets/v1/film/l1-2688.avif 2688w">
-      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l1-1008.webp 1008w, /assets/v1/film/l1-1344.webp 1344w, /assets/v1/film/l1-1680.webp 1680w, /assets/v1/film/l1-2016.webp 2016w, /assets/v1/film/l1-2688.webp 2688w">
-      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p1-570.avif 570w, /assets/v1/film/p1-760.avif 760w, /assets/v1/film/p1-950.avif 950w, /assets/v1/film/p1-1140.avif 1140w, /assets/v1/film/p1-1520.avif 1520w">
-      <img src="/assets/v1/film/p1-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p1-570.webp 570w, /assets/v1/film/p1-760.webp 760w, /assets/v1/film/p1-950.webp 950w, /assets/v1/film/p1-1140.webp 1140w, /assets/v1/film/p1-1520.webp 1520w" alt="Krem bir duvarın önünde, kâğıda el yazısıyla yazılmış bir market listesi ve yeşil bir kalem." fetchpriority="high">
-    </picture>
-    <picture class="film__frame f2">
-      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l2-1008.avif 1008w, /assets/v1/film/l2-1344.avif 1344w, /assets/v1/film/l2-1680.avif 1680w, /assets/v1/film/l2-2016.avif 2016w, /assets/v1/film/l2-2688.avif 2688w">
-      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l2-1008.webp 1008w, /assets/v1/film/l2-1344.webp 1344w, /assets/v1/film/l2-1680.webp 1680w, /assets/v1/film/l2-2016.webp 2016w, /assets/v1/film/l2-2688.webp 2688w">
-      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p2-570.avif 570w, /assets/v1/film/p2-760.avif 760w, /assets/v1/film/p2-950.avif 950w, /assets/v1/film/p2-1140.avif 1140w, /assets/v1/film/p2-1520.avif 1520w">
-      <img data-src="/assets/v1/film/p2-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p2-570.webp 570w, /assets/v1/film/p2-760.webp 760w, /assets/v1/film/p2-950.webp 950w, /assets/v1/film/p2-1140.webp 1140w, /assets/v1/film/p2-1520.webp 1520w" alt="Manavda tahta kasalar içinde mandalina, nar, ıspanak, maydanoz, limon ve domates.">
-    </picture>
-    <picture class="film__frame f3">
-      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l3-1008.avif 1008w, /assets/v1/film/l3-1344.avif 1344w, /assets/v1/film/l3-1680.avif 1680w, /assets/v1/film/l3-2016.avif 2016w, /assets/v1/film/l3-2688.avif 2688w">
-      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l3-1008.webp 1008w, /assets/v1/film/l3-1344.webp 1344w, /assets/v1/film/l3-1680.webp 1680w, /assets/v1/film/l3-2016.webp 2016w, /assets/v1/film/l3-2688.webp 2688w">
-      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p3-570.avif 570w, /assets/v1/film/p3-760.avif 760w, /assets/v1/film/p3-950.avif 950w, /assets/v1/film/p3-1140.avif 1140w, /assets/v1/film/p3-1520.avif 1520w">
-      <img data-src="/assets/v1/film/p3-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p3-570.webp 570w, /assets/v1/film/p3-760.webp 760w, /assets/v1/film/p3-950.webp 950w, /assets/v1/film/p3-1140.webp 1140w, /assets/v1/film/p3-1520.webp 1520w" alt="Market rafları: kavanozlarda zeytin ve turşu, makarna, bakliyat, yumurta ve zeytinyağı.">
-    </picture>
-    <picture class="film__frame f4">
-      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l4-1008.avif 1008w, /assets/v1/film/l4-1344.avif 1344w, /assets/v1/film/l4-1680.avif 1680w, /assets/v1/film/l4-2016.avif 2016w, /assets/v1/film/l4-2688.avif 2688w">
-      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l4-1008.webp 1008w, /assets/v1/film/l4-1344.webp 1344w, /assets/v1/film/l4-1680.webp 1680w, /assets/v1/film/l4-2016.webp 2016w, /assets/v1/film/l4-2688.webp 2688w">
-      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p4-570.avif 570w, /assets/v1/film/p4-760.avif 760w, /assets/v1/film/p4-950.avif 950w, /assets/v1/film/p4-1140.avif 1140w, /assets/v1/film/p4-1520.avif 1520w">
-      <img data-src="/assets/v1/film/p4-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p4-570.webp 570w, /assets/v1/film/p4-760.webp 760w, /assets/v1/film/p4-950.webp 950w, /assets/v1/film/p4-1140.webp 1140w, /assets/v1/film/p4-1520.webp 1520w" alt="Kasa bandında ekmek, süt, yumurta, poşetlerde mandalina ve domates, maydanoz, limon ve beyaz peynir.">
-    </picture>
-    <picture class="film__frame f5">
-      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l5-1008.avif 1008w, /assets/v1/film/l5-1344.avif 1344w, /assets/v1/film/l5-1680.avif 1680w, /assets/v1/film/l5-2016.avif 2016w, /assets/v1/film/l5-2688.avif 2688w">
-      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l5-1008.webp 1008w, /assets/v1/film/l5-1344.webp 1344w, /assets/v1/film/l5-1680.webp 1680w, /assets/v1/film/l5-2016.webp 2016w, /assets/v1/film/l5-2688.webp 2688w">
-      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p5-570.avif 570w, /assets/v1/film/p5-760.avif 760w, /assets/v1/film/p5-950.avif 950w, /assets/v1/film/p5-1140.avif 1140w, /assets/v1/film/p5-1520.avif 1520w">
-      <img data-src="/assets/v1/film/p5-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p5-570.webp 570w, /assets/v1/film/p5-760.webp 760w, /assets/v1/film/p5-950.webp 950w, /assets/v1/film/p5-1140.webp 1140w, /assets/v1/film/p5-1520.webp 1520w" alt="Aynı market listesi, bütün maddelerinin üstü çizilmiş; yanında yeşil kalem.">
-    </picture>
-    <noscript><picture class="film__frame f5 nojs">
-      <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l5-1008.avif 1008w, /assets/v1/film/l5-1344.avif 1344w, /assets/v1/film/l5-1680.avif 1680w, /assets/v1/film/l5-2016.avif 2016w, /assets/v1/film/l5-2688.avif 2688w">
-      <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v1/film/l5-1008.webp 1008w, /assets/v1/film/l5-1344.webp 1344w, /assets/v1/film/l5-1680.webp 1680w, /assets/v1/film/l5-2016.webp 2016w, /assets/v1/film/l5-2688.webp 2688w">
-      <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p5-570.avif 570w, /assets/v1/film/p5-760.avif 760w, /assets/v1/film/p5-950.avif 950w, /assets/v1/film/p5-1140.avif 1140w, /assets/v1/film/p5-1520.avif 1520w">
-      <img src="/assets/v1/film/p5-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v1/film/p5-570.webp 570w, /assets/v1/film/p5-760.webp 760w, /assets/v1/film/p5-950.webp 950w, /assets/v1/film/p5-1140.webp 1140w, /assets/v1/film/p5-1520.webp 1520w" alt="Aynı market listesi, bütün maddelerinin üstü çizilmiş; yanında yeşil kalem.">
-    </picture></noscript>
-    <p class="film__word" aria-hidden="true"></p>
-    <p class="film__soon">ÇOK YAKINDA</p>
-    <svg class="film__logo" role="img" aria-label="List-em" focusable="false"><use href="#lockup"/></svg>
-  </div>
-
-  <section class="sec sec--text" id="giris" aria-labelledby="giris-h">
-    <h1 class="h h1" id="giris-h">Türkiye’ye özel market alışveriş listesi.</h1>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Ürün yazmak yok, seçmek var. Kalorisi, gramajı, mevsimi tek bakışta.</p>
-      <p>App Store’da çok yakında.</p>
+  <section class="story" id="hikaye" aria-labelledby="hikaye-h">
+    <h1 class="vh" id="hikaye-h">List-em: market listen mevsimiyle, kalorisiyle, gramıyla. Türkiye’ye özel market alışveriş listesi, çok yakında App Store’da.</h1>
+    <div class="vh">
+      <h2 id="secmek">Ürün yazmak yok, seçmek var.</h2>
+      <p>Haftalık Market listesinde Ürün Ekle’ye dokunulur. Katalogda Meyve reyonu açılır; Mandalina, Limon ve Nar birer dokunuşla listeye girer. Klavye hiç açılmaz.</p>
+      <h2 id="mevsimiyle">mevsimiyle,</h2>
+      <p>Mevsiminde olan ürün listende işaretli gelir. Ekim’de Mandalina, Nar, Ispanak ve Hamsi “Mevsiminde” rozetiyle görünür.</p>
     </div>
-  </section>
-
-  <section class="sec" id="kagittan" aria-labelledby="kagittan-h">
-    <h2 class="h h2" id="kagittan-h">Aynı liste, her şeyi bilen hâli.</h2>
-    <div class="sec__visual paper-pair">
-      <figure class="paper">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 331px, 52vw" srcset="/assets/v1/film/paper-420.avif 420w, /assets/v1/film/paper-640.avif 640w, /assets/v1/film/paper-840.avif 840w">
-          <img src="/assets/v1/film/paper-420.webp" sizes="(min-width: 860px) 331px, 52vw" srcset="/assets/v1/film/paper-420.webp 420w, /assets/v1/film/paper-640.webp 640w, /assets/v1/film/paper-840.webp 840w" width="840" height="1218" loading="lazy" decoding="async" alt="Kâğıda el yazısıyla yazılmış market listesi: 2 ekmek, süt (1 lt), 15’li yumurta, siyah zeytin, 3 limon, maydanoz, 1 kg mandalina, nar, ıspanak, 1 kg domates, beyaz peynir (az tuzlu), deterjan.">
-        </picture>
-      </figure>
-      <figure class="phone">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 226px, 37vw" srcset="/assets/v1/screens/8550-440.avif 440w, /assets/v1/screens/8550-660.avif 660w, /assets/v1/screens/8550-880.avif 880w">
-          <img src="/assets/v1/screens/8550-660.webp" sizes="(min-width: 860px) 226px, 37vw" srcset="/assets/v1/screens/8550-440.webp 440w, /assets/v1/screens/8550-660.webp 660w, /assets/v1/screens/8550-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Aynı ürünler List-em’de, reyonlarına göre: Meyve’de Mandalina ve Nar mevsiminde rozetiyle, yanında Limon; Sebze’de Ispanak ve Maydanoz; Fırın’da Beyaz ekmek. Her ürünün altında gramajı ve kalorisi yazıyor.">
-        </picture>
-      </figure>
-    </div>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Ürünleri katalogdan seçersin. Gramajı, kalorisi, mevsimi ve marketteki yeri kendiliğinden gelir.</p>
-    </div>
-    <div class="rule sec__foot"></div>
-  </section>
-
-  <section class="sec" id="gramiyla" aria-labelledby="gramiyla-h">
-    <h2 class="h h2" id="gramiyla-h">Gramıyla, kilosuyla.</h2>
-    <div class="sec__visual">
-      <figure class="phone">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8554-440.avif 440w, /assets/v1/screens/8554-660.avif 660w, /assets/v1/screens/8554-880.avif 880w">
-          <img src="/assets/v1/screens/8554-660.webp" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8554-440.webp 440w, /assets/v1/screens/8554-660.webp 660w, /assets/v1/screens/8554-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Domates ürün kartı: 100 gramında 18 kcal, 0,9 g protein, 0,2 g yağ ve 1,2 g lif. Tür olarak Salkım, Cherry ya da Kokteyl; miktar olarak 500 g, 1 kg ya da 2 kg seçiliyor. Altında Mevsiminde, Yaz-Sonbahar etiketi ve Listeye Ekle düğmesi var.">
-        </picture>
-      </figure>
-    </div>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Her ürün türüyle ve miktarıyla hazır. Salkım mı cherry mi, 500 g mı 1 kg mı; tek dokunuşla seçersin.</p>
-    </div>
-    <div class="rule sec__foot"></div>
-  </section>
-
-  <section class="sec" id="kalorisiyle" aria-labelledby="kalorisiyle-h">
-    <h2 class="h h2" id="kalorisiyle-h">Kalorisi yanında.</h2>
-    <div class="sec__visual pair">
-      <figure class="phone">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8560-440.avif 440w, /assets/v1/screens/8560-660.avif 660w, /assets/v1/screens/8560-880.avif 880w">
-          <img src="/assets/v1/screens/8560-660.webp" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8560-440.webp 440w, /assets/v1/screens/8560-660.webp 660w, /assets/v1/screens/8560-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Haftalık Market listesinin üstünde kalori özeti: 19 üründen yaklaşık 19.289 kcal. En yüksek Zeytinyağı, en düşük Maydanoz. Altında her ürün kalorisiyle listeleniyor.">
-        </picture>
-      </figure>
-      <figure class="phone">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8561-440.avif 440w, /assets/v1/screens/8561-660.avif 660w, /assets/v1/screens/8561-880.avif 880w">
-          <img src="/assets/v1/screens/8561-660.webp" sizes="(min-width: 860px) 254px, 45vw" srcset="/assets/v1/screens/8561-440.webp 440w, /assets/v1/screens/8561-660.webp 660w, /assets/v1/screens/8561-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Sepet Detayı ekranı: 20 ürün, yaklaşık 19.289 kcal, yüzde 71’i mevsiminde. Kategorilere göre kalori dağılımı ve öne çıkanlar: en çok protein Tavuk göğsü, en çok yağ Zeytinyağı, en çok lif Patates.">
-        </picture>
-      </figure>
-    </div>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Her ürünün kalorisi listede görünür. List-em+ ile sepetin toplamını; protein, yağ ve lif dağılımını da görürsün.</p>
-    </div>
-    <div class="rule sec__foot"></div>
-  </section>
-
-  <section class="sec sec--band" id="mevsimiyle" aria-labelledby="mevsimiyle-h">
-    <div class="band">
-      <picture class="band__photo">
-        <source type="image/avif" sizes="(max-width: 760px) 760px, 100vw" srcset="/assets/v1/film/l2-1008.avif 1008w, /assets/v1/film/l2-1344.avif 1344w, /assets/v1/film/l2-1680.avif 1680w, /assets/v1/film/l2-2016.avif 2016w, /assets/v1/film/l2-2688.avif 2688w">
-        <img src="/assets/v1/film/l2-1344.webp" sizes="(max-width: 760px) 760px, 100vw" srcset="/assets/v1/film/l2-1008.webp 1008w, /assets/v1/film/l2-1344.webp 1344w, /assets/v1/film/l2-1680.webp 1680w, /assets/v1/film/l2-2016.webp 2016w, /assets/v1/film/l2-2688.webp 2688w" width="2688" height="1520" loading="lazy" decoding="async" alt="Manavda tahta kasalar içinde mandalina, nar, ıspanak, maydanoz, limon ve domates.">
-      </picture>
-      <div class="band__line"></div>
-      <h2 class="h h2" id="mevsimiyle-h">Mevsimi gelen öne çıkar.</h2>
-      <figure class="band__shot shot">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 440px, 92vw" srcset="/assets/v1/screens/8550-season-440.avif 440w, /assets/v1/screens/8550-season-660.avif 660w, /assets/v1/screens/8550-season-880.avif 880w">
-          <img src="/assets/v1/screens/8550-season-660.webp" sizes="(min-width: 860px) 440px, 92vw" srcset="/assets/v1/screens/8550-season-440.webp 440w, /assets/v1/screens/8550-season-660.webp 660w, /assets/v1/screens/8550-season-880.webp 880w" width="1320" height="528" loading="lazy" decoding="async" alt="List-em’de Meyve reyonu: Mandalina ve Nar, adlarının yanında yeşil Mevsiminde rozetiyle.">
-        </picture>
-      </figure>
-    </div>
-    <div class="sec__body">
-      <p>Mandalina, nar, hamsi… Mevsiminde olan ürünler listende işaretlenir. Sepetinin ne kadarının mevsiminde olduğunu da görürsün.</p>
-    </div>
-  </section>
-
-  <section class="sec" id="reyon" aria-labelledby="reyon-h">
-    <h2 class="h h2" id="reyon-h">Markette reyon sırasıyla.</h2>
-    <div class="sec__visual">
-      <figure class="phone">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8551-440.avif 440w, /assets/v1/screens/8551-660.avif 660w, /assets/v1/screens/8551-880.avif 880w">
-          <img src="/assets/v1/screens/8551-660.webp" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8551-440.webp 440w, /assets/v1/screens/8551-660.webp 660w, /assets/v1/screens/8551-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Reyonlara göre dizilmiş liste: Fırın’da Beyaz ekmek, Et ve Tavuk’ta Tavuk göğsü, Balık ve Deniz Ürünleri’nde Hamsi, Süt Ürünleri’nde Süt, Yoğurt ve Beyaz peynir, Kahvaltılık’ta Yumurta.">
-        </picture>
-      </figure>
-    </div>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Liste marketteki reyonlara göre dizilir. Aynı koridora iki kez dönmezsin.</p>
-    </div>
-    <div class="rule sec__foot"></div>
-  </section>
-
-  <section class="sec" id="gecmis" aria-labelledby="gecmis-h">
-    <h2 class="h h2" id="gecmis-h">Her alışveriş takviminde.</h2>
-    <div class="sec__visual">
-      <figure class="phone">
-        <picture>
-          <source type="image/avif" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8567-440.avif 440w, /assets/v1/screens/8567-660.avif 660w, /assets/v1/screens/8567-880.avif 880w">
-          <img src="/assets/v1/screens/8567-660.webp" sizes="(min-width: 860px) 282px, 60vw" srcset="/assets/v1/screens/8567-440.webp 440w, /assets/v1/screens/8567-660.webp 660w, /assets/v1/screens/8567-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Sepet Geçmişi ekranında Ekim 2026 takvimi; alışveriş yapılan günler işaretli. Ayın özeti: 6 alışveriş, 62 ürün, yaklaşık 53.319 kcal, yüzde 71’i mevsiminde. Öne çıkanlarda en sık alınan Muz, en yüksek kalorili Şeker.">
-        </picture>
-      </figure>
-    </div>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Tamamlanan her alışveriş Sepet Geçmişi’ne düşer. Ay ay ne aldığını ve sepetinin nasıl değiştiğini görürsün. List-em+ ile.</p>
-    </div>
-    <div class="rule sec__foot"></div>
-  </section>
-
-  <section class="sec sec--text" id="paylasim" aria-labelledby="paylasim-h">
-    <h2 class="h h2" id="paylasim-h">Paylaş, uygulamasız açılsın.</h2>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Listeni bir bağlantıyla gönderirsin. Karşı taraf uygulamayı indirmeden tarayıcıda açar.</p>
-    </div>
-  </section>
-
-  <section class="sec sec--text" id="temalar" aria-labelledby="temalar-h">
-    <h2 class="h h2" id="temalar-h">Yedi bölge, yedi tema.</h2>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Taze Bahçe ücretsiz. İstanbul Sisi’nden Baharat Yolu’na, Türkiye’nin yedi bölgesinden yedi tema List-em+ ile açılır.</p>
-    </div>
-    <ul class="themes" tabindex="0" aria-label="Listelerim ekranı sekiz temada">
-      <li>
-        <figure class="phone">
+    <div class="stage" id="stage">
+      <div class="film" aria-hidden="true">
+        <div class="frame f-kapak is-on">
           <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8559-440.avif 440w, /assets/v1/screens/8559-660.avif 660w, /assets/v1/screens/8559-880.avif 880w">
-            <img src="/assets/v1/screens/8559-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8559-440.webp 440w, /assets/v1/screens/8559-660.webp 660w, /assets/v1/screens/8559-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Taze Bahçe temasında.">
+            <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v2/film/kapak-l-1008.avif 1008w, /assets/v2/film/kapak-l-1344.avif 1344w, /assets/v2/film/kapak-l-1680.avif 1680w, /assets/v2/film/kapak-l-2016.avif 2016w, /assets/v2/film/kapak-l-2688.avif 2688w">
+            <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" srcset="/assets/v2/film/kapak-l-1008.webp 1008w, /assets/v2/film/kapak-l-1344.webp 1344w, /assets/v2/film/kapak-l-1680.webp 1680w, /assets/v2/film/kapak-l-2016.webp 2016w, /assets/v2/film/kapak-l-2688.webp 2688w">
+            <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v2/film/kapak-p-570.avif 570w, /assets/v2/film/kapak-p-760.avif 760w, /assets/v2/film/kapak-p-950.avif 950w, /assets/v2/film/kapak-p-1140.avif 1140w, /assets/v2/film/kapak-p-1520.avif 1520w">
+            <img src="/assets/v2/film/kapak-p-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" srcset="/assets/v2/film/kapak-p-570.webp 570w, /assets/v2/film/kapak-p-760.webp 760w, /assets/v2/film/kapak-p-950.webp 950w, /assets/v2/film/kapak-p-1140.webp 1140w, /assets/v2/film/kapak-p-1520.webp 1520w" alt="" fetchpriority="high">
           </picture>
-        </figure>
-        <p>Taze Bahçe</p>
-      </li>
-      <li>
-        <figure class="phone">
+          <p class="word is-static">Market listen</p>
+        </div>
+        <div class="frame f-manav">
           <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8586-440.avif 440w, /assets/v1/screens/8586-660.avif 660w, /assets/v1/screens/8586-880.avif 880w">
-            <img src="/assets/v1/screens/8586-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8586-440.webp 440w, /assets/v1/screens/8586-660.webp 660w, /assets/v1/screens/8586-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, İstanbul Sisi temasında.">
+            <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l2-1008.avif 1008w, /assets/v1/film/l2-1344.avif 1344w, /assets/v1/film/l2-1680.avif 1680w, /assets/v1/film/l2-2016.avif 2016w, /assets/v1/film/l2-2688.avif 2688w">
+            <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l2-1008.webp 1008w, /assets/v1/film/l2-1344.webp 1344w, /assets/v1/film/l2-1680.webp 1680w, /assets/v1/film/l2-2016.webp 2016w, /assets/v1/film/l2-2688.webp 2688w">
+            <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p2-570.avif 570w, /assets/v1/film/p2-760.avif 760w, /assets/v1/film/p2-950.avif 950w, /assets/v1/film/p2-1140.avif 1140w, /assets/v1/film/p2-1520.avif 1520w">
+            <img data-src="/assets/v1/film/p2-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p2-570.webp 570w, /assets/v1/film/p2-760.webp 760w, /assets/v1/film/p2-950.webp 950w, /assets/v1/film/p2-1140.webp 1140w, /assets/v1/film/p2-1520.webp 1520w" alt="">
           </picture>
-        </figure>
-        <p>İstanbul Sisi</p>
-      </li>
-      <li>
-        <figure class="phone">
+          <p class="word">mevsimiyle,</p>
+        </div>
+        <div class="frame f-reyon">
           <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8587-440.avif 440w, /assets/v1/screens/8587-660.avif 660w, /assets/v1/screens/8587-880.avif 880w">
-            <img src="/assets/v1/screens/8587-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8587-440.webp 440w, /assets/v1/screens/8587-660.webp 660w, /assets/v1/screens/8587-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Ege Kıyısı temasında.">
+            <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l3-1008.avif 1008w, /assets/v1/film/l3-1344.avif 1344w, /assets/v1/film/l3-1680.avif 1680w, /assets/v1/film/l3-2016.avif 2016w, /assets/v1/film/l3-2688.avif 2688w">
+            <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l3-1008.webp 1008w, /assets/v1/film/l3-1344.webp 1344w, /assets/v1/film/l3-1680.webp 1680w, /assets/v1/film/l3-2016.webp 2016w, /assets/v1/film/l3-2688.webp 2688w">
+            <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p3-570.avif 570w, /assets/v1/film/p3-760.avif 760w, /assets/v1/film/p3-950.avif 950w, /assets/v1/film/p3-1140.avif 1140w, /assets/v1/film/p3-1520.avif 1520w">
+            <img data-src="/assets/v1/film/p3-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p3-570.webp 570w, /assets/v1/film/p3-760.webp 760w, /assets/v1/film/p3-950.webp 950w, /assets/v1/film/p3-1140.webp 1140w, /assets/v1/film/p3-1520.webp 1520w" alt="">
           </picture>
-        </figure>
-        <p>Ege Kıyısı</p>
-      </li>
-      <li>
-        <figure class="phone">
+          <p class="word">kalorisiyle,</p>
+        </div>
+        <div class="frame f-kasa">
           <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8588-440.avif 440w, /assets/v1/screens/8588-660.avif 660w, /assets/v1/screens/8588-880.avif 880w">
-            <img src="/assets/v1/screens/8588-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8588-440.webp 440w, /assets/v1/screens/8588-660.webp 660w, /assets/v1/screens/8588-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Akdeniz Güneşi temasında.">
+            <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l4-1008.avif 1008w, /assets/v1/film/l4-1344.avif 1344w, /assets/v1/film/l4-1680.avif 1680w, /assets/v1/film/l4-2016.avif 2016w, /assets/v1/film/l4-2688.avif 2688w">
+            <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v1/film/l4-1008.webp 1008w, /assets/v1/film/l4-1344.webp 1344w, /assets/v1/film/l4-1680.webp 1680w, /assets/v1/film/l4-2016.webp 2016w, /assets/v1/film/l4-2688.webp 2688w">
+            <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p4-570.avif 570w, /assets/v1/film/p4-760.avif 760w, /assets/v1/film/p4-950.avif 950w, /assets/v1/film/p4-1140.avif 1140w, /assets/v1/film/p4-1520.avif 1520w">
+            <img data-src="/assets/v1/film/p4-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v1/film/p4-570.webp 570w, /assets/v1/film/p4-760.webp 760w, /assets/v1/film/p4-950.webp 950w, /assets/v1/film/p4-1140.webp 1140w, /assets/v1/film/p4-1520.webp 1520w" alt="">
           </picture>
-        </figure>
-        <p>Akdeniz Güneşi</p>
-      </li>
-      <li>
-        <figure class="phone">
+          <p class="word">gramıyla.</p>
+        </div>
+        <div class="frame f-final">
           <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8589-440.avif 440w, /assets/v1/screens/8589-660.avif 660w, /assets/v1/screens/8589-880.avif 880w">
-            <img src="/assets/v1/screens/8589-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8589-440.webp 440w, /assets/v1/screens/8589-660.webp 660w, /assets/v1/screens/8589-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Karadeniz Yaylası temasında.">
+            <source media="(min-aspect-ratio: 1/1)" type="image/avif" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v2/film/final-l-1008.avif 1008w, /assets/v2/film/final-l-1344.avif 1344w, /assets/v2/film/final-l-1680.avif 1680w, /assets/v2/film/final-l-2016.avif 2016w, /assets/v2/film/final-l-2688.avif 2688w">
+            <source media="(min-aspect-ratio: 1/1)" type="image/webp" sizes="(max-aspect-ratio: 1994/1000) 200vh, 100vw" data-srcset="/assets/v2/film/final-l-1008.webp 1008w, /assets/v2/film/final-l-1344.webp 1344w, /assets/v2/film/final-l-1680.webp 1680w, /assets/v2/film/final-l-2016.webp 2016w, /assets/v2/film/final-l-2688.webp 2688w">
+            <source type="image/avif" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v2/film/final-p-570.avif 570w, /assets/v2/film/final-p-760.avif 760w, /assets/v2/film/final-p-950.avif 950w, /assets/v2/film/final-p-1140.avif 1140w, /assets/v2/film/final-p-1520.avif 1520w">
+            <img data-src="/assets/v2/film/final-p-760.webp" sizes="(max-aspect-ratio: 65/100) 65vh, 100vw" data-srcset="/assets/v2/film/final-p-570.webp 570w, /assets/v2/film/final-p-760.webp 760w, /assets/v2/film/final-p-950.webp 950w, /assets/v2/film/final-p-1140.webp 1140w, /assets/v2/film/final-p-1520.webp 1520w" alt="">
           </picture>
-        </figure>
-        <p>Karadeniz Yaylası</p>
-      </li>
-      <li>
-        <figure class="phone">
           <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8590-440.avif 440w, /assets/v1/screens/8590-660.avif 660w, /assets/v1/screens/8590-880.avif 880w">
-            <img src="/assets/v1/screens/8590-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8590-440.webp 440w, /assets/v1/screens/8590-660.webp 660w, /assets/v1/screens/8590-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Bozkır Altını temasında.">
+            <source media="(min-aspect-ratio: 1/1)" type="image/webp" data-srcset="/assets/v2/film/final-l-1008.webp">
+            <img class="fblur" data-src="/assets/v2/film/final-p-570.webp" alt="">
           </picture>
-        </figure>
-        <p>Bozkır Altını</p>
-      </li>
-      <li>
-        <figure class="phone">
-          <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8591-440.avif 440w, /assets/v1/screens/8591-660.avif 660w, /assets/v1/screens/8591-880.avif 880w">
-            <img src="/assets/v1/screens/8591-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8591-440.webp 440w, /assets/v1/screens/8591-660.webp 660w, /assets/v1/screens/8591-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Dağların Moru temasında.">
-          </picture>
-        </figure>
-        <p>Dağların Moru</p>
-      </li>
-      <li>
-        <figure class="phone">
-          <picture>
-            <source type="image/avif" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8592-440.avif 440w, /assets/v1/screens/8592-660.avif 660w, /assets/v1/screens/8592-880.avif 880w">
-            <img src="/assets/v1/screens/8592-660.webp" sizes="(min-width: 860px) 186px, 44vw" srcset="/assets/v1/screens/8592-440.webp 440w, /assets/v1/screens/8592-660.webp 660w, /assets/v1/screens/8592-880.webp 880w" width="1320" height="2718" loading="lazy" decoding="async" alt="Listelerim ekranı, Baharat Yolu temasında.">
-          </picture>
-        </figure>
-        <p>Baharat Yolu</p>
-      </li>
-    </ul>
-  </section>
-
-  <section class="sec sec--text" id="kapanis" aria-labelledby="kapanis-h">
-    <h2 class="h h2" id="kapanis-h">Çok yakında App Store’da.</h2>
-    <div class="rule"></div>
-    <div class="sec__body">
-      <p>Çıktığı gün haberin olsun: X’te <a href="https://x.com/listemapp">@listemapp</a>, Instagram’da <a href="https://instagram.com/listem.app">listem.app</a>.</p>
+          <p class="soon">ÇOK YAKINDA</p>
+          <svg class="flogo" role="img" aria-label="List-em" focusable="false"><use href="#lockup"/></svg>
+        </div>
+        <p class="note">Türkiye’ye özel market alışveriş listesi.<br>Çok yakında App Store’da.</p>
+        <span class="cue"></span>
+      </div>
+      <div class="hline"></div>
+      <ol class="toc" aria-label="İçindekiler">
+        <li><a href="#mevsimiyle" data-step="2">mevsimiyle,</a></li>
+        <li>kalorisiyle,</li>
+        <li>gramıyla.</li>
+      </ol>
+      <div class="say" aria-hidden="true">
+        <p>Ürün yazmak yok, seçmek var.</p>
+        <p>Mevsiminde olan ürün listende işaretli gelir.</p>
+      </div>
+      <div class="mh" aria-hidden="true">
+        <div class="mh__s"><p class="mh__h">Ürün yazmak yok, seçmek var.</p></div>
+        <div class="mh__s"><p class="mh__w">mevsimiyle,</p><p class="mh__t">Mevsiminde olan ürün listende işaretli gelir.</p></div>
+      </div>
+      <div class="phone" aria-hidden="true"><div class="screen"><div class="a" id="app"></div></div></div>
+      <div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
     </div>
   </section>
 </main>
 
-<footer class="foot">
-  <div class="rule"></div>
+<footer class="foot" id="alt">
   <div class="foot__in">
-    <a href="#top" aria-label="List-em, sayfanın başına dön"><svg aria-hidden="true" focusable="false"><use href="#lockup"/></svg></a>
     <ul>
       <li><a href="mailto:contact@list-em.app">Destek</a></li>
       <li><a href="/gizlilik">Gizlilik</a></li>
       <li><a href="/kosullar">Koşullar</a></li>
-      <li><a href="https://x.com/listemapp">X</a></li>
-      <li><a href="https://instagram.com/listem.app">Instagram</a></li>
     </ul>
     <p class="foot__copy">© 2026 List-em</p>
   </div>
@@ -600,127 +550,705 @@ a:hover { color: var(--green); }
 
 <script>
 (function () {
-  var d = document, root = d.documentElement;
-  var film = d.getElementById('film');
-  var frames = [].slice.call(film.querySelectorAll('.film__frame'));
-  var imgs = frames.map(function (f) { return f.querySelector('img'); });
-  var word = film.querySelector('.film__word');
-  var logo = film.querySelector('.film__logo');
-  var soon = film.querySelector('.film__soon');
-  var WORDS = ['Market listen', 'mevsimiyle,', 'kalorisiyle,', 'gramıyla.'];
-  var EASE = 'cubic-bezier(.2,.7,.2,1)';
-  var HOLD = 2000;
-  var FINAL = frames.length - 1;
+  'use strict';
+  var d = document, root = d.documentElement, win = window;
+  var story = d.getElementById('hikaye'), stage = d.getElementById('stage');
+  var app = d.getElementById('app'), phone = stage.querySelector('.phone');
+  var mqReduce = win.matchMedia('(prefers-reduced-motion: reduce)');
+  var mqWide = win.matchMedia('(min-width: 1000px) and (min-height: 520px), (min-width: 740px) and (min-aspect-ratio: 7/5)');
 
-  // Layout uses the file's real pixel size, not an assumed aspect ratio. naturalWidth on a
-  // srcset image is density-corrected and rounded, so read the chosen file on its own.
-  function fit(img) {
-    if (!img.currentSrc) return;
-    var file = new Image();
-    file.onload = function () {
-      img.style.setProperty('--iw', file.naturalWidth);
-      img.style.setProperty('--ih', file.naturalHeight);
+  // ── Math ──────────────────────────────────────────────────────────────
+  function clamp(x, a, b) { return x < a ? a : x > b ? b : x; }
+  function prog(p, a, b) { return p <= a ? 0 : p >= b ? 1 : (p - a) / (b - a); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function bezier(x1, y1, x2, y2) {
+    function bx(t) { return ((1 - 3 * x2 + 3 * x1) * t + (3 * x2 - 6 * x1)) * t * t + 3 * x1 * t; }
+    function by(t) { return ((1 - 3 * y2 + 3 * y1) * t + (3 * y2 - 6 * y1)) * t * t + 3 * y1 * t; }
+    return function (x) {
+      if (x <= 0) return 0;
+      if (x >= 1) return 1;
+      var lo = 0, hi = 1, t = x;
+      for (var i = 0; i < 20; i++) { var v = bx(t); if (Math.abs(v - x) < 1e-5) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2; }
+      return by(t);
     };
+  }
+  var easeStd = bezier(0, 0, .2, 1);   // the app's motion.easing.standard
+  var easeInOut = bezier(.42, 0, .58, 1);
+
+  // ── Style writes, only when a value changes ───────────────────────────
+  var memo = new WeakMap();
+  function put(el, k, v) {
+    var m = memo.get(el);
+    if (!m) memo.set(el, (m = {}));
+    if (m[k] !== v) { m[k] = v; el.style.setProperty(k, v); }
+  }
+  function cls(el, c, on) { if (el.classList.contains(c) !== on) el.classList.toggle(c, on); }
+  function text(el, s) { if (el.textContent !== s) el.textContent = s; }
+  function show(el, o) { put(el, 'opacity', String(o)); put(el, 'visibility', o > 0 ? 'visible' : 'hidden'); }
+
+  // ── The app's values (grocery-list-FIXED, read only) ──────────────────
+  // data/categories.ts — Sanal Reyon order, Turkish names, picker emoji, colour, catalog count
+  var CAT = {
+    Fruit: ['Meyve', '🍎', '#2D8B75', 30], Vegetables: ['Sebze', '🥬', '#5AADA8', 48],
+    Bakery: ['Fırın', '🥖', '#2D8B75', 28], MeatPoultry: ['Et & Tavuk', '🥩', '#E05C4D', 36],
+    Fish: ['Balık & Deniz Ürünleri', '🐟', '#4A90D9', 24], Charcuterie: ['Şarküteri', '🥓', '#C24B3A', 9],
+    Dairy: ['Süt Ürünleri', '🥛', '#4A90D9', 45], Frozen: ['Dondurulmuş', '❄️', '#4A90D9', 16],
+    Breakfast: ['Kahvaltılık', '🍯', '#D4883C', 16], PantryStaples: ['Temel Gıda', '🫘', '#9B6EB7', 60],
+    Snacks: ['Atıştırmalık', '🍿', '#E05C4D', 17], Beverages: ['Su & İçecek', '🥤', '#4A90D9', 21],
+    AlcoholicBeverages: ['Alkollü İçecek', '🍷', '#9B6EB7', 10], Cleaning: ['Temizlik', '🧹', '#5AADA8', 13],
+    PersonalCare: ['Kişisel Bakım', '🧴', '#9B6EB7', 14], Baby: ['Bebek', '👶', '#E05C4D', 5],
+    HomeAndKitchen: ['Ev & Mutfak', '🏠', '#2D8B75', 5], Pets: ['Evcil Hayvan', '🐾', '#D4883C', 5]
+  };
+  // Vitrin's Haftalık Market (utils/showcaseData, free, tr, October), in the list's own order.
+  // Row text from GroceryItem (size · ~kcal). Flags: c checked, s in season in October
+  // (data/seasonal), v two or more types (layers mark), 2 quantity two.
+  var VITRIN = [
+    ['muz', 'Muz', '🍌', 'Fruit', '1kg · ~890 kcal', 'cv'],
+    ['mandalina', 'Mandalina', '🍊', 'Fruit', '1kg · ~530 kcal', 'sv'],
+    ['nar', 'Nar', '🍎', 'Fruit', '1kg · ~830 kcal', 'sv'],
+    ['domates', 'Domates', '🍅', 'Vegetables', '1kg · ~180 kcal', 'csv'],
+    ['salatalik', 'Salatalık', '🥒', 'Vegetables', '1kg · ~150 kcal', 'c'],
+    ['patates', 'Patates', '🥔', 'Vegetables', '2.5kg · ~1.925 kcal', 'cv'],
+    ['sogan', 'Soğan', '🧅', 'Vegetables', '1kg · ~400 kcal', 'cv'],
+    ['ispanak', 'Ispanak', '🥬', 'Vegetables', '500g · ~115 kcal', 's'],
+    ['limon', 'Limon', '🍋', 'Fruit', '500g · ~145 kcal', 'v'],
+    ['maydanoz', 'Maydanoz', '🌿', 'Vegetables', '~36 kcal', ''],
+    ['ekmek-beyaz', 'Beyaz ekmek', '🍞', 'Bakery', '~530 kcal', '2'],
+    ['tavuk-gogus', 'Tavuk göğsü', '🍗', 'MeatPoultry', '1kg · ~1.200 kcal', ''],
+    ['hamsi', 'Hamsi', '🐟', 'Fish', '500g · ~655 kcal', 's'],
+    ['sut', 'Süt', '🥛', 'Dairy', '1L · ~610 kcal', 'v'],
+    ['yogurt', 'Yoğurt', '🥣', 'Dairy', '1kg · ~610 kcal', 'v'],
+    ['beyaz-peynir', 'Beyaz peynir', '🧀', 'Dairy', '400g · ~1.040 kcal', 'v'],
+    ['yumurta', 'Yumurta', '🥚', 'Breakfast', "15'li · ~143 kcal", 'v'],
+    ['siyah-zeytin', 'Siyah zeytin', '🫒', 'Breakfast', '400g · ~460 kcal', 'v'],
+    ['zeytinyagi', 'Zeytinyağı', '🫒', 'PantryStaples', '1L · ~8.840 kcal', 'v'],
+    ['bulasik-deterjani', 'Bulaşık deterjanı', '🧽', 'Cleaning', '1L', 'v']
+  ];
+  // Step 1 taps these, in this order. A tap in the picker adds the product without a
+  // size (QuickAddSheet → addSingleImmediate), so its row reads the catalog's kcal.
+  var TAPS = [['mandalina', '~53 kcal'], ['limon', '~29 kcal'], ['nar', '~83 kcal']];
+  // Meyve in catalog order (data/catalog.ts) with "~kcal / 100 g" (s.kcalPerRow).
+  var FRUIT = [
+    ['elma', 'Elma', '🍎', 52], ['armut', 'Armut', '🍐', 57], ['muz', 'Muz', '🍌', 89], ['portakal', 'Portakal', '🍊', 47],
+    ['mandalina', 'Mandalina', '🍊', 53], ['limon', 'Limon', '🍋', 29], ['greyfurt', 'Greyfurt', '🍊', 42], ['nar', 'Nar', '🍎', 83],
+    ['uzum', 'Üzüm', '🍇', 69], ['cilek', 'Çilek', '🍓', 32], ['kiraz', 'Kiraz', '🍒', 63], ['visne', 'Vişne', '🍒', 50],
+    ['seftali', 'Şeftali', '🍑', 39], ['nektarin', 'Nektarin', '🍑', 44], ['kayisi', 'Kayısı', '🍑', 48], ['erik', 'Erik', '🫐', 46],
+    ['karpuz', 'Karpuz', '🍉', 30], ['kavun', 'Kavun', '🍈', 34], ['kivi', 'Kivi', '🥝', 61], ['avokado', 'Avokado', '🥑', 160],
+    ['mango', 'Mango', '🥭', 60], ['ananas', 'Ananas', '🍍', 50], ['hurma', 'Hurma (taze)', '🌴', 145], ['trabzon-hurmasi', 'Trabzon hurması', '🍊', 70],
+    ['yaban-mersini', 'Yaban mersini', '🫐', 57], ['ahududu', 'Ahududu', '🍓', 52], ['bogurtlen', 'Böğürtlen', '🫐', 43], ['incir', 'İncir', '🍑', 74],
+    ['ayva', 'Ayva', '🍐', 57], ['dut', 'Dut', '🫐', 43]
+  ];
+  // Sık Kullanılanlar (utils/frequentItems → pickFrequent) from Vitrin's usage count,
+  // hiding what the list holds — before any tap.
+  var CHIPS_HOME = [['🍋', 'Limon'], ['🍉', 'Karpuz'], ['🫘', 'Taze fasulye'], ['🍒', 'Kiraz'], ['🐟', 'Sardalya'], ['🍓', 'Çilek'], ['🥕', 'Havuç'], ['🍎', 'Nar'], ['👶', 'Bebek bezi'], ['🧻', 'Bebek ıslak mendil']];
+  var CHIPS_FRUIT = [['limon', '🍋', 'Limon'], ['karpuz', '🍉', 'Karpuz'], ['kiraz', '🍒', 'Kiraz'], ['cilek', '🍓', 'Çilek'], ['nar', '🍎', 'Nar'], ['seftali', '🍑', 'Şeftali'], ['mandalina', '🍊', 'Mandalina']];
+  var FRUIT_BY_ID = {};
+  FRUIT.forEach(function (f) { FRUIT_BY_ID[f[0]] = f; });
+  // In season in October and in the list: the order the badges appear in step 2.
+  var BADGES = ['nar', 'mandalina', 'ispanak', 'hamsi'];
+
+  // ── Build the screen ──────────────────────────────────────────────────
+  function ic(n, s, extra) {
+    return '<svg class="ic' + (extra ? ' ' + extra : '') + '" width="' + s + '" height="' + s + '" aria-hidden="true"><use href="#i-' + n + '"/></svg>';
+  }
+  function tint(cat) { return CAT[cat][2] + '1A'; }   // ProductFace: category colour at 10%
+  function chip(e, n, id) { return '<span class="a-chip"' + (id ? ' data-chip="' + id + '"' : '') + '><b>' + e + '</b><span>' + n + '</span></span>'; }
+  function freq(list) {
+    return '<div class="a-fq"><div class="a-fqh">' + ic('star', 18) + '<span class="a-fql">SIK KULLANILANLAR</span></div>' +
+      '<div class="a-chips">' + list.join('') + '</div></div>';
+  }
+  function row(r, meta) {
+    var f = r[5], done = f.indexOf('c') >= 0, sea = r[3] === 'Fish';
+    return '<div class="a-row' + (done ? ' is-done' : '') + '" data-row="' + r[0] + '">' +
+      '<span class="a-ck">' + (done ? ic('checkmark', 13.92) : '') + '</span>' +
+      '<span class="a-eb">' + r[2] + '</span>' +
+      '<span class="a-rc"><span class="a-nr"><span class="a-nm">' + r[1] + '</span>' +
+        (f.indexOf('s') >= 0 && !done ? '<span class="a-bdg' + (sea ? ' is-sea' : '') + '">' + (sea ? '🐟' : '🌿') + ' Mevsiminde</span>' : '') +
+      '</span>' + (meta ? '<span class="a-meta">' + meta + '</span>' : '') + '</span>' +
+      (f.indexOf('2') >= 0 ? '<span class="a-qty">×2</span>' : '') +
+      (f.indexOf('v') >= 0 ? ic('layers-outline', 14, 'a-vm') : '') +
+      ic('chevron-forward', 18, 'a-chv') +
+    '</div>';
+  }
+  function sec(cat, rows, id) {
+    return '<div class="a-group"' + (id ? ' data-sec="' + id + '"' : '') + '><div class="a-sec"><span class="a-se">' + CAT[cat][1] + '</span><span class="a-sl">' + CAT[cat][0] + '</span></div>' + rows + '</div>';
+  }
+  function listHTML(vitrin) {
+    var byId = {}; VITRIN.forEach(function (r) { byId[r[0]] = r; });
+    var tapped = TAPS.map(function (t) { return t[0]; });
+    // Prototype: the taps are prepended as they are added (GroceryContext ADD_ITEM), latest first.
+    var order = vitrin ? VITRIN.slice() : tapped.slice().reverse().map(function (id) { return byId[id]; })
+      .concat(VITRIN.filter(function (r) { return tapped.indexOf(r[0]) < 0; }));
+    var html = '<div class="a-cal"><div class="a-lock"><span class="a-plus">List-em+</span><span>Kalori özeti</span><span class="a-ll">Kalori takibini keşfet</span></div></div>';
+    Object.keys(CAT).forEach(function (cat) {
+      var rows = order.filter(function (r) { return r[3] === cat && r[5].indexOf('c') < 0; });
+      if (!rows.length) return;
+      html += sec(cat, rows.map(function (r, i) {
+        var meta = r[4];
+        if (!vitrin) TAPS.forEach(function (t) { if (t[0] === r[0]) meta = t[1]; });
+        return (i ? '<div class="a-sep"></div>' : '') + row(r, meta);
+      }).join(''), cat);
+    });
+    var done = order.filter(function (r) { return r[5].indexOf('c') >= 0; });
+    html += '<div class="a-group"><div class="a-sec"><span class="a-sl">Tamamlananlar (' + done.length + ')</span><span class="a-sr"><span class="a-clr">Temizle</span>' + ic('chevron-down', 18) + '</span></div>' +
+      done.map(function (r, i) { return (i ? '<div class="a-sep"></div>' : '') + row(r, r[4]); }).join('') + '</div>';
+    return html;
+  }
+  function buildApp() {
+    var grid = Object.keys(CAT).map(function (c) {
+      return '<span class="a-card" data-cat="' + c + '"><b>' + CAT[c][1] + '</b><span>' + CAT[c][0] + '</span><i>' + CAT[c][3] + '</i></span>';
+    }).join('');
+    var fruit = FRUIT.map(function (f, i) {
+      return '<div class="a-cr' + (i === 0 ? ' is-first' : '') + (i === FRUIT.length - 1 ? ' is-last' : '') + '" data-cr="' + f[0] + '">' +
+        '<span class="a-pf" style="background:' + tint('Fruit') + '"><b>' + f[2] + '</b></span>' +
+        '<span class="a-ci"><span class="a-cn">' + f[1] + '</span><span class="a-ck2">~' + f[3] + ' kcal / 100&nbsp;g</span></span>' +
+        '<span class="a-cic">' + ic('add-circle-outline', 18) + '</span>' +
+      '</div>';
+    }).join('');
+    app.innerHTML =
+      '<div class="a-main">' +
+        '<div class="a-hd"><div class="a-hdr">' +
+          '<div class="a-hl"><span class="a-back">' + ic('chevron-back', 24) + '</span>' +
+            '<div class="a-hle"><span class="a-lf"><span class="a-face">🛒</span><span class="a-cnt">15</span></span><span class="a-title">Haftalık Market</span></div></div>' +
+          '<div class="a-acts"><span class="a-hb"><span class="a-lang">TR</span></span><span class="a-hb">' + ic('contrast', 18) + '</span><span class="a-hb">' + ic('settings-outline', 18) + '</span></div>' +
+        '</div></div>' +
+        '<div class="a-sa"><div class="a-sbar">' + ic('search', 18) + '<span class="a-ph">Hızlı Ara &amp; Ekle…</span></div></div>' +
+        '<div class="a-list"><div class="a-lc"></div></div>' +
+        '<div class="a-tb"><div class="a-tbr"><span class="a-st">5 / 20 tamamlandı</span><span class="a-add">' + ic('add', 18) + 'Ürün Ekle</span></div></div>' +
+      '</div>' +
+      '<div class="a-gr"></div>' +
+      '<div class="a-sheet">' +
+        '<div class="a-hdl"><i></i></div>' +
+        '<div class="a-shd">' +
+          '<div class="a-shr"><span class="a-sbk">' + ic('chevron-back', 18) + '</span><span class="a-stl">Ürün Ekle</span><span class="a-scl">' + ic('close-circle', 24) + '</span></div>' +
+          '<div class="a-ssr">' + ic('search', 18) + '<span class="a-ssp">Ara veya özel ürün ekle…</span></div>' +
+          '<div class="a-hint">Tür ve miktar için uzun bas</div>' +
+        '</div>' +
+        '<div class="a-sbd">' +
+          '<div class="a-lay a-home">' + freq(CHIPS_HOME.map(function (c) { return chip(c[0], c[1]); })) + '<div class="a-grid">' + grid + '</div></div>' +
+          '<div class="a-lay a-drill is-off">' + freq(CHIPS_FRUIT.map(function (c) { return chip(c[1], c[2], c[0]); })) + fruit + '</div>' +
+          '<div class="a-strip"><div class="a-stc"><span class="a-stf" style="background:' + tint('Fruit') + '"><b></b></span><span class="a-stt"><span class="a-ste">LİSTEYE EKLENDİ</span><span class="a-stn"></span></span></div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="a-touch"></div>';
+    setList(false);
+  }
+
+  var A = {};
+  function setList(vitrin) {
+    var lc = app.querySelector('.a-lc');
+    lc.innerHTML = listHTML(vitrin);
+    A.lc = lc;
+    A.rows = {}; [].forEach.call(lc.querySelectorAll('[data-row]'), function (el) { A.rows[el.getAttribute('data-row')] = el; });
+    A.badge = {}; BADGES.forEach(function (id) { var r = A.rows[id]; if (r) A.badge[id] = r.querySelector('.a-bdg'); });
+    A.fruitSec = lc.querySelector('[data-sec="Fruit"]');
+    A.vitrin = vitrin;
+  }
+  function grabApp() {
+    A.list = app.querySelector('.a-list');
+    A.cnt = app.querySelector('.a-cnt');
+    A.st = app.querySelector('.a-st');
+    A.add = app.querySelector('.a-add');
+    A.gr = app.querySelector('.a-gr');
+    A.sheet = app.querySelector('.a-sheet');
+    A.sbd = app.querySelector('.a-sbd');
+    A.stl = app.querySelector('.a-stl');
+    A.ssp = app.querySelector('.a-ssp');
+    A.close = app.querySelector('.a-scl');
+    A.home = app.querySelector('.a-home');
+    A.drill = app.querySelector('.a-drill');
+    A.meyve = app.querySelector('[data-cat="Fruit"]');
+    A.cr = {}; [].forEach.call(app.querySelectorAll('[data-cr]'), function (el) { A.cr[el.getAttribute('data-cr')] = el; });
+    A.chip = {}; [].forEach.call(A.drill.querySelectorAll('[data-chip]'), function (el) { A.chip[el.getAttribute('data-chip')] = el; });
+    A.strip = app.querySelector('.a-strip');
+    A.stripFace = A.strip.querySelector('.a-stf b');
+    A.stripName = A.strip.querySelector('.a-stn');
+    A.touch = app.querySelector('.a-touch');
+  }
+
+  // ── Geometry (on load and resize) ─────────────────────────────────────
+  function at(el, upto) {
+    var x = 0, y = 0;
+    while (el && el !== upto) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; }
+    return { x: x, y: y };
+  }
+  function center(el) { var p = at(el, app); return { x: p.x + el.offsetWidth / 2, y: p.y + el.offsetHeight / 2 }; }
+  var G = {};
+  function measureApp() {
+    // Everything the steps need, measured on the real layout: the sheet open in
+    // each of its two modes, and the list as it stands after the taps.
+    var keep = { drill: A.sheet.classList.contains('is-drill') };
+    G.add = center(A.add);
+    cls(A.sheet, 'is-drill', false);
+    G.sheetTop = A.sheet.offsetTop;
+    G.sheetH = A.sheet.offsetHeight;
+    G.off68 = G.sheetH * (.92 - .68) / .92;   // how far below the 92% stop the 68% stop sits
+    G.meyve = center(A.meyve);
+    G.close = center(A.close);    // the header row is the same in both modes
+    cls(A.sheet, 'is-drill', true);
+    G.drillTop = at(A.sbd, app).y + 16;      // the layer's padding
+    G.drillVH = A.sbd.offsetHeight - 16;
+    G.drillMax = Math.max(0, A.drill.offsetHeight - 16 - G.drillVH);
+    G.cr = {};
+    TAPS.forEach(function (t) { var el = A.cr[t[0]]; G.cr[t[0]] = { top: el.offsetTop - 16, h: el.offsetHeight }; });
+    G.stripZone = A.strip.offsetHeight + parseFloat(getComputedStyle(A.strip).bottom) + 8;
+    cls(A.sheet, 'is-drill', keep.drill);
+    // the list with every tap in place
+    var hidden = [];
+    TAPS.forEach(function (t) { var r = A.rows[t[0]]; if (r && r.style.display === 'none') { hidden.push(r); r.style.display = ''; } });
+    var secHidden = A.fruitSec && A.fruitSec.style.display === 'none';
+    if (secHidden) A.fruitSec.style.display = '';
+    var seps = [].slice.call(A.lc.querySelectorAll('[data-sec="Fruit"] .a-sep'));
+    var sepD = seps.map(function (s) { var v = s.style.display; s.style.display = ''; return v; });
+    G.listTop = at(A.list, app).y;
+    // the toolbar lies over the bottom of the list
+    G.listVH = A.list.offsetHeight - app.querySelector('.a-tb').offsetHeight;
+    G.listMax = Math.max(0, A.lc.offsetHeight - G.listVH);
+    G.row = {};
+    BADGES.forEach(function (id) { var r = A.rows[id]; if (r) G.row[id] = { top: at(r, A.lc).y, h: r.offsetHeight }; });
+    // the list opens with its first section at the top (the calorie card just above)
+    G.scroll0 = A.fruitSec ? at(A.fruitSec, A.lc).y : 0;
+    seps.forEach(function (s, i) { s.style.display = sepD[i]; });
+    if (secHidden) A.fruitSec.style.display = 'none';
+    hidden.forEach(function (r) { r.style.display = 'none'; });
+    G.appW = app.offsetWidth;
+  }
+
+  // ── Timeline ──────────────────────────────────────────────────────────
+  // One unit = one screen height of scrolling. Film frames take one each.
+  // Steps are built from the measured layout: a scroll is added only where the
+  // next thing to touch is not on screen, so a small phone gets more of them.
+  var TL = [], S = {}, TOTAL = 0, MOTION_END = 0, REDUCED = false;
+  function buildTimeline() {
+    TL = []; S = {};
+    var t = 0;
+    function beat(kind, len, o) { o = o || {}; o.kind = kind; o.a = t; o.b = t + len; TL.push(o); t += len; return o; }
+    t = 5;
+    var rb = beat('rise', .9); S.rise = [rb.a, rb.b];
+    var ib = beat('intro', .66); S.intro = [ib.a, ib.b];
+    beat('hold', .14);
+    S.step1 = t;
+    beat('press', .24, { target: 'add', dim: .8 });
+    beat('sheet', .34, { from: 0, to: 1 });
+    // pulled up by the handle to the sheet's second stop: more of the aisle on screen
+    beat('expand', .3);
+    beat('press', .24, { target: 'meyve', dim: .75, set: 'drill' });
+    var scroll = 0, strip = -1;
+    // If the aisle can show all three at once, bring them up together first.
+    var firstRow = G.cr[TAPS[0][0]], lastRow = G.cr[TAPS[TAPS.length - 1][0]];
+    var together = clamp(firstRow.top - 8, 0, G.drillMax);
+    var allNow = TAPS.every(function (t) { var r = G.cr[t[0]]; return r.top >= 6 && r.top + r.h <= G.drillVH - 6; });
+    if (!allNow && lastRow.top + lastRow.h - together <= G.drillVH - 6) {
+      beat('drag', .32, { layer: 'drill', from: 0, to: together });
+      scroll = together;
+    }
+    TAPS.forEach(function (tap, i) {
+      var r = G.cr[tap[0]];
+      function fits(sc, s) { var bottom = G.drillVH - (s >= 0 ? G.stripZone : 0) - 6; return r.top - sc >= 6 && r.top + r.h - sc <= bottom; }
+      if (!fits(scroll, strip) && strip >= 0) { beat('strip', .17, { from: strip, to: -1 }); strip = -1; }
+      if (!fits(scroll, strip)) {
+        var to = clamp(r.top - 8, 0, G.drillMax);
+        beat('drag', .32, { layer: 'drill', from: scroll, to: to });
+        scroll = to;
+      }
+      beat('press', .24, { target: 'row', id: tap[0], scroll: scroll, dim: .7, set: 'add' });
+      beat('strip', strip >= 0 ? .3 : .18, { from: strip, to: i });
+      strip = i;
+    });
+    beat('strip', .17, { from: strip, to: -1 });
+    beat('press', .24, { target: 'close', dim: .2, set: 'close' });
+    beat('sheet', .34, { from: 1, to: 0 });
+    beat('hold', .3);
+    S.step2 = t;
+    beat('swap', .55);
+    var ls = G.scroll0;
+    BADGES.forEach(function (id) {
+      var r = G.row[id];
+      if (!r) return;
+      var top = r.top - ls, bottom = r.top + r.h - ls;
+      // the badge sits on the name line: that line on screen is enough
+      if (top < 6 || top + 44 > G.listVH - 6) {
+        var to = clamp(bottom > G.listVH - 6 ? r.top + r.h - G.listVH + 10 : r.top - 10, 0, G.listMax);
+        beat('drag', .34, { layer: 'list', from: ls, to: to });
+        ls = to;
+      }
+      beat('badge', .26, { id: id });
+    });
+    beat('hold', .6);
+    MOTION_END = t;
+    // Reduce motion: each scene (five frames, two steps) shows its last state, still.
+    REDUCED = mqReduce.matches;
+    TOTAL = REDUCED ? 7 : MOTION_END;
+  }
+
+  // App state at p: the beats before p apply fully, the one under p partly.
+  function stateAt(p) {
+    var st = { sheet: 0, stop: 1, drill: false, added: 0, dim: null, dimTo: 1, strip: -1, stripK: 0,
+      drillScroll: 0, listScroll: G.scroll0, badges: {}, finger: null };
+    for (var i = 0; i < TL.length; i++) {
+      var b = TL[i];
+      if (p < b.a) break;
+      var q = prog(p, b.a, b.b);
+      switch (b.kind) {
+        case 'press': {
+          var pt = b.target === 'add' ? G.add : b.target === 'meyve' ? G.meyve : b.target === 'close' ? G.close : null;
+          if (b.target === 'row') {
+            var r = G.cr[b.id];
+            pt = { x: Math.min(G.appW * .42, 170), y: G.drillTop + r.top + r.h / 2 - b.scroll };
+          }
+          // the finger lands, holds, lifts; the press takes effect on release
+          if (q < 1) st.finger = { x: pt.x, y: pt.y, o: q < .3 ? easeStd(q / .3) : q < .7 ? 1 : 1 - easeStd((q - .7) / .3), s: q < .3 ? lerp(.72, 1, easeStd(q / .3)) : 1 };
+          if (q >= .3 && q < .72) { st.dim = b.target === 'row' ? b.id : b.target; st.dimTo = b.dim; }
+          if (q >= .72) {
+            if (b.set === 'drill') st.drill = true;
+            if (b.set === 'add') st.added++;
+          }
+          break;
+        }
+        case 'sheet': st.sheet = b.to > b.from ? easeStd(q) : 1 - easeStd(q); break;
+        case 'expand': {
+          var u2 = prog(q, .14, .86);
+          st.stop = 1 - easeInOut(u2);
+          if (q < 1) st.finger = { x: G.appW / 2, y: G.sheetTop + 12 + st.stop * G.off68,
+            o: q < .14 ? easeStd(q / .14) : q < .86 ? 1 : 1 - easeStd((q - .86) / .14), s: 1 };
+          break;
+        }
+        case 'drag': {
+          var u = prog(q, .12, .9), k = easeInOut(u), y = lerp(b.from, b.to, k);
+          if (b.layer === 'drill') st.drillScroll = y; else st.listScroll = y;
+          if (q < 1) {
+            var vt = b.layer === 'drill' ? G.drillTop : G.listTop, vh = b.layer === 'drill' ? G.drillVH : G.listVH;
+            var travel = Math.min(Math.abs(b.to - b.from), vh * .55), up = b.to > b.from;
+            var y0 = up ? vt + vh * .78 : vt + vh * .22;
+            st.finger = { x: G.appW * .62, y: y0 + (up ? -1 : 1) * travel * easeStd(prog(q, .12, .62)),
+              o: q < .12 ? easeStd(q / .12) : q < .62 ? 1 : 1 - easeStd(prog(q, .62, .8)), s: 1 };
+          }
+          break;
+        }
+        case 'strip':
+          if (b.from >= 0 && b.to >= 0) {
+            if (q < .5) { st.strip = b.from; st.stripK = 1 - easeStd(q / .5); } else { st.strip = b.to; st.stripK = easeStd((q - .5) / .5); }
+          } else if (b.to >= 0) { st.strip = b.to; st.stripK = easeStd(q); }
+          else { st.strip = b.from; st.stripK = 1 - easeStd(q); }
+          break;
+        case 'badge': st.badges[b.id] = easeStd(q); break;
+      }
+    }
+    return st;
+  }
+
+  function applyApp(st) {
+    var added = st.added;
+    // list behind: the taps land as they happen (prepended; latest first)
+    TAPS.forEach(function (t, i) { var r = A.rows[t[0]]; if (r && !A.vitrin) put(r, 'display', i < added ? '' : 'none'); });
+    if (A.fruitSec && !A.vitrin) {
+      put(A.fruitSec, 'display', added > 0 ? '' : 'none');
+      // a separator sits above every row but the first visible one
+      var vis = TAPS.map(function (t, i) { return i < added; }).reverse();    // display order: nar, limon, mandalina
+      var seps = A.fruitSec.querySelectorAll('.a-sep'), seen = 0, si = 0;
+      vis.forEach(function (v, i) { if (i > 0) { put(seps[si], 'display', v && seen ? '' : 'none'); si++; } if (v) seen++; });
+    }
+    var total = A.vitrin ? 20 : 17 + added;
+    text(A.cnt, String(total - 5));
+    text(A.st, '5 / ' + total + ' tamamlandı');
+    put(A.lc, 'transform', 'translate3d(0,' + (-st.listScroll).toFixed(2) + 'px,0)');
+    BADGES.forEach(function (id) { var b = A.badge[id]; if (b) put(b, 'opacity', String(st.badges[id] == null ? (A.vitrin ? 1 : 0) : st.badges[id])); });
+    put(A.add, 'opacity', st.dim === 'add' ? String(st.dimTo) : '1');
+    // sheet + ground
+    show(A.gr, st.sheet);
+    put(A.sheet, 'transform', 'translate3d(0,' + ((1 - st.sheet) * (G.sheetH + 48) + st.stop * G.off68).toFixed(2) + 'px,0)');
+    put(A.sheet, 'visibility', st.sheet > 0 ? 'visible' : 'hidden');
+    cls(A.sheet, 'is-drill', st.drill);
+    cls(A.home, 'is-off', st.drill);
+    cls(A.drill, 'is-off', !st.drill);
+    text(A.stl, st.drill ? 'Meyve' : 'Ürün Ekle');
+    text(A.ssp, st.drill ? 'Meyve içinde ara…' : 'Ara veya özel ürün ekle…');
+    put(A.meyve, 'opacity', st.dim === 'meyve' ? String(st.dimTo) : '1');
+    put(A.close, 'opacity', st.dim === 'close' ? String(st.dimTo) : '1');
+    put(A.drill, 'transform', 'translate3d(0,' + (-st.drillScroll).toFixed(2) + 'px,0)');
+    TAPS.forEach(function (t, i) {
+      var el = A.cr[t[0]];
+      put(el, 'opacity', st.dim === t[0] ? String(st.dimTo) : '1');
+      var on = i < added, icon = el.querySelector('.a-cic');
+      if (icon.classList.contains('is-in') !== on) {
+        cls(icon, 'is-in', on);
+        icon.innerHTML = ic(on ? 'checkmark-circle' : 'add-circle-outline', 18);
+      }
+      // the strip of Sık Kullanılanlar drops what was just added
+      if (A.chip[t[0]]) put(A.chip[t[0]], 'display', on ? 'none' : '');
+    });
+    // strip
+    if (st.strip >= 0 && st.stripK > 0) {
+      var f = FRUIT_BY_ID[TAPS[st.strip][0]];
+      text(A.stripFace, f[2]);
+      text(A.stripName, f[1]);
+      put(A.strip, 'visibility', 'visible');
+      put(A.strip, 'opacity', st.stripK.toFixed(3));
+      put(A.strip, 'transform', 'translate3d(0,' + ((1 - st.stripK) * 60).toFixed(2) + 'px,0)');
+    } else {
+      put(A.strip, 'visibility', 'hidden');
+    }
+    // finger
+    var fg = st.finger;
+    if (fg && fg.o > 0) {
+      put(A.touch, 'opacity', fg.o.toFixed(3));
+      put(A.touch, 'transform', 'translate3d(' + fg.x.toFixed(1) + 'px,' + fg.y.toFixed(1) + 'px,0) scale(' + fg.s.toFixed(3) + ')');
+    } else put(A.touch, 'opacity', '0');
+  }
+
+  // ── Stage: film, line, phone, words around it ─────────────────────────
+  var frames = [].slice.call(stage.querySelectorAll('.frame'));
+  var imgs = frames.map(function (f) { return f.querySelector('img'); });
+  var blurImg = stage.querySelector('.fblur');
+  var finalPic = frames[4].querySelector('picture');
+  var words = frames.map(function (f) { return f.querySelector('.word'); });
+  var soon = stage.querySelector('.soon'), flogo = stage.querySelector('.flogo');
+  var note = stage.querySelector('.note'), cue = stage.querySelector('.cue');
+  var film = stage.querySelector('.film'), hline = stage.querySelector('.hline');
+  var tocLi = [].slice.call(stage.querySelectorAll('.toc li'));
+  var says = [].slice.call(stage.querySelectorAll('.say p'));
+  var mhs = [].slice.call(stage.querySelectorAll('.mh__s'));
+  var dots = [].slice.call(stage.querySelectorAll('.dots i')), dotsBox = stage.querySelector('.dots');
+  var letters = [];   // per frame: array of spans
+
+  // Letters settle onto the horizon one at a time. Each letter keeps the place it
+  // has in the set word (kerning included), measured once in em.
+  function split(el) {
+    if (!el || el.classList.contains('is-split')) return [];
+    var str = el.textContent, node = el.firstChild, r = d.createRange();
+    var fs = parseFloat(getComputedStyle(el).fontSize);
+    r.selectNodeContents(el);
+    var box = r.getBoundingClientRect();
+    if (!box.width) return [];
+    var parts = [];
+    for (var i = 0; i < str.length; i++) {
+      if (str[i] === ' ') continue;
+      r.setStart(node, i); r.setEnd(node, i + 1);
+      parts.push({ c: str[i], x: (r.getBoundingClientRect().left - box.left) / fs });
+    }
+    var wl = d.createElement('span');
+    wl.className = 'wl';
+    wl.style.width = (box.width / fs) + 'em';
+    wl.style.marginLeft = (box.width / fs / -2) + 'em';
+    var out = parts.map(function (p) {
+      var s = d.createElement('span');
+      s.textContent = p.c;
+      s.style.left = p.x + 'em';
+      wl.appendChild(s);
+      return s;
+    });
+    el.setAttribute('aria-label', str);
+    el.textContent = '';
+    el.appendChild(wl);
+    el.classList.add('is-split');
+    return out;
+  }
+  function splitAll() {
+    for (var i = 1; i < 4; i++) if (!letters[i] || !letters[i].length) letters[i] = split(words[i]);
+    if (!letters[4] || !letters[4].length) letters[4] = split(soon);
+  }
+
+  function setLetters(spans, k, fade) {
+    if (!spans) return;
+    var n = spans.length, u = k * n, f = fade == null ? 1 : fade;
+    for (var j = 0; j < n; j++) {
+      var v = easeStd(clamp(u - j, 0, 1));
+      put(spans[j], 'opacity', (v * f).toFixed(3));
+      put(spans[j], 'transform', 'translate(0,' + ((1 - v) * -.16).toFixed(3) + 'em)');
+    }
+  }
+
+  // Frames after the first are fetched when they come near, never all at once.
+  var woke = [true, false, false, false, false];
+  function wake(i) {
+    if (i < 0 || i > 4 || woke[i]) return;
+    woke[i] = true;
+    [].forEach.call(frames[i].querySelectorAll('[data-srcset],[data-src]'), function (el) {
+      if (el.hasAttribute('data-srcset')) { el.setAttribute('srcset', el.getAttribute('data-srcset')); el.removeAttribute('data-srcset'); }
+      if (el.hasAttribute('data-src')) { el.setAttribute('src', el.getAttribute('data-src')); el.removeAttribute('data-src'); }
+    });
+  }
+  // Layout uses the file's real pixel size, not an assumed aspect ratio.
+  function fit(img) {
+    if (!img || !img.currentSrc) return;
+    var file = new Image();
+    file.onload = function () { img.style.setProperty('--iw', file.naturalWidth); img.style.setProperty('--ih', file.naturalHeight); };
     file.src = img.currentSrc;
   }
-  imgs.forEach(function (img) { img.addEventListener('load', function () { fit(img); }); fit(img); });
+  imgs.concat([blurImg]).forEach(function (img) { img.addEventListener('load', function () { fit(img); }); if (img.complete) fit(img); });
+
+  // Film: hard cuts between frames; inside a frame the letters settle first, then a slow push-in.
+  function renderFilm(p) {
+    var inFilm = p < S.rise[1];
+    put(film, 'visibility', inFilm ? 'visible' : 'hidden');
+    if (!inFilm) return;
+    var idx = Math.min(4, Math.floor(clamp(p, 0, 4.999)));
+    for (var i = 0; i < 5; i++) cls(frames[i], 'is-on', i === idx);
+    var lp = clamp(p - idx, 0, 1);
+    wake(idx);
+    wake(idx + 1);
+    if (lp > .5) wake(idx + 2);
+    var z = 1 + .06 * easeInOut(prog(lp, idx === 0 ? .2 : idx === 4 ? .5 : .45, 1));
+    put(imgs[idx], 'transform', 'scale(' + z.toFixed(4) + ')');
+    if (idx >= 1 && idx <= 3) setLetters(letters[idx], prog(lp, 0, .45));
+    if (idx === 4) {
+      put(blurImg, 'transform', 'scale(' + (z * 1.04).toFixed(4) + ')');
+      // the frame's lettering leaves with the frame once the phone comes up
+      var out = 1 - easeStd(prog(p, S.rise[0], S.rise[0] + .4));
+      var lg = easeStd(prog(lp, 0, .18));
+      put(flogo, 'opacity', (lg * out).toFixed(3));
+      put(flogo, 'transform', 'translate3d(0,' + ((1 - lg) * -5).toFixed(2) + '%,0)');
+      setLetters(letters[4], prog(lp, .18, .5), out);
+    }
+    var nk = 1 - easeStd(prog(p, 0, .2));
+    put(note, 'opacity', nk.toFixed(3));
+    put(cue, 'opacity', nk.toFixed(3));
+  }
+
+  var L = {};
+  function measureStage() {
+    L.stageH = stage.offsetHeight;
+    L.phoneTop = phone.offsetTop;
+    L.rise = L.stageH - L.phoneTop + 40;
+    L.wide = mqWide.matches;
+  }
+
+  // rq: the phone's rise; iq: the words around it come in; sw: step 1 → step 2.
+  function renderStage(rq, iq, sw) {
+    // the last frame goes out of focus and back to the ground; its horizon stays as the page's line
+    put(finalPic, 'opacity', (1 - easeStd(prog(rq, 0, .5))).toFixed(3));
+    put(blurImg, 'opacity', (rq < .5 ? easeStd(rq / .5) : 1 - easeStd((rq - .5) / .5)).toFixed(3));
+    put(hline, 'opacity', easeStd(prog(rq, 0, .5)).toFixed(3));
+    // the phone comes up from below and settles in the middle
+    put(phone, 'visibility', rq > 0 ? 'visible' : 'hidden');
+    put(phone, 'transform', 'translate3d(0,' + ((1 - easeStd(rq)) * L.rise).toFixed(2) + 'px,0)');
+    if (L.wide) {
+      // the film's three words line up on the left as the index; the one being told turns green
+      tocLi.forEach(function (li, i) {
+        var k = easeStd(prog(iq, i * .2, i * .2 + .2));
+        var on = i === 0 ? easeStd(prog(sw, .3, .5)) : 0;
+        put(li, 'opacity', (k * (.28 + .72 * on)).toFixed(3));
+        put(li, 'transform', 'translate3d(0,' + ((1 - k) * -.14).toFixed(3) + 'em,0)');
+      });
+      var s1in = easeStd(prog(iq, .62, 1)), s1out = easeStd(prog(sw, 0, .3)), s2in = easeStd(prog(sw, .5, 1));
+      put(says[0], 'opacity', (s1in * (1 - s1out)).toFixed(3));
+      put(says[0], 'transform', 'translate3d(0,' + ((1 - s1in) * -10).toFixed(2) + 'px,0)');
+      put(says[1], 'opacity', s2in.toFixed(3));
+      put(says[1], 'transform', 'translate3d(0,' + ((1 - s2in) * -10).toFixed(2) + 'px,0)');
+    } else {
+      // phones: only the current heading, above the card; progress dots below it
+      var h1 = easeStd(prog(iq, 0, .6)), h1out = easeStd(prog(sw, 0, .3)), h2 = easeStd(prog(sw, .5, 1));
+      put(mhs[0], 'opacity', (h1 * (1 - h1out)).toFixed(3));
+      put(mhs[0], 'transform', 'translate3d(0,' + ((1 - h1) * -8).toFixed(2) + 'px,0)');
+      put(mhs[1], 'opacity', h2.toFixed(3));
+      put(mhs[1], 'transform', 'translate3d(0,' + ((1 - h2) * -8).toFixed(2) + 'px,0)');
+      put(dotsBox, 'opacity', easeStd(prog(iq, .6, 1)).toFixed(3));
+      cls(dots[0], 'is-on', true);
+      cls(dots[1], 'is-on', sw >= .4);
+    }
+  }
+
+  // ── Scroll → p ────────────────────────────────────────────────────────
+  var unit = 1, top0 = 0, last = -1, ticking = false;
+  var probe = d.createElement('div');
+  probe.style.cssText = 'position:absolute;left:-9999px;top:0;width:1px;height:100vh;height:100svh;visibility:hidden;pointer-events:none';
+  d.body.appendChild(probe);
+
+  function layout() {
+    unit = probe.offsetHeight || win.innerHeight;
+    measureStage();
+    measureApp();
+    buildTimeline();
+    story.style.height = (TOTAL * unit + L.stageH) + 'px';
+    top0 = story.offsetTop;
+    last = -1;
+    frame();
+  }
+
+  function render(p) {
+    if (REDUCED) {
+      // Reduce motion: no movement tied to scrolling. Each scene stands still in its last state.
+      var scene = Math.min(6, Math.floor(clamp(p, 0, 6.999)));
+      put(film, 'visibility', scene < 5 ? 'visible' : 'hidden');
+      for (var i = 0; i < 5; i++) cls(frames[i], 'is-on', i === scene);
+      if (scene < 5) {
+        wake(scene); wake(scene + 1);
+        put(imgs[scene], 'transform', 'none');
+        if (scene >= 1 && scene <= 3) setLetters(letters[scene], 1);
+        if (scene === 4) { put(flogo, 'opacity', '1'); put(flogo, 'transform', 'none'); setLetters(letters[4], 1); }
+        put(note, 'opacity', scene === 0 ? '1' : '0');
+        put(cue, 'opacity', scene === 0 ? '1' : '0');
+      }
+      var on = scene >= 5 ? 1 : 0;
+      renderStage(on, on, scene === 6 ? 1 : 0);
+      applyApp(stateAt(scene === 6 ? MOTION_END : scene === 5 ? S.step2 - .001 : -1));
+      return;
+    }
+    renderFilm(p);
+    renderStage(prog(p, S.rise[0], S.rise[1]), prog(p, S.intro[0], S.intro[1]), prog(p, S.step2, S.step2 + .55));
+    applyApp(stateAt(p));
+  }
+
+  var bar = d.querySelector('.top');
+  function frame() {
+    ticking = false;
+    var y = win.scrollY || win.pageYOffset;
+    // once the story lets go of the stage, the bar needs its own ground
+    cls(bar, 'is-solid', y > top0 + TOTAL * unit + 1);
+    var p = clamp((y - top0) / unit, 0, TOTAL);
+    if (p === last) return;
+    last = p;
+    render(p);
+  }
+  function onScroll() { if (!ticking) { ticking = true; win.requestAnimationFrame(frame); } }
+
+  // Index: jump to a step.
+  stage.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('.toc a[data-step]');
+    if (!a) return;
+    e.preventDefault();
+    var p = a.getAttribute('data-step') === '2' ? S.step2 + .56 : S.step1;
+    win.scrollTo({ top: top0 + p * unit, behavior: REDUCED ? 'auto' : 'smooth' });
+  });
 
   // Where the font's baseline really sits in a 1em line box, so words land on the horizon in every engine.
   function measureBaseline() {
-    var probe = d.createElement('span');
-    probe.style.cssText = 'position:absolute;left:-9999px;top:0;display:block;font:600 100px/1 Fraunces;visibility:hidden';
-    probe.innerHTML = 'H<i style="display:inline-block;width:0;height:0;vertical-align:baseline"></i>';
-    d.body.appendChild(probe);
-    var asc = (probe.lastChild.getBoundingClientRect().top - probe.getBoundingClientRect().top) / 100;
-    probe.remove();
+    var probeB = d.createElement('span');
+    probeB.style.cssText = 'position:absolute;left:-9999px;top:0;display:block;font:600 100px/1 Fraunces;visibility:hidden';
+    probeB.innerHTML = 'H<i style="display:inline-block;width:0;height:0;vertical-align:baseline"></i>';
+    d.body.appendChild(probeB);
+    var asc = (probeB.lastChild.getBoundingClientRect().top - probeB.getBoundingClientRect().top) / 100;
+    probeB.remove();
     if (asc > .5 && asc < 1.2) root.style.setProperty('--asc', asc.toFixed(4));
   }
-  var fontReady = d.fonts && d.fonts.load ? d.fonts.load('600 100px Fraunces', 'Hğ') : Promise.resolve();
-  var fontOrTimeout = Promise.race([fontReady, new Promise(function (r) { setTimeout(r, 1500); })]);
-  fontReady.then(measureBaseline, function () {});
 
-  function loaded(i) {
-    var img = imgs[i];
-    var wait = img.complete && img.naturalWidth ? Promise.resolve() : new Promise(function (res) {
-      img.addEventListener('load', res, { once: true });
-      img.addEventListener('error', res, { once: true });
-    });
-    return wait.then(function () { return img.decode ? img.decode().catch(function () {}) : null; });
-  }
+  // ── Start ─────────────────────────────────────────────────────────────
+  buildApp();
+  grabApp();
+  layout();
+  var fontsReady = d.fonts && d.fonts.load ? Promise.all([d.fonts.load('600 100px Fraunces', 'ÇğıİşÜ mevsimiyle'), d.fonts.ready]) : Promise.resolve();
+  fontsReady.then(function () { measureBaseline(); splitAll(); last = -1; frame(); }, function () { splitAll(); });
+  win.addEventListener('scroll', onScroll, { passive: true });
+  var lastW = win.innerWidth, lastS = unit;
+  win.addEventListener('resize', function () {
+    // iOS toolbars change innerHeight while scrolling; the small viewport does not move.
+    var s = probe.offsetHeight;
+    if (win.innerWidth === lastW && Math.abs(s - lastS) < 2) return;
+    lastW = win.innerWidth; lastS = s;
+    layout();
+  });
+  if (mqReduce.addEventListener) mqReduce.addEventListener('change', function () { cls(root, 'rm', mqReduce.matches); FULL = null; layout(); });
+  // wake the next frame once the first screen is in
+  win.addEventListener('load', function () { wake(1); });
 
-  // Frames 2-5 are fetched later so they never compete with the first frame and the font.
-  function wakeRest(finalOnly) {
-    (finalOnly ? frames.slice(FINAL) : frames).forEach(function (f) {
-      [].forEach.call(f.querySelectorAll('[data-srcset]'), function (el) {
-        el.setAttribute('srcset', el.getAttribute('data-srcset'));
-        el.removeAttribute('data-srcset');
-        if (el.hasAttribute('data-src')) { el.setAttribute('src', el.getAttribute('data-src')); el.removeAttribute('data-src'); }
-      });
-    });
-  }
-
-  function remember() { try { sessionStorage.setItem('listem-film', '1'); } catch (e) {} }
-
-  // Solid top bar once the film has scrolled away.
-  var bar = d.getElementById('top-bar');
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver(function (e) { bar.classList.toggle('is-solid', !e[0].isIntersecting); }, { rootMargin: '-60px 0px 0px 0px' }).observe(film);
-  }
-
-  if (root.classList.contains('film-final')) { wakeRest(true); return; }
-
-  var done = false, timers = [], anims = [];
-  var SKIP = ['pointerdown', 'wheel', 'touchstart', 'keydown', 'scroll'];
-
-  function later(ms, fn) { timers.push(setTimeout(fn, ms)); }
-  function run(el, keys, opts) { if (el.animate) anims.push(el.animate(keys, opts)); }
-  function reveal(el, delay, tracking) {
-    var from = { opacity: 0, filter: 'blur(12px)' }, to = { opacity: 1, filter: 'blur(0px)' };
-    if (tracking) { from.letterSpacing = '.05em'; to.letterSpacing = '-.01em'; }
-    run(el, [from, to], { duration: 700, delay: delay, easing: EASE, fill: 'both' });
-  }
-  function show(i) {
-    frames.forEach(function (f, j) { f.classList.toggle('is-on', j === i); });
-    run(imgs[i], [{ transform: 'scale(1)' }, { transform: 'scale(1.04)' }], { duration: HOLD, easing: i === FINAL ? 'cubic-bezier(.3,0,.3,1)' : 'linear', fill: 'forwards' });
-  }
-  function stopListening() { SKIP.forEach(function (t) { removeEventListener(t, skip, true); }); }
-  function end() { done = true; stopListening(); remember(); root.classList.add('film-final'); }
-
-  function play(i) {
-    loaded(i).then(function () {
-      if (done) return;
-      show(i);
-      // the other frames download once the first word is on screen
-      if (i === 0) later(900, wakeRest);
-      if (i < FINAL) {
-        word.textContent = WORDS[i];
-        reveal(word, 100, true);
-        later(HOLD, function () { play(i + 1); });
-      } else {
-        word.textContent = '';
-        reveal(logo, 100);
-        reveal(soon, 1000);
-        later(1700, end);
-      }
-    });
-  }
-
-  // Any touch, click, scroll or key jumps straight to the final frame.
-  function skip() {
-    if (done) return;
-    done = true;
-    stopListening();
-    timers.forEach(clearTimeout);
-    remember();
-    wakeRest();
-    loaded(FINAL).then(function () {
-      anims.forEach(function (a) { a.cancel(); });
-      root.classList.add('film-final');
-    });
-  }
-  SKIP.forEach(function (t) { addEventListener(t, skip, { capture: true, passive: true }); });
-
-  fontOrTimeout.then(function () { play(0); });
+  // Comparison hook for the screen checks (scripts in the report): renders the
+  // app alone with Vitrin's own list and a given state.
+  win.__listem = {
+    G: G, S: S, TL: function () { return TL; }, render: function (p) { render(p); },
+    vitrin: function (on) { setList(!!on); grabApp(); },
+    state: function (o) { applyApp(Object.assign({ sheet: 0, stop: 1, drill: false, added: 3, dim: null, dimTo: 1, strip: -1, stripK: 0, drillScroll: 0, listScroll: 0, badges: {}, finger: null }, o)); },
+    measure: function () { measureApp(); return G; }
+  };
 })();
 </script>
 </body>
