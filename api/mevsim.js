@@ -89,17 +89,6 @@ function build(lang) {
 }
 
 
-/* Sayfanın sağ üstünde, açılınca yukarıdan aşağı uzayan bir asma dalı; yapraklar sırayla açar. */
-const VINE = '<svg class="vine" viewBox="0 0 240 420" aria-hidden="true">' +
-  '<path class="vine-stem" pathLength="1" d="M176 -6 C150 50 212 92 188 150 S126 228 150 288 S208 352 180 426"/>' +
-  '<g transform="translate(178 40) rotate(-38)"><image class="lf" style="--d:250ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
-  '<g transform="translate(197 104) rotate(38)"><image class="lf" style="--d:480ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
-  '<g transform="translate(171 170) rotate(-62)"><image class="lf" style="--d:700ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
-  '<g transform="translate(147 232) rotate(28)"><image class="lf" style="--d:900ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
-  '<g transform="translate(163 300) rotate(-42)"><image class="lf" style="--d:1100ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
-  '<g transform="translate(193 362) rotate(34)"><image class="lf" style="--d:1280ms" href="/img/pazar/yaprak.webp" x="-20" y="-66" width="60" height="67"/></g>' +
-  '</svg>';
-
 /* Ürün işaretleri: çizimi olanlar çizimle, diğerleri uygulamadaki emojiyle. Çizim seti büyüdükçe buraya eklenir. */
 const PIECE = { nar: 'nar', ayva: 'ayva', 'trabzon-hurmasi': 'hurma', mandalina: 'mandalina', hamsi: 'hamsi' };
 const icon = (id, emoji) => PIECE[id] ? '<span class="ico"><img src="/img/pazar/' + PIECE[id] + '.webp" alt="" loading="lazy"></span>' : '<span class="ico" aria-hidden="true">' + esc(emoji) + '</span>';
@@ -205,7 +194,7 @@ ${DARK('.grid-h{background:var(--bg)}')}
   .explain{font-size:16px}
   .sr i b{height:14px}
 }
-@media (max-width:899px){.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin:24px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.cal h1{font-size:72px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
+@media (max-width:899px){.cal-hero{padding-top:28px}.cal h1{font-size:68px;margin-top:12px}.lead{margin-top:12px}.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:36px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.kinds{margin-top:16px}.show{margin-top:48px;gap:36px}.chart{margin-top:72px}.yr{margin-top:64px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
 @media (hover:hover){.sr:hover{background:var(--chip)}}
 `;
 
@@ -319,7 +308,7 @@ function render(lang, host, q) {
   };
   const body = '<div class="wrap">' + site.header(lang, '/mevsim?lang=' + (lang === 'tr' ? 'en' : 'tr'), 'season') +
     '<main class="cal">' +
-    '<section class="cal-hero solo">' + VINE.replace('class="vine"', 'class="vine grow"') + '<div style="position:relative;z-index:1"><p class="kicker">' + esc(t.title) + '</p>' +
+    '<section class="cal-hero solo"><div style="position:relative;z-index:1"><p class="kicker">' + esc(t.title) + '</p>' +
     '<h1 id="mname">' + esc(t.months[month - 1]) + '</h1>' +
     '<p class="lead" id="count">' + esc(countTxt[month - 1].replace('{n}', visible.length)) + '</p></div></section>' +
     '<nav class="months" role="tablist" aria-label="' + esc(t.monthsLabel) + '">' + tabs + '</nav>' +
