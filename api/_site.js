@@ -47,6 +47,8 @@ function esc(s) {
 const FONT_CSS = `
 @font-face{font-family:"Fraunces";font-style:normal;font-display:swap;font-weight:100 900;src:url(/fonts/fraunces-latin-ext-soft-normal.woff2) format("woff2-variations"),url(/fonts/fraunces-latin-ext-soft-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
 @font-face{font-family:"Fraunces";font-style:normal;font-display:swap;font-weight:100 900;src:url(/fonts/fraunces-latin-soft-normal.woff2) format("woff2-variations"),url(/fonts/fraunces-latin-soft-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:"Inter";font-style:normal;font-display:swap;font-weight:100 900;src:url(/fonts/inter-latin-ext-wght-normal.woff2) format("woff2-variations"),url(/fonts/inter-latin-ext-wght-normal.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:"Inter";font-style:normal;font-display:swap;font-weight:100 900;src:url(/fonts/inter-latin-wght-normal.woff2) format("woff2-variations"),url(/fonts/inter-latin-wght-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 `;
 
 /* Uygulamanın Taze Bahçe teması. Görünüm seçimi html[data-theme]'i ayarlar; seçim yoksa sistem. */
@@ -70,7 +72,7 @@ const TOKENS_CSS = `
 const BASE_CSS = `
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI","Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
 button{font:inherit;color:inherit}
 a{color:inherit}

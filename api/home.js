@@ -1,9 +1,9 @@
 'use strict';
 /*
- * Ana sayfa (list-em.app) — ilk ekran.
+ * Ana sayfa (list-em.app) — ilk ekran ve bu ayın mevsim şeridi.
  * Açılış "listeden pazara": uygulamanın liste kartına satırlar tek tek düşer, her satırla o
  * ürünün çizimi kartın yanındaki tezgâha konar, sonunda ilk ürün işaretlenir. Yaklaşık 2,6 sn;
- * oturumda bir kez oynar, dokunuş/kaydırma/tuşla anında son hâline geçer, "hareketi azalt"
+ * dışarıdan gelen her ziyarette ve yenilemede oynar, site içinde dolaşırken oynamaz; dokunuş/kaydırma/tuşla anında son hâline geçer, "hareketi azalt"
  * açıksa ve betik yoksa doğrudan son hâli görünür. Yalnız transform ve opacity oynar.
  * Görsel dil: mevsim afişi (düz çizim, risograf dokusu, krem kâğıt). Şimdilik ekim.
  */
@@ -99,11 +99,37 @@ function stage(lang) {
 
 /* Bu ayın mevsimindekiler: tezgâhtaki ürünler önce, ay değişince katalog ne diyorsa o. */
 const FEATURED = ['nar', 'ayva', 'trabzon-hurmasi', 'mandalina', 'hamsi'];
-function inSeasonNow(month, lang) {
+function inSeasonNow(month) {
   const ok = (p) => p.season && !p.season.yearRound && p.season.months.includes(month) && ['Fruit', 'Vegetables', 'Fish'].includes(p.category);
   const first = FEATURED.map((id) => byId.get(id)).filter((p) => p && ok(p));
   const rest = catalog.products.filter((p) => ok(p) && !FEATURED.includes(p.id));
-  return first.concat(rest).slice(0, 5).map((p) => ({ name: lang === 'en' ? p.nameEn : p.nameTr, emoji: p.emoji }));
+  return first.concat(rest).slice(0, 5);
+}
+const PIECE = { nar: 'nar', ayva: 'ayva', 'trabzon-hurmasi': 'hurma', mandalina: 'mandalina', hamsi: 'hamsi-uc' };
+const MONTHS = {
+  tr: ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'],
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+};
+/* Bu ayı içeren kesintisiz mevsim aralığı: "Eylül – Aralık", "Ekim – Şubat". */
+function range(months, month, lang) {
+  const has = (m) => months.includes(((m - 1 + 12) % 12) + 1);
+  let a = month, b = month, n = 0;
+  while (has(a - 1) && n++ < 11) a = ((a - 2 + 12) % 12) + 1;
+  n = 0;
+  while (has(b + 1) && n++ < 11) b = (b % 12) + 1;
+  return a === b ? MONTHS[lang][a - 1] : MONTHS[lang][a - 1] + ' – ' + MONTHS[lang][b - 1];
+}
+function nowSection(lang, month, q) {
+  const t = T[lang];
+  const items = inSeasonNow(month);
+  if (!items.length) return '';
+  const href = '/mevsim' + (q ? q + '&' : '?') + 'ay=' + month;
+  return '<section class="now" aria-labelledby="now-h"><div class="now-head"><h2 id="now-h">' + esc(t.inSeason[month - 1]) + '</h2>' +
+    '<a class="all" href="/mevsim' + q + '">' + esc(t.all) + ' →</a></div><ul class="now-list">' +
+    items.map((p) => '<li><a href="' + href + '"><span class="pic">' +
+      (PIECE[p.id] ? '<img src="/img/pazar/' + PIECE[p.id] + '.webp" alt="" loading="lazy">' : '<span class="emo" aria-hidden="true">' + esc(p.emoji) + '</span>') +
+      '</span><span class="nm">' + esc(lang === 'en' ? p.nameEn : p.nameTr) + '</span><span class="rng">' + esc(range(p.season.months, month, lang)) + '</span></a></li>').join('') +
+    '</ul></section>';
 }
 function istanbulMonth() {
   try { return Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Istanbul', month: 'numeric' }).format(new Date())); }
@@ -115,26 +141,36 @@ const GRAIN = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/
 const DARK = (sel) => '@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) ' + sel + '}\n:root[data-theme="dark"] ' + sel + '\n';
 
 const CSS = `
-:root{--paper:#F7E8CE;--paper-ink:#2B2118;--paper-2:#5E5245;--card:#FFFFFF;--card-rule:rgba(43,33,24,.09);--tile:#F4EEE3;--ease-back:cubic-bezier(.34,1.5,.64,1);--ease-out:cubic-bezier(.2,.8,.2,1)}
+:root{--paper:#F7E8CE;--paper-ink:#2B2118;--paper-2:#6A5D4E;--paper-body:#4A3F33;--card:#FFFFFF;--card-rule:rgba(43,33,24,.09);--tile:#F4EEE3;--ease-back:cubic-bezier(.34,1.5,.64,1);--ease-out:cubic-bezier(.2,.8,.2,1)}
 body.home{background:var(--paper)}
 body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};opacity:.16;mix-blend-mode:multiply;pointer-events:none;z-index:30}
 .hero{display:grid;gap:8px;padding-bottom:8px}
-.hero-copy{padding:8px 0 0}
+.hero-copy{padding:40px 0 0}
 .eyebrow{margin:0;display:inline-flex;align-items:center;min-height:28px;padding:0 12px;border-radius:999px;background:rgba(45,139,117,.12);color:var(--accent);font-size:13px;font-weight:600}
-.hero h1{margin:16px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:40px;line-height:1.03;letter-spacing:-.025em;color:var(--paper-ink)}
-.hero p.body{margin:14px 0 0;font-size:17px;line-height:1.5;color:var(--paper-2)}
-.follow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:26px}
-.follow-label{font-size:clamp(14px,.95vw,17px);font-weight:600;color:var(--paper-2);margin-right:2px}
+.hero h1{text-wrap:balance;margin:20px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:40px;line-height:1.03;letter-spacing:-.025em;color:var(--paper-ink)}
+.hero p.body{margin:16px 0 0;font-size:17px;line-height:1.5;color:var(--paper-body);max-width:34ch;text-wrap:pretty}
+.follow{display:grid;gap:12px;margin-top:32px}
+.soc-row{display:flex;flex-wrap:wrap;gap:10px}
+.follow-label{font-size:clamp(14px,.95vw,16px);font-weight:600;color:var(--paper-2)}
 .soc{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:0 18px 0 14px;border-radius:999px;border:1px solid rgba(43,33,24,.2);background:rgba(255,255,255,.4);color:var(--paper-ink);font-size:clamp(15px,1vw,18px);font-weight:600;text-decoration:none}
 .soc svg{width:20px;height:20px;flex:none}
 .soc:active{opacity:.6}
 @media (hover:hover){.soc:hover{background:rgba(255,255,255,.7)}}
-.season{margin-top:28px}
-.season h2{margin:0;font-size:13px;font-weight:600;color:var(--paper-2)}
-.season ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.season li a{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;background:rgba(255,255,255,.5);border:1px solid rgba(43,33,24,.1);color:var(--paper-ink);font-size:14px;font-weight:600;text-decoration:none}
-.season .all{display:inline-flex;align-items:center;min-height:44px;margin-top:6px;color:var(--accent);font-weight:600;text-decoration:none}
 .home .site-foot{border-top-color:rgba(43,33,24,.14)}
+.now{margin-top:56px;padding-top:28px;border-top:1px solid rgba(43,33,24,.14)}
+.now-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px 16px;flex-wrap:wrap}
+.now h2{margin:0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(28px,2.6vw,48px);letter-spacing:-.02em;line-height:1.05;color:var(--paper-ink)}
+.now .all{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:600;text-decoration:none;font-size:clamp(15px,1vw,18px)}
+.now-list{list-style:none;margin:20px -16px 0;padding:0 16px 8px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(136px,1fr);gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;scrollbar-width:none}
+.now-list::-webkit-scrollbar{display:none}
+.now-list li{scroll-snap-align:start}
+.now-list a{display:flex;flex-direction:column;text-decoration:none;color:var(--paper-ink)}
+.now-list .pic{display:grid;place-items:center;aspect-ratio:1;border-radius:20px;background:rgba(255,255,255,.45)}
+.now-list img{width:72%;height:72%;object-fit:contain}
+.now-list .emo{font-size:52px}
+.now-list .nm{margin-top:10px;font-size:clamp(16px,1.1vw,20px);font-weight:600}
+.now-list .rng{margin-top:2px;font-size:clamp(13px,.9vw,16px);color:var(--paper-2)}
+@media (hover:hover){.now-list a:hover .pic{background:rgba(255,255,255,.75)}}
 
 /* sahne: telefonda önce tezgâh, altında kart; masaüstünde kart solda, tezgâh sağda */
 .stage{position:relative;font-size:clamp(13px,3.6vw,15px);margin:6px 0 0}
@@ -192,21 +228,24 @@ ${DARK('body.home{background:var(--bg)}')}
 ${DARK('body.home::before{display:none}')}
 ${DARK('.app-card{box-shadow:0 18px 44px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.4)}')}
 ${DARK('.chk{border-color:rgba(255,255,255,.25)}')}
-${DARK('.soc,.season li a{background:var(--surface);border-color:var(--border);color:var(--text)}')}
+${DARK('.soc{background:var(--surface);border-color:var(--border);color:var(--text)}')}
+${DARK('.home{--paper-body:var(--text2)}')}
+${DARK('.now-list .pic{background:var(--surface)}')}
+${DARK('.now,.home .site-foot{border-top-color:var(--border)}')}
 
 @media (min-width:900px){
-  .hero{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;gap:clamp(24px,3vw,72px);min-height:calc(100svh - clamp(68px,5vw,88px) - 40px);padding:8px 0 24px}
+  .hero{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:center;gap:clamp(24px,3vw,72px);padding:clamp(24px,6vh,104px) 0 0}
   .hero-copy{order:1;padding:0}
   .stage{order:2;font-size:clamp(12px,1.02vw,19px);aspect-ratio:1.32;margin:0}
   .pile{position:absolute;inset:0;aspect-ratio:auto;margin:0}
   .pc{left:var(--x);top:var(--y);width:var(--w)}
   .app-card{position:absolute;left:0;top:17%;width:50%;margin:0}
-  .hero h1{font-size:clamp(56px,4.4vw,96px)}
-  .hero p.body{font-size:clamp(19px,1.3vw,25px);max-width:30em}
+  .hero h1{font-size:clamp(52px,4.2vw,92px);margin-top:24px}
+  .hero p.body{font-size:clamp(18px,1.2vw,22px);margin-top:24px;max-width:40ch}
+  .follow{margin-top:40px}
+  .now{margin-top:clamp(56px,8vh,120px);padding-top:clamp(28px,3vw,48px)}
+  .now-list{margin:clamp(20px,2.4vw,40px) 0 0;padding:0;grid-auto-flow:row;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(12px,1.6vw,28px);overflow:visible}
   .eyebrow{font-size:clamp(13px,.9vw,16px);min-height:clamp(28px,2vw,36px);padding:0 clamp(12px,.9vw,16px)}
-  .season h2{font-size:clamp(13px,.9vw,16px)}
-  .season li a{font-size:clamp(14px,.95vw,17px);min-height:clamp(36px,2.5vw,44px)}
-  .season .all{font-size:clamp(16px,1vw,19px)}
 }
 @media (min-width:1700px){.hero{grid-template-columns:minmax(0,6fr) minmax(0,7fr)}}
 @media (prefers-reduced-motion:reduce){.stage.play *{animation:none!important}}
@@ -214,9 +253,10 @@ ${DARK('.soc,.season li a{background:var(--surface);border-color:var(--border);c
 
 /* Açılış: oturumda bir kez; dokunuş, kaydırma ya da tuşla anında son hâline geçer. */
 const INTRO_JS = '(function(){var s=document.querySelector(".stage");if(!s)return;' +
-  'var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches,seen=false;' +
-  'try{seen=sessionStorage.getItem("listem-intro")==="1";sessionStorage.setItem("listem-intro","1")}catch(e){}' +
-  'if(rm||seen)return;s.classList.add("play");' +
+  'var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches,inside=false,reload=false;' +
+  'try{inside=!!document.referrer&&new URL(document.referrer).host===location.host}catch(e){}' +
+  'try{var n=performance.getEntriesByType("navigation")[0];reload=!!n&&n.type==="reload"}catch(e){}' +
+  'if(rm||(inside&&!reload))return;s.classList.add("play");' +
   'function end(){s.classList.remove("play");["pointerdown","keydown","wheel","touchstart"].forEach(function(t){removeEventListener(t,end,true)})}' +
   '["pointerdown","keydown","wheel","touchstart"].forEach(function(t){addEventListener(t,end,{capture:true,passive:true})});' +
   'setTimeout(function(){["pointerdown","keydown","wheel","touchstart"].forEach(function(t){removeEventListener(t,end,true)})},3200)})();';
@@ -225,20 +265,16 @@ function render(lang, host) {
   const t = T[lang];
   const q = lang === 'en' ? '?lang=en' : '';
   const month = istanbulMonth();
-  const chips = inSeasonNow(month, lang).map((p) =>
-    '<li><a href="/mevsim' + (q ? q + '&' : '?') + 'ay=' + month + '"><span aria-hidden="true">' + esc(p.emoji) + '</span>' + esc(p.name) + '</a></li>').join('');
   const body = '<div class="wrap">' + site.header(lang, '/?lang=' + (lang === 'tr' ? 'en' : 'tr'), null) +
     '<main class="hero">' + stage(lang) +
     '<div class="hero-copy">' +
     '<p class="eyebrow">' + esc(t.eyebrow) + '</p>' +
     '<h1>' + esc(t.title) + '</h1>' +
     '<p class="body">' + esc(t.body) + '</p>' +
-    '<div class="follow"><span class="follow-label">' + esc(t.follow) + '</span>' +
+    '<div class="follow"><span class="follow-label">' + esc(t.follow) + '</span><div class="soc-row">' +
     '<a class="soc" href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.ig) + '">' + site.SOCIAL.instagram + '<span>Instagram</span></a>' +
-    '<a class="soc" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.x) + '">' + site.SOCIAL.x + '<span>X</span></a></div>' +
-    (chips ? '<section class="season"><h2>' + esc(t.inSeason[month - 1]) + '</h2><ul>' + chips + '</ul>' +
-      '<a class="all" href="/mevsim' + q + '">' + esc(t.all) + ' →</a></section>' : '') +
-    '</div></main>' + site.footer(lang, '') + '</div>' +
+    '<a class="soc" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.x) + '">' + site.SOCIAL.x + '<span>X</span></a></div></div>' +
+    '</div></main>' + nowSection(lang, month, q) + site.footer(lang, '') + '</div>' +
     '<script>' + INTRO_JS + '</script>';
   return site.pageShell({ lang, title: 'List-em · ' + t.title, description: t.meta, ogTitle: 'List-em', ogDescription: t.meta, host, css: CSS, body, bodyClass: 'home', index: true });
 }
