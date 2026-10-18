@@ -26,7 +26,7 @@ const STR = {
     inSeasonCount: (n) => n + '’i mevsiminde',
     fallbackName: 'Alışveriş Listesi',
     done: (d, t) => d + ' / ' + t + ' tamamlandı',
-    allDone: 'Liste tamamlandı',
+    allDone: 'Alışveriş tamamlandı',
     reset: 'Sıfırla',
     resetDone: 'Liste sıfırlandı.',
     undo: 'Geri al',
@@ -62,7 +62,7 @@ const STR = {
     inSeasonCount: (n) => n + ' in season',
     fallbackName: 'Shopping List',
     done: (d, t) => d + ' / ' + t + ' done',
-    allDone: 'List complete',
+    allDone: 'Shopping done',
     reset: 'Reset',
     resetDone: 'List reset.',
     undo: 'Undo',
@@ -271,13 +271,10 @@ a{color:inherit}
 .sprout{position:absolute;bottom:2px;left:0;width:36px;height:27px;transition:left 250ms var(--move)}
 .sprout svg{position:absolute;left:0;bottom:0;width:36px;height:27px;overflow:visible}
 .plant{fill:var(--accent);stroke:var(--accent);stroke-width:3;stroke-linejoin:round}
-.finished{display:none;margin:16px 0 0;background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:20px;gap:12px;align-items:center}
-.finished.on{display:flex}
-.finished-icon{flex:none;width:36px;height:36px;border-radius:12px;background:var(--accent-muted);color:var(--accent);display:flex;align-items:center;justify-content:center}
-.finished-icon svg{width:20px;height:20px}
-.finished h2{margin:0;font-size:16px;font-weight:600;line-height:21px}
-.finished p{margin:2px 0 0;font-size:13px;font-weight:500;color:var(--text2)}
-.list{margin-top:8px}
+.count .all{display:block;font-size:16px;font-weight:600;color:var(--accent);line-height:21px}
+.count .all-sub{display:block;margin-top:2px;font-size:13px;font-weight:500;color:var(--text2)}
+.note{margin:10px 2px 0;font-size:12px;line-height:1.45;color:var(--text2)}
+.list{margin-top:4px}
 .aisle[hidden],.done-sec[hidden]{display:none}
 .aisle-h,.done-h{display:flex;align-items:center;gap:8px;margin:0;padding:24px 0 8px;font-size:13px;font-weight:600;color:var(--text2)}
 .aisle-h .ae{font-size:13px}
@@ -346,7 +343,7 @@ ul{list-style:none;margin:0;padding:0}
   .side[hidden]{display:none}
   .side h2{margin:0;font-size:16px;font-weight:600;line-height:21px}
   .side p{margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--text2)}
-  .qr{margin:16px 0 0;background:var(--qr-tile);border-radius:12px;padding:16px;display:flex;justify-content:center}
+  .qr{margin:16px 0 0;background:var(--qr-tile);border-radius:12px;padding:18px;display:flex;justify-content:center}
   .qr svg{display:block;width:100%;height:auto;max-width:196px}
   .side .note{margin-top:12px}
   .actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
@@ -357,7 +354,7 @@ ul{list-style:none;margin:0;padding:0}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 @media print{
   :root,:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--border:#ccc;--text:#000;--text2:#444;--disabled:#666;--accent:#000;--accent-muted:#fff;--emoji-bg:#f2f2f2;--track:#ddd;color-scheme:light}
-  .bar .tools,.side,.toast,.prog,.finished,.foot .ttl{display:none!important}
+  .bar .tools,.side,.toast,.prog,.note{display:none!important}
   .done-sec.closed ul{display:block}
   .row{break-inside:avoid}
   .layout{display:block}
@@ -423,7 +420,6 @@ const CLIENT_JS = `
   var lfL = sprout.querySelector('.lf-l'), lfR = sprout.querySelector('.lf-r');
   var countEl = document.getElementById('count');
   var resetBtn = document.getElementById('reset');
-  var finished = document.getElementById('finished');
   var LEFT_D = lfL.getAttribute('d'), RIGHT_D = lfR.getAttribute('d');
   function c01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
   function eo(t){ return 1 - Math.pow(1 - t, 3); }
@@ -504,8 +500,8 @@ const CLIENT_JS = `
       var cs = getComputedStyle(document.documentElement);
       var base = { colors: [cs.getPropertyValue('--accent').trim(), cs.getPropertyValue('--success').trim(), cs.getPropertyValue('--leaf-light').trim()], origin: origin, scalar: 1.5, zIndex: 50, disableForReducedMotion: true };
       if (leafShapes) base.shapes = leafShapes;
-      cf(Object.assign({}, base, { particleCount: 24, angle: 118, spread: 72, startVelocity: 21, gravity: 0.6, decay: 0.92, drift: -0.3, ticks: 270 }));
-      setTimeout(function(){ cf(Object.assign({}, base, { particleCount: 14, angle: 88, spread: 56, startVelocity: 17, gravity: 0.58, decay: 0.92, drift: 0.15, ticks: 270 })); }, 140);
+      cf(Object.assign({}, base, { particleCount: 24, angle: 118, spread: 72, startVelocity: 21, gravity: 0.6, decay: 0.92, drift: -0.3, ticks: 200 }));
+      setTimeout(function(){ cf(Object.assign({}, base, { particleCount: 14, angle: 88, spread: 56, startVelocity: 17, gravity: 0.58, decay: 0.92, drift: 0.15, ticks: 200 })); }, 140);
     }).catch(function(){});
   }
 
@@ -517,9 +513,10 @@ const CLIENT_JS = `
     fillEl.style.width = pct;
     sprout.style.left = 'clamp(-8px, calc(' + pct + ' - 18px), calc(100% - 28px))';
     prog.classList.toggle('complete', complete);
-    countEl.innerHTML = complete ? T.allDone : T.done.replace('{d}', '<b>' + d + '</b>').replace('{t}', String(total));
+    countEl.innerHTML = complete
+      ? '<span class="all">' + T.allDone + '</span><span class="all-sub">' + T.allDoneSub + '</span>'
+      : T.done.replace('{d}', '<b>' + d + '</b>').replace('{t}', String(total));
     resetBtn.hidden = d === 0;
-    finished.classList.toggle('on', complete);
     if (d === 0) celebrated = false;
     if (p >= 0.7 && !reduced) loadConfetti().catch(function(){});
     if (mode === 'still' || reduced) {
@@ -554,7 +551,7 @@ const CLIENT_JS = `
 
   function snapshot(){
     var m = new Map();
-    each('.row, .aisle-h, .done-h, #finished, .foot', function(el){
+    each('.row, .aisle-h, .done-h, .foot', function(el){
       if (el.offsetParent !== null) m.set(el, el.getBoundingClientRect().top);
     });
     return m;
@@ -773,14 +770,12 @@ function renderShareHTML(data, host, opts) {
     '<div class="track" aria-hidden="true"><div class="track-fill"></div>' +
     '<div class="sprout" id="sprout">' + sproutSvg() + '</div>' +
     '</div></section>' +
-    '<section class="finished" id="finished"><span class="finished-icon">' + ICON.checkCircle + '</span><div>' +
-    '<h2>' + esc(t.finishedTitle) + '</h2><p>' + esc(t.finishedBody(total)) + '</p></div></section>' +
+    '<p class="note">' + esc(t.localOnly) + ' ' + esc(ttlLine) + '</p>' +
     '<div class="list">' + sectionsHtml +
     '<section class="done-sec" id="done-sec" hidden>' +
     '<button type="button" class="done-h" aria-expanded="true"><span class="done-title"></span>' + ICON.chevronDown + '</button>' +
     '<ul></ul></section></div>' +
     '<footer class="foot"><span class="made">' + esc(t.madeWith) + ' <a href="https://list-em.app">list-em.app</a></span>' +
-    '<span>' + esc(t.localOnly) + '</span><span class="ttl">' + esc(ttlLine) + '</span>' +
     '<span><a href="/gizlilik">' + esc(t.privacy) + '</a></span></footer>' +
     '</main>' + side + '</div></div>' +
     '<div class="toast" id="toast" role="status"><span></span><button type="button" hidden>' + esc(t.undo) + '</button></div>';
@@ -792,7 +787,8 @@ function renderShareHTML(data, host, opts) {
     initialDone: model.items.filter((it) => it.done).map((it) => it.index),
     t: {
       done: t.done('{d}', '{t}'),
-      allDone: t.allDone,
+      allDone: esc(t.allDone),
+      allDoneSub: esc(t.finishedBody(total)),
       completed: t.completed('{n}'),
       resetDone: t.resetDone,
       copied: t.copied,
@@ -824,10 +820,44 @@ function renderExpiredHTML(host, opts) {
   return pageShell({ lang, title: t.expiredTitle + ' · List-em', ogTitle: 'List-em', ogDescription: t.expiredTitle, host, body, inlineData: null });
 }
 
+/* QR: birbirine değen yumuşak köşeli modüller (aralarında boşluk bırakmak okunmayı bozuyor), yumuşak köşe gözleri, ortada List-em işareti. Koyu yeşil, beyaz zemin.
+   Ortadaki işaret yalnız en yüksek hata düzeltmesiyle (H) ve merkezinde hizalama deseni olmayan
+   sürümlerde (≤6) konur; uzun adreslerde sade QR'a dönülür. Her değişiklikten sonra bir QR
+   çözücüyle okunarak doğrulanmalı. */
 async function qrSvgFor(url) {
-  if (!url || url.length > 1200) return '';
+  if (!url) return '';
   try {
-    return await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#0F0F0DFF', light: '#FFFFFFFF' } });
+    if (url.length > 160) {
+      return await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#17423AFF', light: '#FFFFFFFF' } });
+    }
+    const qr = QRCode.create(url, { errorCorrectionLevel: 'H' });
+    const n = qr.modules.size;
+    const m = 1;
+    const S = n + 2 * m;
+    const ink = '#17423A', eye = '#2D8B75';
+    const finder = (r, c) => (r < 7 && c < 7) || (r < 7 && c >= n - 7) || (r >= n - 7 && c < 7);
+    let L = 0, s0 = 0;
+    if (qr.version <= 6) { L = Math.round(n * 0.22); if (L % 2 === 0) L += 1; s0 = (n - L) / 2; }
+    const clear = (r, c) => L > 0 && r >= s0 - 1 && r < s0 + L + 1 && c >= s0 - 1 && c < s0 + L + 1;
+    let dots = '';
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (qr.modules.get(r, c) && !finder(r, c) && !clear(r, c)) dots += '<rect x="' + (c + m) + '" y="' + (r + m) + '" width="1" height="1" rx="0.35"/>';
+      }
+    }
+    const eyeAt = (r0, c0) =>
+      '<rect x="' + (c0 + m + 0.5) + '" y="' + (r0 + m + 0.5) + '" width="6" height="6" rx="1.6" fill="none" stroke="' + ink + '" stroke-width="1"/>' +
+      '<rect x="' + (c0 + m + 2) + '" y="' + (r0 + m + 2) + '" width="3" height="3" rx="0.8" fill="' + eye + '"/>';
+    let logo = '';
+    if (L > 0) {
+      const x = s0 + m, pad = L * 0.16;
+      logo = '<rect x="' + x + '" y="' + x + '" width="' + L + '" height="' + L + '" rx="' + (L * 0.24).toFixed(2) + '" fill="' + eye + '"/>' +
+        '<svg x="' + (x + pad).toFixed(2) + '" y="' + (x + pad).toFixed(2) + '" width="' + (L - 2 * pad).toFixed(2) + '" height="' + (L - 2 * pad).toFixed(2) + '" viewBox="180 180 640 660"><path fill="#F8F7F4" d="' + LOGO_PATH + '"/></svg>';
+    }
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + S + ' ' + S + '">' +
+      '<rect width="' + S + '" height="' + S + '" fill="#FFFFFF"/>' +
+      '<g fill="' + ink + '">' + dots + '</g>' +
+      eyeAt(0, 0) + eyeAt(0, n - 7) + eyeAt(n - 7, 0) + logo + '</svg>';
   } catch (e) {
     return '';
   }
