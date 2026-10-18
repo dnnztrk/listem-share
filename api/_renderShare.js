@@ -1,128 +1,797 @@
+'use strict';
+/*
+ * List-em — paylaşılan liste sayfası (list-em.app/s/<id>).
+ *
+ * Bu sayfa uygulamadaki liste ekranının ikizidir. Ölçüler, renkler, satır
+ * metni ve kalori uygulamanın kendisinden gelir:
+ *   - satır metni ve kalori: public/js/row-text.js (uygulamanın kaynağından üretilir)
+ *   - ürün emojisi, reyon ve mevsim: public/data/catalog.json (uygulamanın kataloğu)
+ *   - renk ve ölçüler: uygulamanın Taze Bahçe teması (aşağıdaki CSS değişkenleri)
+ * Uygulama ikonları ya da kataloğu değişince bu iki dosya yeniden üretilir;
+ * sayfa elle güncellenmez.
+ */
 const LZString = require('lz-string');
+const QRCode = require('qrcode');
+const catalog = require('../public/data/catalog.json');
+const { rowText } = require('../public/js/row-text.js');
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+const PRODUCTS = new Map(catalog.products.map((p) => [p.id, p]));
+const CATEGORIES = new Map(catalog.categories.map((c) => [c.id, c]));
+const OTHER = CATEGORIES.get('Other') || { id: 'Other', order: 999, nameTr: 'Diğer', nameEn: 'Other', emoji: '🛒' };
+
+const STR = {
+  tr: {
+    sharedWithYou: 'Seninle paylaşıldı',
+    items: (n) => n + ' ürün',
+    inSeasonCount: (n) => n + '’i mevsiminde',
+    fallbackName: 'Alışveriş Listesi',
+    done: (d, t) => d + ' / ' + t + ' tamamlandı',
+    allDone: 'Liste tamamlandı',
+    reset: 'Sıfırla',
+    resetDone: 'Liste sıfırlandı.',
+    undo: 'Geri al',
+    completed: (n) => 'Tamamlananlar (' + n + ')',
+    finishedTitle: 'Alışveriş tamamlandı',
+    finishedBody: (n) => n + ' ürünün hepsi alındı.',
+    inSeasonLand: '🌿 Mevsiminde',
+    inSeasonSea: '🐟 Mevsiminde',
+    qrTitle: 'Bu listeyi telefonunda aç',
+    qrBody: 'Telefonunun kamerasını koda tut; aynı liste telefonunda açılır. Uygulama indirmen gerekmez.',
+    qrNote: 'İşaretler cihazlar arasında taşınmaz; her cihaz kendi işaretlerini tutar.',
+    copyLink: 'Bağlantıyı kopyala',
+    copied: 'Bağlantı kopyalandı.',
+    print: 'Yazdır',
+    madeWith: 'Bu liste List-em ile hazırlandı.',
+    localOnly: 'İşaretlerin yalnızca bu cihazda tutulur.',
+    ttlDays: (d) => d <= 1 ? 'Bağlantı yarın kapanıyor.' : 'Bağlantı ' + d + ' gün daha açık.',
+    ttlDefault: 'Paylaşılan listeler 30 gün açık kalır.',
+    themeSystem: 'Görünüm: sistem',
+    themeLight: 'Görünüm: açık',
+    themeDark: 'Görünüm: koyu',
+    otherLang: 'EN',
+    otherLangLabel: 'Show in English',
+    privacy: 'Gizlilik',
+    expiredTitle: 'Bu bağlantının süresi doldu',
+    expiredBody: 'Paylaşılan listeler 30 gün açık kalır. Listeyi gönderen kişiden yeni bir bağlantı isteyebilirsin.',
+    expiredLink: 'List-em nedir?',
+    ogList: (name, n) => '“' + name + '” listesi' + (n ? ' (' + n + ' ürün)' : '') + ' seninle paylaşıldı',
+  },
+  en: {
+    sharedWithYou: 'Shared with you',
+    items: (n) => n + (n === 1 ? ' item' : ' items'),
+    inSeasonCount: (n) => n + ' in season',
+    fallbackName: 'Shopping List',
+    done: (d, t) => d + ' / ' + t + ' done',
+    allDone: 'List complete',
+    reset: 'Reset',
+    resetDone: 'List reset.',
+    undo: 'Undo',
+    completed: (n) => 'Completed (' + n + ')',
+    finishedTitle: 'Shopping done',
+    finishedBody: (n) => 'All ' + n + ' items are in the basket.',
+    inSeasonLand: '🌿 In Season',
+    inSeasonSea: '🐟 In Season',
+    qrTitle: 'Open this list on your phone',
+    qrBody: 'Point your phone’s camera at the code; the same list opens on your phone. No app needed.',
+    qrNote: 'Ticks don’t move between devices; each device keeps its own.',
+    copyLink: 'Copy link',
+    copied: 'Link copied.',
+    print: 'Print',
+    madeWith: 'This list was made with List-em.',
+    localOnly: 'Your ticks are kept only on this device.',
+    ttlDays: (d) => d <= 1 ? 'The link closes tomorrow.' : 'The link stays open for ' + d + ' more days.',
+    ttlDefault: 'Shared lists stay open for 30 days.',
+    themeSystem: 'Appearance: system',
+    themeLight: 'Appearance: light',
+    themeDark: 'Appearance: dark',
+    otherLang: 'TR',
+    otherLangLabel: 'Türkçe göster',
+    privacy: 'Privacy',
+    expiredTitle: 'This link has expired',
+    expiredBody: 'Shared lists stay open for 30 days. You can ask the person who sent it for a new link.',
+    expiredLink: 'What is List-em?',
+    ogList: (name, n) => '“' + name + '” list' + (n ? ' (' + n + (n === 1 ? ' item)' : ' items)') : '') + ' shared with you',
+  },
+};
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function renderShareHTML(data, host) {
-  let listName = '';
-  let listIcon = '🛒';
-  let itemCount = 0;
-  let lang = 'tr';
-  let items = [];
+function istanbulMonth() {
+  try {
+    return Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Europe/Istanbul', month: 'numeric' }).format(new Date()));
+  } catch (e) {
+    return new Date().getMonth() + 1;
+  }
+}
 
-  if (data) {
+function decode(data) {
+  if (!data) return null;
+  try {
+    const json = LZString.decompressFromEncodedURIComponent(data);
+    if (!json) return null;
+    const parsed = JSON.parse(json);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/* Payload → sayfanın modeli. Reyon sırası uygulamanın Sanal Reyon sırasıdır;
+   uygulama ürünleri zaten raf sırasıyla gönderir, burada yalnız gruplanır. */
+function buildModel(payload, lang) {
+  const t = STR[lang];
+  const month = istanbulMonth();
+  const raw = Array.isArray(payload.items) ? payload.items : [];
+  const items = [];
+  raw.forEach((it) => {
+    if (!it || (!it.name && !it.productId)) return;
+    const product = it.productId ? PRODUCTS.get(it.productId) : null;
+    let text;
     try {
-      const decompressed = LZString.decompressFromEncodedURIComponent(data);
-      if (decompressed) {
-        const parsed = JSON.parse(decompressed);
-        listName = parsed.name || '';
-        listIcon = parsed.icon || listIcon;
-        lang = parsed.lang || 'tr';
-        items = Array.isArray(parsed.items) ? parsed.items : [];
-        itemCount = items.length;
+      text = rowText({ productId: it.productId, name: it.name, variety: it.variety, quantity: it.quantity, qty: it.qty }, lang);
+    } catch (e) {
+      text = { title: it.name || '', second: null };
+    }
+    const cat = (product && CATEGORIES.get(product.category)) || OTHER;
+    const season = product && product.season;
+    const inSeason = !!(season && !season.yearRound && Array.isArray(season.months) && season.months.includes(month));
+    const qty = Number(it.qty) > 1 ? Math.round(Number(it.qty)) : 0;
+    items.push({
+      index: items.length,
+      title: text.title || it.name || '',
+      second: text.second || '',
+      emoji: (product && product.emoji) || it.emoji || cat.emoji || '🛒',
+      cat,
+      seasonKind: inSeason ? (season.kind === 'sea' ? 'sea' : 'land') : null,
+      qty,
+      done: !!it.done,
+    });
+  });
+
+  const sections = [];
+  const byCat = new Map();
+  items.forEach((it) => {
+    if (!byCat.has(it.cat.id)) {
+      const s = { cat: it.cat, items: [] };
+      byCat.set(it.cat.id, s);
+      sections.push(s);
+    }
+    byCat.get(it.cat.id).items.push(it);
+  });
+  sections.sort((a, b) => (a.cat.order ?? 999) - (b.cat.order ?? 999));
+  /* Sayfadaki sıra = bölümlerin sırası; Tamamlananlar bu sırayı kullanır. */
+  let order = 0;
+  sections.forEach((s) => s.items.forEach((it) => { it.order = order++; }));
+
+  return {
+    name: (typeof payload.name === 'string' && payload.name.trim()) || t.fallbackName,
+    icon: (typeof payload.icon === 'string' && payload.icon) || '🛒',
+    items,
+    sections,
+    inSeason: items.filter((it) => it.seasonKind).length,
+  };
+}
+
+/* Uygulamadaki filiz (ikondaki filizin kendisi), üç parça: gövde ve iki yaprak. */
+const SPROUT_STEM = 'M567.45 438.04Q568.43 407.02 573.45 381.63Q575.96 368.91 579.76 356.3L609.51 294.18L632.23 351.66Q624.51 371.22 620.61 390.94Q616.47 411.89 615.55 438.04Z';
+const SPROUT_LEFT = 'M579.76 356.3C517.61 359.84 472.39 307.87 451.81 255.76C505.43 239.91 573.91 243.49 609.51 294.18Z';
+const SPROUT_RIGHT = 'M609.51 294.18C639.34 219.85 723.9 198.21 793.19 204.62C776.77 277.75 723.76 357.66 632.23 351.66Z';
+const LOGO_PATH = 'M231.1 332.12H292.73Q314.61 332.12 329.49 344.71Q344.05 357.03 348.02 378.21L360.32 438.04H567.45Q568.43 407.02 573.45 381.63Q575.96 368.91 579.76 356.3C517.61 359.84 472.39 307.87 451.81 255.76C505.43 239.91 573.91 243.49 609.51 294.18C639.34 219.85 723.9 198.21 793.19 204.62C776.77 277.75 723.76 357.66 632.23 351.66Q624.51 371.22 620.61 390.94Q616.47 411.89 615.55 438.04H753.03Q765.42 438.04 770.74 444.18Q776.16 450.44 774.21 463.08L756.88 572.86Q751.1 609.45 712.59 609.45H395.58L403.5 647.97H672.14Q678.27 647.97 683.93 650.32Q689.6 652.66 693.93 657Q698.26 661.33 700.61 666.99Q702.96 672.66 702.96 678.79Q702.96 684.91 700.61 690.58Q698.26 696.24 693.93 700.57Q689.6 704.91 683.93 707.25Q678.27 709.6 672.14 709.6H402.51Q379.66 709.6 364 697.07Q348.12 684.37 343.44 661.88L288.29 393.75H231.1Q224.97 393.75 219.31 391.4Q213.65 389.06 209.31 384.72Q204.98 380.39 202.63 374.73Q200.29 369.06 200.29 362.93Q200.29 356.8 202.63 351.14Q204.98 345.48 209.31 341.14Q213.65 336.81 219.31 334.46Q224.97 332.12 231.1 332.12ZM389.03 780.86C389.03 755.33 409.72 734.64 435.25 734.64C460.78 734.64 481.47 755.33 481.47 780.86C481.47 806.39 460.78 827.08 435.25 827.08C409.72 827.08 389.03 806.39 389.03 780.86ZM593.18 780.86C593.18 755.33 613.87 734.64 639.4 734.64C664.93 734.64 685.62 755.33 685.62 780.86C685.62 806.39 664.93 827.08 639.4 827.08C613.87 827.08 593.18 806.39 593.18 780.86Z';
+
+const ICON = {
+  check: '<svg class="tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.6l3.9 3.9L18 8.2" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  system: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.4a8.6 8.6 0 0 1 0 17.2z" fill="currentColor"/></svg>',
+  light: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>',
+  dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  chevronDown: '<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 9.5l5.5 5.5 5.5-5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  link: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M10.2 13.8a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M13.8 10.2a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+  print: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14.5h10v6H7z"/></svg>',
+  checkCircle: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor"/><path d="M7.8 12.4l2.8 2.8 5.6-5.8" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+};
+
+function sproutSvg() {
+  return '<svg viewBox="440 190 365 255" aria-hidden="true">' +
+    '<path d="' + SPROUT_STEM + '"/>' +
+    '<path class="lf lf-l" d="' + SPROUT_LEFT + '"/>' +
+    '<path class="lf lf-r" d="' + SPROUT_RIGHT + '"/>' +
+    '</svg>';
+}
+
+function burstHtml() {
+  let h = '';
+  for (let i = 1; i <= 8; i++) {
+    h += '<span class="bw bw' + i + '"><svg class="bq bq' + i + '" viewBox="605 195 192 160" aria-hidden="true"><path d="' + SPROUT_RIGHT + '"/></svg></span>';
+  }
+  return h;
+}
+
+function rowHtml(it, t) {
+  const badge = it.seasonKind
+    ? '<span class="badge badge-' + it.seasonKind + '">' + esc(it.seasonKind === 'sea' ? t.inSeasonSea : t.inSeasonLand) + '</span>'
+    : '';
+  const second = it.second ? '<span class="l2">' + esc(it.second) + '</span>' : '';
+  const qty = it.qty ? '<span class="qty">×' + it.qty + '</span>' : '';
+  return '<li class="row" data-i="' + it.index + '" data-o="' + it.order + '">' +
+    '<button type="button" class="row-btn" aria-pressed="false">' +
+    '<span class="check" aria-hidden="true"><span class="fill"></span>' + ICON.check + '</span>' +
+    '<span class="emoji" aria-hidden="true">' + esc(it.emoji) + '</span>' +
+    '<span class="txt"><span class="l1"><span class="name">' + esc(it.title) + '<span class="strike"></span></span>' + badge + '</span>' + second + '</span>' +
+    qty +
+    '</button></li>';
+}
+
+const CSS = `
+:root{
+  --bg:#F8F7F4;--surface:#EFEDE8;--border:#D8D5CE;--text:#0F0F0D;--text2:#6B6B63;--muted:#807D76;--disabled:#948F89;
+  --accent:#2D8B75;--accent-muted:rgba(45,139,117,.082);--success:#3FA672;--emoji-bg:rgba(0,0,0,.04);--track:#DCD8CF;
+  --land-bg:#D7E1DA;--land-ink:#236C5B;--sea-bg:#D4E1E0;--sea-ink:#136A7C;--qr-tile:#FFFFFF;
+  --hair:1px;color-scheme:light;
+  --std:cubic-bezier(0,0,.2,1);--move:cubic-bezier(.4,0,.2,1);
+}
+@media (min-resolution:2dppx){:root{--hair:.5px}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121210;--surface:#1E1D1A;--border:#2C2A26;--text:#EDEBE6;--text2:#8C8780;--muted:#6D6862;--disabled:#5A5A5A;
+  --accent:#3AAF95;--accent-muted:rgba(58,175,149,.082);--success:#4FC486;--emoji-bg:rgba(255,255,255,.06);--track:#2C2A26;
+  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121210;--surface:#1E1D1A;--border:#2C2A26;--text:#EDEBE6;--text2:#8C8780;--muted:#6D6862;--disabled:#5A5A5A;
+  --accent:#3AAF95;--accent-muted:rgba(58,175,149,.082);--success:#4FC486;--emoji-bg:rgba(255,255,255,.06);--track:#2C2A26;
+  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+button{font:inherit;color:inherit}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 40px}
+.bar{display:flex;align-items:center;justify-content:space-between;height:52px}
+.brand{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--accent);font-weight:600;font-size:17px;letter-spacing:-.2px}
+.brand-tile{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center}
+.brand-tile svg{width:19px;height:19px;fill:var(--bg)}
+.tools{display:flex;gap:8px}
+.tool{width:44px;height:44px;border-radius:12px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);text-decoration:none}
+.tool svg{width:18px;height:18px}
+.tool.lang{font-size:13px;font-weight:600;letter-spacing:.3px;color:var(--text)}
+.tool:active{opacity:.6}
+.head{display:flex;align-items:center;gap:12px;padding:12px 0 0}
+.face{flex:none;width:44px;height:44px;border-radius:12px;background:var(--accent-muted);display:flex;align-items:center;justify-content:center;font-size:20px}
+.head h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.4px;line-height:1.1;overflow-wrap:anywhere}
+.sub{margin:4px 0 0;font-size:13px;font-weight:500;color:var(--text2)}
+.prog{margin:20px 0 0;background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:16px 16px 18px}
+.prog-top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:32px}
+.count{margin:0;font-size:15px;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums}
+.count b{font-size:22px;font-weight:700;color:var(--text);margin-right:2px}
+.prog.complete .count{color:var(--accent)}
+.pill{border:0;border-radius:8px;padding:6px 10px;background:var(--accent-muted);color:var(--accent);font-size:13px;font-weight:600;cursor:pointer;min-height:32px}
+.pill:active{opacity:.6}
+.pill[hidden]{display:none}
+.track{position:relative;margin-top:34px;height:4px;border-radius:2px;background:var(--track)}
+.track-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:var(--accent);transition:width 250ms var(--move)}
+.sprout{position:absolute;bottom:100%;left:0;width:34px;height:24px;transition:left 250ms var(--move)}
+.sp-clip{position:absolute;inset:0;clip-path:inset(-120px -120px 0 -120px)}
+.sp-bloom,.sp-nod,.sp-rise,.sp-size{position:absolute;inset:0;transform-origin:50% 100%}
+.sp-rise{transition:transform 350ms cubic-bezier(.34,1.2,.64,1)}
+.sp-size{transition:transform 250ms var(--move)}
+.sprout svg{display:block;width:34px;height:24px;overflow:visible;fill:var(--accent)}
+.lf{transform-box:view-box;transform-origin:0 0;transition:transform 350ms cubic-bezier(.34,1.25,.64,1)}
+.bw{position:absolute;left:12px;top:6px;width:11px;height:9px}
+.bq{display:block;width:11px;height:9px;opacity:0;fill:var(--accent)}
+.bw:nth-of-type(even) .bq{fill:var(--success)}
+.nodA{animation:nodA 360ms linear}
+.nodB{animation:nodB 360ms linear}
+.bloom{animation:bloom 700ms linear forwards}
+@keyframes nodA{0%{transform:rotate(0);animation-timing-function:cubic-bezier(0,0,.2,1)}35%{transform:rotate(-6deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}70%{transform:rotate(3deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:rotate(0)}}
+@keyframes nodB{0%{transform:rotate(0);animation-timing-function:cubic-bezier(0,0,.2,1)}35%{transform:rotate(-6deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}70%{transform:rotate(3deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:rotate(0)}}
+@keyframes bloom{0%{transform:scale(1);animation-timing-function:cubic-bezier(0,0,.2,1)}35%{transform:scale(1.3);animation-timing-function:cubic-bezier(.4,0,.2,1)}70%{transform:scale(1.08);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:scale(1.14)}}
+__BURST_KEYFRAMES__
+.finished{display:none;margin:16px 0 0;background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:20px;gap:12px;align-items:center}
+.finished.on{display:flex}
+.finished-icon{flex:none;width:36px;height:36px;border-radius:12px;background:var(--accent-muted);color:var(--accent);display:flex;align-items:center;justify-content:center}
+.finished-icon svg{width:20px;height:20px}
+.finished h2{margin:0;font-size:16px;font-weight:600;line-height:21px}
+.finished p{margin:2px 0 0;font-size:13px;font-weight:500;color:var(--text2)}
+.list{margin-top:8px}
+.aisle[hidden],.done-sec[hidden]{display:none}
+.aisle-h,.done-h{display:flex;align-items:center;gap:8px;margin:0;padding:24px 0 8px;font-size:13px;font-weight:600;color:var(--text2)}
+.aisle-h .ae{font-size:13px}
+.done-h{width:100%;border:0;background:none;cursor:pointer;text-align:left;justify-content:space-between;color:var(--text2)}
+.done-h .chev{width:18px;height:18px;color:var(--disabled);transition:transform 250ms var(--std)}
+.done-sec.closed .chev{transform:rotate(-90deg)}
+.done-sec.closed ul{display:none}
+ul{list-style:none;margin:0;padding:0}
+.row{position:relative;background:var(--surface)}
+.row+.row::before{content:"";position:absolute;left:0;top:0;width:108px;height:var(--hair);background:var(--bg);z-index:1}
+.row+.row::after{content:"";position:absolute;left:108px;right:0;top:0;height:var(--hair);background:var(--border);z-index:1}
+.row-btn{display:flex;align-items:center;width:100%;min-height:56px;padding:16px;border:0;background:transparent;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.row-btn:active{opacity:.7}
+.row-btn:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.check{position:relative;flex:none;width:24px;height:24px;margin-right:16px;border-radius:50%;border:1.5px solid var(--text2);transition:border-color 0ms linear 100ms}
+.fill{position:absolute;inset:-1.5px;border-radius:50%;background:var(--success);transform:scale(0);transition:transform 200ms var(--std)}
+.tick{position:absolute;left:-1.5px;top:-1.5px;width:24px;height:24px;opacity:0}
+.emoji{flex:none;width:36px;height:36px;margin-right:16px;border-radius:8px;background:var(--emoji-bg);display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1}
+.txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.l1{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-width:0}
+.name{position:relative;min-width:0;max-width:100%;font-size:16px;font-weight:600;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strike{position:absolute;left:0;top:50%;height:1.5px;margin-top:-.75px;width:0;background:var(--disabled);opacity:0;transition:width 250ms var(--std),opacity 250ms var(--std)}
+.badge{flex:none;padding:1px 8px;border-radius:4px;font-size:11px;font-weight:600;font-style:italic}
+.badge-land{background:var(--land-bg);color:var(--land-ink)}
+.badge-sea{background:var(--sea-bg);color:var(--sea-ink)}
+.l2{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qty{flex:none;margin-left:8px;padding:2px 8px;border-radius:999px;background:var(--accent);color:#fff;font-size:13px;font-weight:600}
+.done .check{border-color:var(--success)}
+.done .fill{transform:scale(1)}
+.done .tick{opacity:1}
+.done .name,.done .l2{color:var(--disabled)}
+.done .strike{width:100%;opacity:1}
+.done .emoji{opacity:.45}
+.done .badge{display:none}
+/* Satır Tamamlananlar'a taşınırken geçişler sıfırlanır; işaretin hareketi bu yüzden animasyonla oynar. */
+.row.pop .check{animation:pop 220ms linear 160ms}
+.row.pop .fill{animation:fillIn 200ms var(--std)}
+.row.pop .strike{animation:strikeIn 250ms var(--std)}
+.row.squash .check{animation:squash 160ms linear}
+.row.squash .fill{animation:fillOut 200ms var(--std)}
+.row.squash .strike{animation:strikeOut 250ms var(--std)}
+@keyframes fillIn{from{transform:scale(0)}to{transform:scale(1)}}
+@keyframes fillOut{from{transform:scale(1)}to{transform:scale(0)}}
+@keyframes strikeIn{from{width:0;opacity:0}to{width:100%;opacity:1}}
+@keyframes strikeOut{from{width:100%;opacity:1}to{width:0;opacity:0}}
+@keyframes pop{0%{transform:scale(1);animation-timing-function:cubic-bezier(0,0,.2,1)}45%{transform:scale(1.15);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:scale(1)}}
+@keyframes squash{0%{transform:scale(1);animation-timing-function:cubic-bezier(0,0,.2,1)}50%{transform:scale(.92);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:scale(1)}}
+.nofx,.nofx *{transition:none!important;animation:none!important}
+.side{display:none}
+.foot{margin:40px 0 0;font-size:13px;line-height:1.4;color:var(--text2);display:flex;flex-direction:column;gap:6px}
+.foot a{color:var(--accent);text-decoration:none;font-weight:600}
+.foot .made{color:var(--text)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  display:flex;align-items:center;gap:12px;padding:10px 10px 10px 16px;border-radius:12px;background:var(--text);color:var(--bg);font-size:14px;font-weight:500;
+  transition:transform 250ms var(--std),opacity 250ms var(--std);max-width:calc(100% - 32px);z-index:5}
+.toast.on{transform:translate(-50%,0);opacity:1;pointer-events:auto}
+.toast button{border:0;border-radius:8px;min-height:36px;padding:8px 10px;background:transparent;color:var(--bg);font-weight:700;cursor:pointer;text-decoration:underline}
+.toast button[hidden]{display:none}
+@media (min-width:900px){
+  .wrap{padding:0 40px 56px}
+  .bar{height:64px}
+  .layout{display:grid;grid-template-columns:minmax(0,640px) 300px;justify-content:center;gap:64px;align-items:start}
+  .head{padding-top:24px}
+  .head h1{font-size:34px}
+  .side{display:block;position:sticky;top:24px;margin-top:24px;background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:20px}
+  .side[hidden]{display:none}
+  .side h2{margin:0;font-size:16px;font-weight:600;line-height:21px}
+  .side p{margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--text2)}
+  .qr{margin:16px 0 0;background:var(--qr-tile);border-radius:12px;padding:16px;display:flex;justify-content:center}
+  .qr svg{display:block;width:100%;height:auto;max-width:196px}
+  .side .note{margin-top:12px}
+  .actions{display:flex;flex-direction:column;gap:8px;margin-top:16px}
+  .act{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 14px;border:.5px solid var(--border);border-radius:12px;background:var(--bg);font-size:15px;font-weight:600;color:var(--text);cursor:pointer}
+  .act svg{width:18px;height:18px;color:var(--accent)}
+  .act:active{opacity:.6}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+@media print{
+  :root,:root[data-theme="dark"]{--bg:#fff;--surface:#fff;--border:#ccc;--text:#000;--text2:#444;--disabled:#666;--accent:#000;--accent-muted:#fff;--emoji-bg:#f2f2f2;--track:#ddd;color-scheme:light}
+  .bar .tools,.side,.toast,.prog,.finished,.foot .ttl{display:none!important}
+  .done-sec.closed ul{display:block}
+  .row{break-inside:avoid}
+  .layout{display:block}
+}
+`;
+
+/* Doğrulanmış yaprak saçılması: önce fırlar, sonra sabit hızla sallanarak süzülür. */
+function burstKeyframes() {
+  const dirs = [[-34, -78, -20], [-70, -64, 30], [-8, -96, -10], [-104, -40, -50], [-52, -104, 20], [-128, -76, 40], [10, -70, -35], [-88, -108, -25]];
+  const delays = [0, 20, 40, 60, 10, 30, 50, 0];
+  let k = '';
+  dirs.forEach(([dx, dy, r1], i) => {
+    const n = i + 1;
+    const s = n % 2 ? 1 : -1;
+    const fall = Math.min(dy + 70, 4);
+    k += '@keyframes px' + n + '{0%{transform:translateX(0);animation-timing-function:cubic-bezier(0,0,.2,1)}30%{transform:translateX(' + dx + 'px);animation-timing-function:cubic-bezier(.4,0,.2,1)}55%{transform:translateX(' + (dx - 6 * s) + 'px);animation-timing-function:cubic-bezier(.4,0,.2,1)}80%{transform:translateX(' + (dx + 5 * s) + 'px);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:translateX(' + (dx - 2 * s) + 'px)}}\n';
+    k += '@keyframes py' + n + '{0%{opacity:0;transform:translateY(0) rotate(0) scale(.4);animation-timing-function:cubic-bezier(0,0,.2,1)}8%{opacity:1}30%{transform:translateY(' + dy + 'px) rotate(' + r1 + 'deg) scale(1);animation-timing-function:linear}65%{opacity:1;transform:translateY(' + Math.round(dy + (fall - dy) * 0.5) + 'px) rotate(' + (r1 + 25 * s) + 'deg) scale(1);animation-timing-function:linear}100%{opacity:0;transform:translateY(' + fall + 'px) rotate(' + (r1 - 10 * s) + 'deg) scale(.9)}}\n';
+    k += '.burst .bw' + n + '{animation:px' + n + ' 1000ms linear ' + delays[i] + 'ms forwards}.burst .bq' + n + '{animation:py' + n + ' 1000ms linear ' + delays[i] + 'ms forwards}\n';
+  });
+  return k;
+}
+
+const CLIENT_JS = `
+(function(){
+  var D = JSON.parse(document.getElementById('share-data').textContent);
+  var T = D.t;
+  var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function each(sel, fn){ Array.prototype.forEach.call(document.querySelectorAll(sel), fn); }
+
+  /* İşaretler yalnız bu cihazda; ilk açılışta gönderenin işaretleri gelir. */
+  var KEY = 'listem-ticks:' + D.key;
+  var done = {};
+  var stored = null;
+  try { stored = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){}
+  if (stored && Array.isArray(stored.done)) stored.done.forEach(function(i){ done[i] = true; });
+  else D.initialDone.forEach(function(i){ done[i] = true; });
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify({ done: Object.keys(done).map(Number) })); } catch(e){} }
+  function count(){ return Object.keys(done).length; }
+
+  var rows = {}, homeList = {};
+  each('.aisle', function(sec){
+    var ul = sec.querySelector('ul');
+    Array.prototype.forEach.call(ul.children, function(r){ rows[r.getAttribute('data-i')] = r; homeList[r.getAttribute('data-i')] = ul; });
+  });
+  var doneSec = document.getElementById('done-sec');
+  var doneList = doneSec.querySelector('ul');
+  var doneHead = doneSec.querySelector('.done-h');
+  var doneTitle = doneSec.querySelector('.done-title');
+  var total = D.total;
+
+  function insertOrdered(list, row){
+    var o = +row.getAttribute('data-o'), kids = list.children;
+    for (var k = 0; k < kids.length; k++) {
+      if (kids[k] === row) continue;
+      if (+kids[k].getAttribute('data-o') > o) { if (kids[k] !== row.nextSibling || row.parentNode !== list) list.insertBefore(row, kids[k]); return; }
+    }
+    if (row.parentNode !== list || row.nextSibling) list.appendChild(row);
+  }
+  function place(i){
+    var r = rows[i], isDone = !!done[i];
+    r.classList.toggle('done', isDone);
+    r.firstChild.setAttribute('aria-pressed', isDone ? 'true' : 'false');
+    insertOrdered(isDone ? doneList : homeList[i], r);
+  }
+  function sections(){
+    each('.aisle', function(sec){ sec.hidden = !sec.querySelector('ul').children.length; });
+    var n = doneList.children.length;
+    doneSec.hidden = n === 0;
+    doneTitle.textContent = T.completed.replace('{n}', n);
+  }
+
+  /* İlerleme: filiz boşken görünmez, çizgiden çıkar, yaprakları sırayla açılır. */
+  var prog = document.getElementById('prog');
+  var fillEl = prog.querySelector('.track-fill');
+  var sprout = prog.querySelector('.sprout');
+  var nodEl = prog.querySelector('.sp-nod');
+  var bloomEl = prog.querySelector('.sp-bloom');
+  var riseEl = prog.querySelector('.sp-rise');
+  var sizeEl = prog.querySelector('.sp-size');
+  var lfL = prog.querySelector('.lf-l'), lfR = prog.querySelector('.lf-r');
+  var countEl = document.getElementById('count');
+  var resetBtn = document.getElementById('reset');
+  var finished = document.getElementById('finished');
+  function c01(v){ return Math.max(0, Math.min(1, v)); }
+  function leaf(px, py, rot, s){ return 'translate(' + px + 'px,' + py + 'px) rotate(' + rot.toFixed(2) + 'deg) scale(' + s.toFixed(3) + ') translate(' + (-px) + 'px,' + (-py) + 'px)'; }
+  function progress(mode){
+    var d = count();
+    var p = total ? d / total : 0;
+    var pct = (p * 100).toFixed(2) + '%';
+    var complete = total > 0 && d === total;
+    fillEl.style.width = pct;
+    sprout.style.left = 'clamp(-6px, calc(' + pct + ' - 17px), calc(100% - 28px))';
+    var e = c01(p / 0.25), oL = c01((p - 0.12) / 0.45), oR = c01((p - 0.35) / 0.5);
+    riseEl.style.transform = 'translateY(' + ((1 - e) * 14.5).toFixed(2) + 'px)';
+    sizeEl.style.transform = 'scale(' + (0.88 + 0.12 * p).toFixed(3) + ')';
+    lfL.style.transform = leaf(594.6, 325.2, (1 - oL) * 40, oL);
+    lfR.style.transform = leaf(620.9, 322.9, -(1 - oR) * 32, oR);
+    prog.classList.toggle('complete', complete);
+    countEl.innerHTML = complete ? T.allDone : T.done.replace('{d}', '<b>' + d + '</b>').replace('{t}', String(total));
+    resetBtn.hidden = d === 0;
+    finished.classList.toggle('on', complete);
+    nodEl.classList.remove('nodA', 'nodB');
+    sprout.classList.remove('burst');
+    bloomEl.classList.remove('bloom');
+    bloomEl.style.transform = '';
+    if (!complete) return;
+    if (mode === 'tick' && !reduced) {
+      void sprout.offsetWidth;
+      bloomEl.classList.add('bloom');
+      sprout.classList.add('burst');
+    } else {
+      bloomEl.style.transform = 'scale(1.14)';
+    }
+  }
+  function nod(d){
+    if (reduced || d === 0 || d === total) return;
+    nodEl.classList.remove('nodA', 'nodB');
+    void nodEl.offsetWidth;
+    nodEl.classList.add(d % 2 ? 'nodA' : 'nodB');
+  }
+
+  /* Satırın yer değiştirmesi: uygulamadaki yay (350 ms, sönüm 0,85). */
+  var SPRING = 'cubic-bezier(.2,.9,.3,1)';
+  try {
+    if (window.CSS && CSS.supports('animation-timing-function', 'linear(0, 1)')) {
+      var z = 0.85, w = 4.6 / (z * 0.35), wd = w * Math.sqrt(1 - z * z), pts = [];
+      for (var s = 0; s <= 24; s++) {
+        var tt = 0.35 * s / 24;
+        pts.push((1 - Math.exp(-z * w * tt) * (Math.cos(wd * tt) + (z * w / wd) * Math.sin(wd * tt))).toFixed(4));
       }
-    } catch (e) {}
+      pts[pts.length - 1] = '1';
+      SPRING = 'linear(' + pts.join(',') + ')';
+    }
+  } catch(e){}
+
+  function snapshot(){
+    var m = new Map();
+    each('.row, .aisle-h, .done-h, #finished, .foot', function(el){
+      if (el.offsetParent !== null) m.set(el, el.getBoundingClientRect().top);
+    });
+    return m;
+  }
+  function flip(before){
+    if (reduced || !Element.prototype.animate) return;
+    before.forEach(function(top, el){
+      if (el.offsetParent === null) return;
+      var dy = top - el.getBoundingClientRect().top;
+      if (Math.abs(dy) < 1) return;
+      el.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'translateY(0)' }], { duration: 350, easing: SPRING });
+    });
+  }
+  function settle(list){
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ list.forEach(function(r){ r.classList.remove('nofx'); }); }); });
   }
 
-  if (!listName) listName = lang === 'tr' ? 'Alışveriş Listesi' : 'Shopping List';
-
-  const caption = lang === 'tr'
-    ? itemCount + ' ürün · seninle paylaşıldı'
-    : itemCount + ' items · shared with you';
-
-  const ogDescription = lang === 'tr'
-    ? '"' + listName + '" listesi' + (itemCount > 0 ? ' (' + itemCount + ' ürün)' : '') + ' seninle paylaşıldı'
-    : '"' + listName + '" list' + (itemCount > 0 ? ' (' + itemCount + ' items)' : '') + ' shared with you';
-
-  const btnOpen = lang === 'tr' ? "List-em'de Aç" : 'Open in List-em';
-  const btnDownload = lang === 'tr' ? "App Store'dan İndir" : 'Get List-em';
-  const tagline = lang === 'tr' ? "Türkiye'nin alışveriş listesi" : "Turkey's grocery list";
-  const sectionLabel = lang === 'tr' ? 'ÜRÜNLER' : 'PRODUCTS';
-
-  const deepLink = 'listem://share?data=' + (data || '');
-  const appStoreLink = 'https://apps.apple.com/app/list-em/id0000000000';
-
-  const namedItems = items.filter((item) => item && item.name);
-
-  const escListName = escapeHtml(listName);
-  const escListIcon = escapeHtml(listIcon);
-  const escOgDescription = escapeHtml(ogDescription);
-  const ogTitle = escListIcon + ' ' + escListName + (itemCount > 0 ? ' (' + itemCount + (lang === 'tr' ? ' ürün)' : ' items)') : '');
-
-  let productCardHtml = '';
-  if (namedItems.length > 0) {
-    const rows = namedItems.map((item) => {
-      const escName = escapeHtml(item.name);
-      const qty = Number(item.qty);
-      const badge = qty > 1 ? '<span class="qty-badge">×' + escapeHtml(String(qty)) + '</span>' : '';
-      return '<div class="item-row"><span class="item-dot"></span><div class="item-content"><span class="item-name">' + escName + '</span>' + badge + '</div></div>';
-    }).join('');
-
-    productCardHtml = '<div class="product-card"><div class="section-label">' + escapeHtml(sectionLabel) + '</div>' + rows + '</div>';
+  var lastTap = 0;
+  function toggle(i){
+    var now = Date.now(), rapid = now - lastTap < 250;
+    lastTap = now;
+    var r = rows[i];
+    var before = rapid ? null : snapshot();
+    if (done[i]) delete done[i]; else done[i] = true;
+    r.classList.remove('pop', 'squash');
+    if (rapid || reduced) r.classList.add('nofx');
+    place(i);
+    sections();
+    if (!rapid && !reduced) { void r.offsetWidth; r.classList.add(done[i] ? 'pop' : 'squash'); }
+    progress(rapid ? 'still' : 'tick');
+    if (!rapid) nod(count());
+    if (before) flip(before);
+    if (rapid || reduced) settle([r]);
+    save();
   }
+  Object.keys(rows).forEach(function(i){
+    rows[i].firstChild.addEventListener('click', function(){ toggle(i); });
+  });
 
-  return '<!DOCTYPE html><html lang="' + lang + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta property="og:title" content="' + ogTitle + '"><meta property="og:description" content="' + escOgDescription + '"><meta property="og:type" content="website"><meta property="og:image" content="https://' + host + '/og-image.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="' + ogTitle + '"><meta name="twitter:description" content="' + escOgDescription + '"><meta name="twitter:image" content="https://' + host + '/og-image.png"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><title>' + escListName + ' — List-em</title><style>' +
-    ':root{--bg:#F4F2ED;--card:#FFFFFF;--text:#1B221E;--text-secondary:#6B7570;--text-faint:#8A948E;--border:#E5E8E3;--divider:#ECEFE9;--accent:#2D8B75;--badge-bg:rgba(45,139,117,.12);--badge-text:#1F6A57}' +
-    '@media (prefers-color-scheme:dark){:root{--bg:#141816;--card:#1C211E;--text:#ECEFEA;--text-secondary:#9AA49D;--text-faint:#6E7871;--border:#2A302C;--divider:#232925;--accent:#3AA98F;--badge-bg:rgba(58,169,143,.16);--badge-text:#7FD4BC}}' +
-    '*{margin:0;padding:0;box-sizing:border-box}' +
-    'body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:32px 20px}' +
-    '.page{max-width:420px;width:100%;margin:0 auto;display:flex;flex-direction:column;align-items:center}' +
-    '.icon-circle{width:56px;height:56px;border-radius:50%;background:var(--badge-bg);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}' +
-    'h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:6px}' +
-    '.caption{font-size:13px;font-weight:500;color:var(--text-secondary);text-align:center;margin-bottom:28px}' +
-    '.product-card{background:var(--card);border:1px solid var(--border);border-radius:20px;width:100%;margin-bottom:28px;overflow:hidden}' +
-    '.section-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);padding:16px 16px 8px}' +
-    '.item-row{display:flex;align-items:center;min-height:46px;padding:0 16px}' +
-    '.item-content{display:flex;align-items:center;flex:1;min-height:46px;border-top:1px solid var(--divider)}' +
-    '.item-row:first-of-type .item-content{border-top:none}' +
-    '.item-dot{width:5px;height:5px;border-radius:50%;background:var(--text-faint);margin-right:12px;flex-shrink:0}' +
-    '.item-name{font-size:15px;font-weight:400;flex:1}' +
-    '.qty-badge{font-size:12px;font-weight:600;color:var(--badge-text);background:var(--badge-bg);padding:2px 10px;border-radius:100px;margin-left:8px}' +
-    '.cta{width:100%}' +
-    '.btn{display:block;background:var(--accent);color:white;text-decoration:none;height:50px;line-height:50px;text-align:center;border-radius:14px;font-size:16px;font-weight:600;margin-bottom:12px}' +
-    '.btn-secondary{display:block;color:var(--accent);text-decoration:none;font-size:13px;font-weight:500;text-align:center}' +
-    '.logo{margin-top:28px;display:flex;align-items:center;justify-content:center;gap:8px}' +
-    '.logo img{width:32px;height:32px;border-radius:8px}' +
-    '.logo span{font-size:14px;color:var(--text-faint);font-weight:500}' +
-    '</style></head><body><div class="page">' +
-    '<div class="icon-circle">' + escListIcon + '</div>' +
-    '<h1>' + escListName + '</h1>' +
-    '<p class="caption">' + escapeHtml(caption) + '</p>' +
-    productCardHtml +
-    '<div class="cta"><a href="' + deepLink + '" class="btn" id="openApp">' + btnOpen + '</a><a href="' + appStoreLink + '" class="btn-secondary">' + btnDownload + '</a></div>' +
-    '<div class="logo"><img src="/icon.png.png" alt="List-em"><span>List-em — ' + tagline + '</span></div>' +
-    '</div><script>document.getElementById("openApp").addEventListener("click",function(e){e.preventDefault();window.location.href="' + deepLink + '";setTimeout(function(){window.location.href="' + appStoreLink + '"},1500)})</script></body></html>';
+  doneHead.addEventListener('click', function(){
+    var before = snapshot();
+    var closed = doneSec.classList.toggle('closed');
+    doneHead.setAttribute('aria-expanded', closed ? 'false' : 'true');
+    flip(before);
+  });
+
+  /* Sıfırla: tek dokunuş, beş saniyelik geri alma şeridiyle. */
+  var toast = document.getElementById('toast');
+  var toastMsg = toast.querySelector('span');
+  var toastBtn = toast.querySelector('button');
+  var toastTimer = null, undoState = null;
+  function showToast(msg, withUndo){
+    toastMsg.textContent = msg;
+    toastBtn.hidden = !withUndo;
+    toast.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove('on'); undoState = null; }, withUndo ? 5000 : 2200);
+  }
+  function applyAll(){
+    var before = snapshot();
+    var all = Object.keys(rows).map(function(i){ rows[i].classList.add('nofx'); place(i); return rows[i]; });
+    sections();
+    progress('still');
+    flip(before);
+    settle(all);
+    save();
+  }
+  function reset(){
+    undoState = Object.keys(done);
+    done = {};
+    applyAll();
+    showToast(T.resetDone, true);
+  }
+  resetBtn.addEventListener('click', reset);
+  toastBtn.addEventListener('click', function(){
+    if (!undoState) return;
+    done = {};
+    undoState.forEach(function(i){ done[i] = true; });
+    undoState = null;
+    applyAll();
+    toast.classList.remove('on');
+  });
+
+  var copyBtn = document.getElementById('copy');
+  if (copyBtn) copyBtn.addEventListener('click', function(){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(D.url).then(function(){ showToast(T.copied, false); }, function(){});
+    }
+  });
+  var printBtn = document.getElementById('print');
+  if (printBtn) printBtn.addEventListener('click', function(){ window.print(); });
+
+  /* İlk hâl: hareketsiz. */
+  var all = Object.keys(rows).map(function(i){ rows[i].classList.add('nofx'); place(i); return rows[i]; });
+  sections();
+  progress('still');
+  settle(all);
+
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
+  }
+})();
+`;
+
+const THEME_JS = `
+(function(){
+  /* Görünüm: sistem → açık → koyu. Seçim bu tarayıcıda saklanır, sitenin her sayfasında geçerli. */
+  var root = document.documentElement, btn = document.getElementById('theme');
+  if (!btn) return;
+  var modes = ['system', 'light', 'dark'];
+  var icons = JSON.parse(btn.getAttribute('data-icons'));
+  var labels = JSON.parse(btn.getAttribute('data-labels'));
+  function set(m, save){
+    if (m === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', m);
+    if (save) { try { if (m === 'system') localStorage.removeItem('listem-theme'); else localStorage.setItem('listem-theme', m); } catch(e){} }
+    btn.innerHTML = icons[m];
+    btn.setAttribute('aria-label', labels[m]);
+    btn.setAttribute('data-mode', m);
+  }
+  set(root.getAttribute('data-theme') || 'system', false);
+  btn.addEventListener('click', function(){ set(modes[(modes.indexOf(btn.getAttribute('data-mode')) + 1) % 3], true); });
+})();
+`;
+
+/* Görünüm seçimi ilk boyamadan önce uygulanır: gece açılan sayfa bir an bile parlamaz. */
+const THEME_BOOT = "(function(){try{var m=localStorage.getItem('listem-theme');if(m==='light'||m==='dark')document.documentElement.setAttribute('data-theme',m);}catch(e){}})();";
+
+function pageShell({ lang, title, ogTitle, ogDescription, host, body, inlineData }) {
+  return '<!doctype html>\n<html lang="' + lang + '">\n<head>\n' +
+    '<meta charset="utf-8">\n' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n' +
+    '<meta name="color-scheme" content="light dark">\n' +
+    '<meta name="theme-color" content="#F8F7F4" media="(prefers-color-scheme: light)">\n' +
+    '<meta name="theme-color" content="#121210" media="(prefers-color-scheme: dark)">\n' +
+    '<script>' + THEME_BOOT + '</script>\n' +
+    '<title>' + esc(title) + '</title>\n' +
+    '<meta property="og:title" content="' + esc(ogTitle) + '">\n' +
+    '<meta property="og:description" content="' + esc(ogDescription) + '">\n' +
+    '<meta property="og:image" content="https://' + esc(host) + '/og-image.png">\n' +
+    '<meta property="og:type" content="website">\n' +
+    '<meta name="twitter:card" content="summary_large_image">\n' +
+    '<meta name="robots" content="noindex">\n' +
+    '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n' +
+    '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n' +
+    '<style>' + CSS.replace('__BURST_KEYFRAMES__', burstKeyframes()) + '</style>\n' +
+    '</head>\n<body>\n' + body + '\n' +
+    '<script>' + THEME_JS + '</script>\n' +
+    (inlineData ? '<script type="application/json" id="share-data">' + inlineData + '</script>\n<script>' + CLIENT_JS + '</script>\n' : '') +
+    '</body>\n</html>';
 }
 
-function renderExpiredHTML(host) {
-  return '<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta property="og:title" content="Paylaşım bağlantısının süresi doldu"><meta property="og:type" content="website"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><title>Bağlantının süresi doldu — List-em</title><style>' +
-    ':root{--bg:#F4F2ED;--card:#FFFFFF;--text:#1B221E;--text-secondary:#6B7570;--text-faint:#8A948E;--border:#E5E8E3;--accent:#2D8B75}' +
-    '@media (prefers-color-scheme:dark){:root{--bg:#141816;--card:#1C211E;--text:#ECEFEA;--text-secondary:#9AA49D;--text-faint:#6E7871;--border:#2A302C;--accent:#3AA98F}}' +
-    '*{margin:0;padding:0;box-sizing:border-box}' +
-    'body{font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;min-height:100vh;padding:32px 20px}' +
-    '.page{max-width:420px;width:100%;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center}' +
-    '.icon-circle{width:56px;height:56px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:16px}' +
-    'h1{font-size:22px;font-weight:700;margin-bottom:6px}' +
-    'p{font-size:14px;color:var(--text-secondary);margin-bottom:4px}' +
-    '.divider{width:32px;height:1px;background:var(--border);margin:20px 0}' +
-    '.btn{display:block;background:var(--accent);color:white;text-decoration:none;height:50px;line-height:50px;padding:0 24px;text-align:center;border-radius:14px;font-size:16px;font-weight:600;margin-top:20px}' +
-    '</style></head><body><div class="page">' +
-    '<div class="icon-circle">⏳</div>' +
-    '<h1>Bu paylaşım bağlantısının süresi doldu</h1>' +
-    '<p>Paylaşan kişiden listeyi yeniden göndermesini isteyebilirsin.</p>' +
-    '<div class="divider"></div>' +
-    '<h1>This share link has expired</h1>' +
-    '<p>Ask the person who shared it to send the list again.</p>' +
-    '<a href="https://apps.apple.com/app/list-em/id0000000000" class="btn">List-em</a>' +
-    '</div></body></html>';
+function topBar(t, lang, langHref) {
+  return '<header class="bar">' +
+    '<a class="brand" href="https://list-em.app"><span class="brand-tile"><svg viewBox="180 180 640 660" aria-hidden="true"><path d="' + LOGO_PATH + '"/></svg></span>List-em</a>' +
+    '<div class="tools">' +
+    '<a class="tool lang" href="' + esc(langHref) + '" hreflang="' + (lang === 'tr' ? 'en' : 'tr') + '" aria-label="' + esc(t.otherLangLabel) + '">' + t.otherLang + '</a>' +
+    '<button type="button" class="tool" id="theme" aria-label="' + esc(t.themeSystem) + '" data-icons="' + esc(JSON.stringify({ system: ICON.system, light: ICON.light, dark: ICON.dark })) + '" data-labels="' + esc(JSON.stringify({ system: t.themeSystem, light: t.themeLight, dark: t.themeDark })) + '">' + ICON.system + '</button>' +
+    '</div></header>';
 }
 
-renderShareHTML.renderExpiredHTML = renderExpiredHTML;
+function hashKey(s) {
+  let h = 5381;
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0;
+  return 'd' + (h >>> 0).toString(36);
+}
+
+/**
+ * renderShareHTML(data, host, opts)
+ *   data — LZString ile sıkıştırılmış paylaşım verisi
+ *   opts — { id, url, lang, ttlSeconds, qrSvg }
+ */
+function renderShareHTML(data, host, opts) {
+  opts = opts || {};
+  const payload = decode(data) || {};
+  const lang = opts.lang === 'en' || opts.lang === 'tr' ? opts.lang : (payload.lang === 'en' ? 'en' : 'tr');
+  const t = STR[lang];
+  const model = buildModel(payload, lang);
+  const total = model.items.length;
+  const url = opts.url || ('https://' + host + '/');
+  const langHref = '?lang=' + (lang === 'tr' ? 'en' : 'tr');
+
+  const subParts = [t.sharedWithYou, t.items(total)];
+  if (model.inSeason > 0) subParts.push(t.inSeasonCount(model.inSeason));
+
+  const sectionsHtml = model.sections.map((s) =>
+    '<section class="aisle" data-cat="' + esc(s.cat.id) + '">' +
+    '<h2 class="aisle-h"><span class="ae" aria-hidden="true">' + esc(s.cat.emoji || '') + '</span>' + esc(lang === 'en' ? s.cat.nameEn : s.cat.nameTr) + '</h2>' +
+    '<ul>' + s.items.map((it) => rowHtml(it, t)).join('') + '</ul></section>'
+  ).join('');
+
+  let ttlLine = t.ttlDefault;
+  if (typeof opts.ttlSeconds === 'number' && opts.ttlSeconds > 0) ttlLine = t.ttlDays(Math.ceil(opts.ttlSeconds / 86400));
+
+  const side = opts.qrSvg
+    ? '<aside class="side" aria-labelledby="qr-title">' +
+      '<h2 id="qr-title">' + esc(t.qrTitle) + '</h2>' +
+      '<p>' + esc(t.qrBody) + '</p>' +
+      '<div class="qr">' + opts.qrSvg.replace('<svg', '<svg role="img" aria-label="QR"') + '</div>' +
+      '<p class="note">' + esc(t.qrNote) + '</p>' +
+      '<div class="actions">' +
+      '<button type="button" class="act" id="copy">' + ICON.link + esc(t.copyLink) + '</button>' +
+      '<button type="button" class="act" id="print">' + ICON.print + esc(t.print) + '</button>' +
+      '</div></aside>'
+    : '';
+
+  const body =
+    '<div class="wrap">' +
+    topBar(t, lang, langHref) +
+    '<div class="layout"><main class="main">' +
+    '<div class="head"><span class="face" aria-hidden="true">' + esc(model.icon) + '</span><div>' +
+    '<h1>' + esc(model.name) + '</h1>' +
+    '<p class="sub">' + esc(subParts.join(' · ')) + '</p></div></div>' +
+    '<section class="prog" id="prog" aria-live="polite">' +
+    '<div class="prog-top"><p class="count" id="count"></p><button type="button" class="pill" id="reset" hidden>' + esc(t.reset) + '</button></div>' +
+    '<div class="track" aria-hidden="true"><div class="track-fill"></div>' +
+    '<div class="sprout"><div class="sp-clip"><div class="sp-bloom"><div class="sp-nod"><div class="sp-rise"><div class="sp-size">' + sproutSvg() + '</div></div></div></div></div>' + burstHtml() + '</div>' +
+    '</div></section>' +
+    '<section class="finished" id="finished"><span class="finished-icon">' + ICON.checkCircle + '</span><div>' +
+    '<h2>' + esc(t.finishedTitle) + '</h2><p>' + esc(t.finishedBody(total)) + '</p></div></section>' +
+    '<div class="list">' + sectionsHtml +
+    '<section class="done-sec" id="done-sec" hidden>' +
+    '<button type="button" class="done-h" aria-expanded="true"><span class="done-title"></span>' + ICON.chevronDown + '</button>' +
+    '<ul></ul></section></div>' +
+    '<footer class="foot"><span class="made">' + esc(t.madeWith) + ' <a href="https://list-em.app">list-em.app</a></span>' +
+    '<span>' + esc(t.localOnly) + '</span><span class="ttl">' + esc(ttlLine) + '</span>' +
+    '<span><a href="/gizlilik">' + esc(t.privacy) + '</a></span></footer>' +
+    '</main>' + side + '</div></div>' +
+    '<div class="toast" id="toast" role="status"><span></span><button type="button" hidden>' + esc(t.undo) + '</button></div>';
+
+  const inlineData = JSON.stringify({
+    key: opts.id || hashKey(data || ''),
+    url,
+    total,
+    initialDone: model.items.filter((it) => it.done).map((it) => it.index),
+    t: {
+      done: t.done('{d}', '{t}'),
+      allDone: t.allDone,
+      completed: t.completed('{n}'),
+      resetDone: t.resetDone,
+      copied: t.copied,
+    },
+  }).replace(/</g, '\\u003c');
+
+  return pageShell({
+    lang,
+    title: model.name + ' · List-em',
+    ogTitle: model.icon + ' ' + model.name + (total ? ' (' + t.items(total) + ')' : ''),
+    ogDescription: t.ogList(model.name, total),
+    host,
+    body,
+    inlineData,
+  });
+}
+
+function renderExpiredHTML(host, opts) {
+  opts = opts || {};
+  const lang = opts.lang === 'en' ? 'en' : 'tr';
+  const t = STR[lang];
+  const body = '<div class="wrap">' + topBar(t, lang, '?lang=' + (lang === 'tr' ? 'en' : 'tr')) +
+    '<main style="max-width:520px;margin:0 auto;padding-top:18vh">' +
+    '<span class="face" aria-hidden="true">⏳</span>' +
+    '<h1 style="margin:16px 0 0;font-size:22px;font-weight:700;letter-spacing:-.3px">' + esc(t.expiredTitle) + '</h1>' +
+    '<p class="sub" style="font-size:15px;line-height:1.45;margin-top:8px">' + esc(t.expiredBody) + '</p>' +
+    '<p style="margin-top:20px"><a href="https://list-em.app" style="color:var(--accent);font-weight:600;text-decoration:none">' + esc(t.expiredLink) + '</a></p>' +
+    '</main></div>';
+  return pageShell({ lang, title: t.expiredTitle + ' · List-em', ogTitle: 'List-em', ogDescription: t.expiredTitle, host, body, inlineData: null });
+}
+
+async function qrSvgFor(url) {
+  if (!url || url.length > 1200) return '';
+  try {
+    return await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#0F0F0DFF', light: '#FFFFFFFF' } });
+  } catch (e) {
+    return '';
+  }
+}
 
 module.exports = renderShareHTML;
+module.exports.renderShareHTML = renderShareHTML;
+module.exports.renderExpiredHTML = renderExpiredHTML;
+module.exports.qrSvgFor = qrSvgFor;
+module.exports.decode = decode;
