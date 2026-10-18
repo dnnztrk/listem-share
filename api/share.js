@@ -5,7 +5,8 @@ module.exports = async (req, res) => {
   const host = req.headers.host || 'list-em.app';
   const url = `https://${host}/share?data=${encodeURIComponent(data || '')}`;
   const qrSvg = await render.qrSvgFor(url);
-  const html = render.renderShareHTML(data, host, { url, lang, qrSvg });
+  const langBase = `/share?data=${encodeURIComponent(data || '')}&`;
+  const html = render.renderShareHTML(data, host, { url, lang, qrSvg, langBase });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 's-maxage=3600');

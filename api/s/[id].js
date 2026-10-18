@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
 
   const url = `https://${host}/s/${id}`;
   const qrSvg = await render.qrSvgFor(url);
-  const html = render.renderShareHTML(data, host, { id, url, lang, ttlSeconds, qrSvg });
+  const html = render.renderShareHTML(data, host, { id, url, lang, ttlSeconds, qrSvg, langBase: `/s/${id}?` });
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   // Kalan gün sayısı sayfada yazdığı için kısa önbellek.

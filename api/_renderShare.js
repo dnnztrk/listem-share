@@ -193,20 +193,17 @@ const ICON = {
   checkCircle: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="currentColor"/><path d="M7.8 12.4l2.8 2.8 5.6-5.8" fill="none" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
 };
 
+/* İlerleme göstergesi: ikondaki filiz. Gövde, boğum ve iki yaprak ayrı çizilir; çizgi toprak gibi
+   davranır (altı kırpılır). Biçimini ve hareketini sayfadaki betik çizer. */
 function sproutSvg() {
-  return '<svg viewBox="440 190 365 255" aria-hidden="true">' +
-    '<path d="' + SPROUT_STEM + '"/>' +
-    '<path class="lf lf-l" d="' + SPROUT_LEFT + '"/>' +
-    '<path class="lf lf-r" d="' + SPROUT_RIGHT + '"/>' +
-    '</svg>';
-}
-
-function burstHtml() {
-  let h = '';
-  for (let i = 1; i <= 8; i++) {
-    h += '<span class="bw bw' + i + '"><svg class="bq bq' + i + '" viewBox="605 195 192 160" aria-hidden="true"><path d="' + SPROUT_RIGHT + '"/></svg></span>';
-  }
-  return h;
+  return '<svg viewBox="440 190 365 270" aria-hidden="true">' +
+    '<defs><clipPath id="sprout-ground"><rect x="380" y="40" width="500" height="398.54"/></clipPath></defs>' +
+    '<g clip-path="url(#sprout-ground)"><g class="plant-g">' +
+    '<path class="plant stem-f" d="' + SPROUT_STEM + ' L615.55 446 L567.45 446 Z"/>' +
+    '<circle class="plant node" cx="609" cy="318" r="16"/>' +
+    '<path class="plant lf-l" d="' + SPROUT_LEFT + '"/>' +
+    '<path class="plant lf-r" d="' + SPROUT_RIGHT + '"/>' +
+    '</g></g></svg>';
 }
 
 function rowHtml(it, t) {
@@ -228,7 +225,7 @@ const CSS = `
 :root{
   --bg:#F8F7F4;--surface:#EFEDE8;--border:#D8D5CE;--text:#0F0F0D;--text2:#6B6B63;--muted:#807D76;--disabled:#948F89;
   --accent:#2D8B75;--accent-muted:rgba(45,139,117,.082);--success:#3FA672;--emoji-bg:rgba(0,0,0,.04);--track:#DCD8CF;
-  --land-bg:#D7E1DA;--land-ink:#236C5B;--sea-bg:#D4E1E0;--sea-ink:#136A7C;--qr-tile:#FFFFFF;
+  --land-bg:#D7E1DA;--land-ink:#236C5B;--sea-bg:#D4E1E0;--sea-ink:#136A7C;--qr-tile:#FFFFFF;--leaf-light:#7DC4A5;
   --hair:1px;color-scheme:light;
   --std:cubic-bezier(0,0,.2,1);--move:cubic-bezier(.4,0,.2,1);
 }
@@ -236,11 +233,11 @@ const CSS = `
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#121210;--surface:#1E1D1A;--border:#2C2A26;--text:#EDEBE6;--text2:#8C8780;--muted:#6D6862;--disabled:#5A5A5A;
   --accent:#3AAF95;--accent-muted:rgba(58,175,149,.082);--success:#4FC486;--emoji-bg:rgba(255,255,255,.06);--track:#2C2A26;
-  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;color-scheme:dark}}
+  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;--leaf-light:#2E8A70;color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#121210;--surface:#1E1D1A;--border:#2C2A26;--text:#EDEBE6;--text2:#8C8780;--muted:#6D6862;--disabled:#5A5A5A;
   --accent:#3AAF95;--accent-muted:rgba(58,175,149,.082);--success:#4FC486;--emoji-bg:rgba(255,255,255,.06);--track:#2C2A26;
-  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;color-scheme:dark}
+  --land-bg:#202B25;--land-ink:#36A88D;--sea-bg:#1D2B2C;--sea-ink:#1EA4C0;--leaf-light:#2E8A70;color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Helvetica Neue",Arial,sans-serif;
@@ -271,23 +268,9 @@ a{color:inherit}
 .pill[hidden]{display:none}
 .track{position:relative;margin-top:34px;height:4px;border-radius:2px;background:var(--track)}
 .track-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:var(--accent);transition:width 250ms var(--move)}
-.sprout{position:absolute;bottom:100%;left:0;width:34px;height:24px;transition:left 250ms var(--move)}
-.sp-clip{position:absolute;inset:0;clip-path:inset(-120px -120px 0 -120px)}
-.sp-bloom,.sp-nod,.sp-rise,.sp-size{position:absolute;inset:0;transform-origin:50% 100%}
-.sp-rise{transition:transform 350ms cubic-bezier(.34,1.2,.64,1)}
-.sp-size{transition:transform 250ms var(--move)}
-.sprout svg{display:block;width:34px;height:24px;overflow:visible;fill:var(--accent)}
-.lf{transform-box:view-box;transform-origin:0 0;transition:transform 350ms cubic-bezier(.34,1.25,.64,1)}
-.bw{position:absolute;left:12px;top:6px;width:11px;height:9px}
-.bq{display:block;width:11px;height:9px;opacity:0;fill:var(--accent)}
-.bw:nth-of-type(even) .bq{fill:var(--success)}
-.nodA{animation:nodA 360ms linear}
-.nodB{animation:nodB 360ms linear}
-.bloom{animation:bloom 700ms linear forwards}
-@keyframes nodA{0%{transform:rotate(0);animation-timing-function:cubic-bezier(0,0,.2,1)}35%{transform:rotate(-6deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}70%{transform:rotate(3deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:rotate(0)}}
-@keyframes nodB{0%{transform:rotate(0);animation-timing-function:cubic-bezier(0,0,.2,1)}35%{transform:rotate(-6deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}70%{transform:rotate(3deg);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:rotate(0)}}
-@keyframes bloom{0%{transform:scale(1);animation-timing-function:cubic-bezier(0,0,.2,1)}35%{transform:scale(1.3);animation-timing-function:cubic-bezier(.4,0,.2,1)}70%{transform:scale(1.08);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:scale(1.14)}}
-__BURST_KEYFRAMES__
+.sprout{position:absolute;bottom:2px;left:0;width:36px;height:27px;transition:left 250ms var(--move)}
+.sprout svg{position:absolute;left:0;bottom:0;width:36px;height:27px;overflow:visible}
+.plant{fill:var(--accent);stroke:var(--accent);stroke-width:3;stroke-linejoin:round}
 .finished{display:none;margin:16px 0 0;background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:20px;gap:12px;align-items:center}
 .finished.on{display:flex}
 .finished-icon{flex:none;width:36px;height:36px;border-radius:12px;background:var(--accent-muted);color:var(--accent);display:flex;align-items:center;justify-content:center}
@@ -381,22 +364,6 @@ ul{list-style:none;margin:0;padding:0}
 }
 `;
 
-/* Doğrulanmış yaprak saçılması: önce fırlar, sonra sabit hızla sallanarak süzülür. */
-function burstKeyframes() {
-  const dirs = [[-34, -78, -20], [-70, -64, 30], [-8, -96, -10], [-104, -40, -50], [-52, -104, 20], [-128, -76, 40], [10, -70, -35], [-88, -108, -25]];
-  const delays = [0, 20, 40, 60, 10, 30, 50, 0];
-  let k = '';
-  dirs.forEach(([dx, dy, r1], i) => {
-    const n = i + 1;
-    const s = n % 2 ? 1 : -1;
-    const fall = Math.min(dy + 70, 4);
-    k += '@keyframes px' + n + '{0%{transform:translateX(0);animation-timing-function:cubic-bezier(0,0,.2,1)}30%{transform:translateX(' + dx + 'px);animation-timing-function:cubic-bezier(.4,0,.2,1)}55%{transform:translateX(' + (dx - 6 * s) + 'px);animation-timing-function:cubic-bezier(.4,0,.2,1)}80%{transform:translateX(' + (dx + 5 * s) + 'px);animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:translateX(' + (dx - 2 * s) + 'px)}}\n';
-    k += '@keyframes py' + n + '{0%{opacity:0;transform:translateY(0) rotate(0) scale(.4);animation-timing-function:cubic-bezier(0,0,.2,1)}8%{opacity:1}30%{transform:translateY(' + dy + 'px) rotate(' + r1 + 'deg) scale(1);animation-timing-function:linear}65%{opacity:1;transform:translateY(' + Math.round(dy + (fall - dy) * 0.5) + 'px) rotate(' + (r1 + 25 * s) + 'deg) scale(1);animation-timing-function:linear}100%{opacity:0;transform:translateY(' + fall + 'px) rotate(' + (r1 - 10 * s) + 'deg) scale(.9)}}\n';
-    k += '.burst .bw' + n + '{animation:px' + n + ' 1000ms linear ' + delays[i] + 'ms forwards}.burst .bq' + n + '{animation:py' + n + ' 1000ms linear ' + delays[i] + 'ms forwards}\n';
-  });
-  return k;
-}
-
 const CLIENT_JS = `
 (function(){
   var D = JSON.parse(document.getElementById('share-data').textContent);
@@ -409,9 +376,10 @@ const CLIENT_JS = `
   var done = {};
   var stored = null;
   try { stored = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){}
+  var celebrated = !!(stored && stored.c);
   if (stored && Array.isArray(stored.done)) stored.done.forEach(function(i){ done[i] = true; });
   else D.initialDone.forEach(function(i){ done[i] = true; });
-  function save(){ try { localStorage.setItem(KEY, JSON.stringify({ done: Object.keys(done).map(Number) })); } catch(e){} }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify({ done: Object.keys(done).map(Number), c: celebrated })); } catch(e){} }
   function count(){ return Object.keys(done).length; }
 
   var rows = {}, homeList = {};
@@ -446,54 +414,128 @@ const CLIENT_JS = `
     doneTitle.textContent = T.completed.replace('{n}', n);
   }
 
-  /* İlerleme: filiz boşken görünmez, çizgiden çıkar, yaprakları sırayla açılır. */
+  /* İlerleme: ikondaki filiz. Her işarette sessizce bir adım büyür; bir reyon bitince bir kez
+     sallanır; liste bitince büyür ve yapraklar saçılır, tamamlanma başına bir kez (hareket dili). */
   var prog = document.getElementById('prog');
   var fillEl = prog.querySelector('.track-fill');
-  var sprout = prog.querySelector('.sprout');
-  var nodEl = prog.querySelector('.sp-nod');
-  var bloomEl = prog.querySelector('.sp-bloom');
-  var riseEl = prog.querySelector('.sp-rise');
-  var sizeEl = prog.querySelector('.sp-size');
-  var lfL = prog.querySelector('.lf-l'), lfR = prog.querySelector('.lf-r');
+  var sprout = document.getElementById('sprout');
+  var plantG = sprout.querySelector('.plant-g'), stemEl = sprout.querySelector('.stem-f'), nodeEl = sprout.querySelector('.node');
+  var lfL = sprout.querySelector('.lf-l'), lfR = sprout.querySelector('.lf-r');
   var countEl = document.getElementById('count');
   var resetBtn = document.getElementById('reset');
   var finished = document.getElementById('finished');
-  function c01(v){ return Math.max(0, Math.min(1, v)); }
-  function leaf(px, py, rot, s){ return 'translate(' + px + 'px,' + py + 'px) rotate(' + rot.toFixed(2) + 'deg) scale(' + s.toFixed(3) + ') translate(' + (-px) + 'px,' + (-py) + 'px)'; }
-  function progress(mode){
+  var LEFT_D = lfL.getAttribute('d'), RIGHT_D = lfR.getAttribute('d');
+  function c01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function eo(t){ return 1 - Math.pow(1 - t, 3); }
+  function eio(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+  function spec(bx, by, tx, ty){ var dx = tx - bx, dy = ty - by, l = Math.sqrt(dx * dx + dy * dy); return { bx: bx, by: by, ux: dx / l, uy: dy / l }; }
+  var LL = spec(594.6, 325.2, 451.81, 255.76), RL = spec(620.9, 322.9, 793.19, 204.62);
+  var J = { x: 609.51, y: 294.18 }, B = { x: 591.5, y: 438.04 };
+  function fx(n){ return n.toFixed(4); }
+  function leafMatrix(sp, th, lam, wid, dx, dy){
+    var ux = sp.ux, uy = sp.uy, vx = -uy, vy = ux;
+    var m11 = lam * ux * ux + wid * vx * vx, m12 = lam * ux * uy + wid * vx * vy, m21 = lam * uy * ux + wid * vy * vx, m22 = lam * uy * uy + wid * vy * vy;
+    var c = Math.cos(th), s = Math.sin(th);
+    var a = c * m11 - s * m21, cc = c * m12 - s * m22, b = s * m11 + c * m21, d = s * m12 + c * m22;
+    return 'matrix(' + [a, b, cc, d, sp.bx + dx - (a * sp.bx + cc * sp.by), sp.by + dy - (b * sp.bx + d * sp.by)].map(fx).join(' ') + ')';
+  }
+  function draw(g, sw, sc){
+    var gs = Math.max(0, g), over = Math.max(0, g - 1);
+    var sh = eo(c01(gs / 0.28)), lean = (1 - eio(c01((gs - 0.1) / 0.32))) * 0.42, wx = 0.62 + 0.38 * eo(c01(gs / 0.4)), k = -lean * sh;
+    if (sh > 0.002) {
+      stemEl.setAttribute('transform', 'matrix(' + [wx, 0, k, sh, B.x - wx * B.x - k * B.y, B.y - sh * B.y].map(fx).join(' ') + ')');
+      stemEl.style.display = '';
+    } else stemEl.style.display = 'none';
+    var dX = B.x + wx * (J.x - B.x) + k * (J.y - B.y) - J.x, dY = B.y + sh * (J.y - B.y) - J.y;
+    var ap = eo(c01((gs - 0.14) / 0.14));
+    if (ap > 0.002) {
+      var a = c01((gs - 0.14) / 0.6), b = c01((gs - 0.24) / 0.6);
+      var Ls = ap * (0.32 + 0.68 * eo(a)) * (1 + over * 0.5), Rs = ap * (0.32 + 0.68 * eo(b)) * (1 + over * 0.5);
+      var rL = 0.52 + 0.48 * eio(c01((gs - 0.22) / 0.6)), rR = 0.52 + 0.48 * eio(c01((gs - 0.32) / 0.58));
+      var thL = (50 * Math.PI / 180) * (1 - eo(c01((gs - 0.18) / 0.66))) - over * 0.12;
+      var thR = (-42 * Math.PI / 180) * (1 - eo(c01((gs - 0.27) / 0.62))) + over * 0.12;
+      nodeEl.setAttribute('transform', 'translate(' + fx(dX) + ' ' + fx(dY) + ') translate(609 318) scale(' + fx(ap) + ') translate(-609 -318)');
+      lfL.setAttribute('transform', leafMatrix(LL, thL, Ls, Ls * rL * (1 + over * 0.6), dX, dY));
+      lfR.setAttribute('transform', leafMatrix(RL, thR, Rs, Rs * rR * (1 + over * 0.6), dX, dY));
+      nodeEl.style.display = lfL.style.display = lfR.style.display = '';
+    } else nodeEl.style.display = lfL.style.display = lfR.style.display = 'none';
+    plantG.setAttribute('transform', 'rotate(' + sw.toFixed(3) + ' 591.5 438) translate(591.5 438) scale(' + fx(sc) + ') translate(-591.5 -438)');
+  }
+  function Spring(x, k, c){ this.x = x; this.v = 0; this.t = x; this.k = k; this.c = c; }
+  Spring.prototype.step = function(dt){ this.v += (-this.k * (this.x - this.t) - this.c * this.v) * dt; this.x += this.v * dt; };
+  Spring.prototype.rest = function(){ return Math.abs(this.x - this.t) < 0.0005 && Math.abs(this.v) < 0.0005; };
+  var grow = new Spring(0, 150, 24), scale = new Spring(1, 260, 15), sway = new Spring(0, 180, 11);
+  var running = false, lastT = 0;
+  function advance(dt){
+    var n = Math.max(1, Math.ceil(dt / 0.008)), h = dt / n;
+    for (var i = 0; i < n; i++) { grow.step(h); scale.step(h); sway.step(h); }
+    draw(grow.x, sway.x, scale.x);
+    return grow.rest() && scale.rest() && sway.rest();
+  }
+  function loop(t){
+    var dt = lastT ? Math.min(0.05, (t - lastT) / 1000) : 0.016; lastT = t;
+    if (advance(dt)) { running = false; lastT = 0; return; }
+    requestAnimationFrame(loop);
+  }
+  function kick(){ if (!running) { running = true; lastT = 0; requestAnimationFrame(loop); } }
+
+  /* Kutlama: canvas-confetti (public/js/confetti.browser.js, ISC). Yalnız gerektiğinde yüklenir. */
+  var confettiP = null, leafShapes = null;
+  function loadConfetti(){
+    if (window.confetti) return Promise.resolve(window.confetti);
+    if (!confettiP) confettiP = new Promise(function(res, rej){
+      var el = document.createElement('script'); el.src = '/js/confetti.browser.js'; el.async = true;
+      el.onload = function(){ window.confetti ? res(window.confetti) : rej(); }; el.onerror = rej;
+      document.head.appendChild(el);
+    });
+    return confettiP;
+  }
+  function celebrate(){
+    if (reduced) return;
+    loadConfetti().then(function(cf){
+      if (!leafShapes && cf.shapeFromPath) {
+        leafShapes = [
+          cf.shapeFromPath({ path: LEFT_D, matrix: [0.0634, 0, 0, 0.0634, -530.7 * 0.0634, -302.5 * 0.0634] }),
+          cf.shapeFromPath({ path: RIGHT_D, matrix: [0.0544, 0, 0, 0.0544, -701.4 * 0.0544, -280 * 0.0544] })
+        ];
+      }
+      var r = sprout.getBoundingClientRect();
+      var origin = { x: (r.left + r.width / 2) / window.innerWidth, y: (r.top + r.height * 0.35) / window.innerHeight };
+      var cs = getComputedStyle(document.documentElement);
+      var base = { colors: [cs.getPropertyValue('--accent').trim(), cs.getPropertyValue('--success').trim(), cs.getPropertyValue('--leaf-light').trim()], origin: origin, scalar: 1.5, zIndex: 50, disableForReducedMotion: true };
+      if (leafShapes) base.shapes = leafShapes;
+      cf(Object.assign({}, base, { particleCount: 24, angle: 118, spread: 72, startVelocity: 21, gravity: 0.6, decay: 0.92, drift: -0.3, ticks: 270 }));
+      setTimeout(function(){ cf(Object.assign({}, base, { particleCount: 14, angle: 88, spread: 56, startVelocity: 17, gravity: 0.58, decay: 0.92, drift: 0.15, ticks: 270 })); }, 140);
+    }).catch(function(){});
+  }
+
+  function progress(mode, milestone){
     var d = count();
     var p = total ? d / total : 0;
     var pct = (p * 100).toFixed(2) + '%';
     var complete = total > 0 && d === total;
     fillEl.style.width = pct;
-    sprout.style.left = 'clamp(-6px, calc(' + pct + ' - 17px), calc(100% - 28px))';
-    var e = c01(p / 0.25), oL = c01((p - 0.12) / 0.45), oR = c01((p - 0.35) / 0.5);
-    riseEl.style.transform = 'translateY(' + ((1 - e) * 14.5).toFixed(2) + 'px)';
-    sizeEl.style.transform = 'scale(' + (0.88 + 0.12 * p).toFixed(3) + ')';
-    lfL.style.transform = leaf(594.6, 325.2, (1 - oL) * 40, oL);
-    lfR.style.transform = leaf(620.9, 322.9, -(1 - oR) * 32, oR);
+    sprout.style.left = 'clamp(-8px, calc(' + pct + ' - 18px), calc(100% - 28px))';
     prog.classList.toggle('complete', complete);
     countEl.innerHTML = complete ? T.allDone : T.done.replace('{d}', '<b>' + d + '</b>').replace('{t}', String(total));
     resetBtn.hidden = d === 0;
     finished.classList.toggle('on', complete);
-    nodEl.classList.remove('nodA', 'nodB');
-    sprout.classList.remove('burst');
-    bloomEl.classList.remove('bloom');
-    bloomEl.style.transform = '';
-    if (!complete) return;
-    if (mode === 'tick' && !reduced) {
-      void sprout.offsetWidth;
-      bloomEl.classList.add('bloom');
-      sprout.classList.add('burst');
-    } else {
-      bloomEl.style.transform = 'scale(1.14)';
+    if (d === 0) celebrated = false;
+    if (p >= 0.7 && !reduced) loadConfetti().catch(function(){});
+    if (mode === 'still' || reduced) {
+      grow.x = grow.t = p; grow.v = 0; scale.x = scale.t = complete ? 1.1 : 1; scale.v = 0; sway.x = sway.v = 0;
+      draw(grow.x, 0, scale.x);
+      return;
     }
-  }
-  function nod(d){
-    if (reduced || d === 0 || d === total) return;
-    nodEl.classList.remove('nodA', 'nodB');
-    void nodEl.offsetWidth;
-    nodEl.classList.add(d % 2 ? 'nodA' : 'nodB');
+    grow.t = p;
+    if (complete) {
+      scale.t = 1.1;
+      if (!celebrated) { celebrated = true; scale.v += 2.4; celebrate(); }
+    } else {
+      scale.t = 1;
+      if (milestone) sway.v += (d % 2 ? -1 : 1) * 95;
+    }
+    kick();
   }
 
   /* Satırın yer değiştirmesi: uygulamadaki yay (350 ms, sönüm 0,85). */
@@ -542,8 +584,8 @@ const CLIENT_JS = `
     place(i);
     sections();
     if (!rapid && !reduced) { void r.offsetWidth; r.classList.add(done[i] ? 'pop' : 'squash'); }
-    progress(rapid ? 'still' : 'tick');
-    if (!rapid) nod(count());
+    var milestone = !!done[i] && homeList[i].children.length === 0 && count() < total;
+    progress(rapid ? 'still' : 'tick', milestone);
     if (before) flip(before);
     if (rapid || reduced) settle([r]);
     save();
@@ -657,7 +699,7 @@ function pageShell({ lang, title, ogTitle, ogDescription, host, body, inlineData
     '<meta name="robots" content="noindex">\n' +
     '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n' +
-    '<style>' + CSS.replace('__BURST_KEYFRAMES__', burstKeyframes()) + '</style>\n' +
+    '<style>' + CSS + '</style>\n' +
     '</head>\n<body>\n' + body + '\n' +
     '<script>' + THEME_JS + '</script>\n' +
     (inlineData ? '<script type="application/json" id="share-data">' + inlineData + '</script>\n<script>' + CLIENT_JS + '</script>\n' : '') +
@@ -682,7 +724,8 @@ function hashKey(s) {
 /**
  * renderShareHTML(data, host, opts)
  *   data — LZString ile sıkıştırılmış paylaşım verisi
- *   opts — { id, url, lang, ttlSeconds, qrSvg }
+ *   opts — { id, url, lang, ttlSeconds, qrSvg, langBase }
+ *          langBase: dil bağlantısının önü ('/s/<id>?' ya da '/share?data=…&'); liste verisi kaybolmasın diye
  */
 function renderShareHTML(data, host, opts) {
   opts = opts || {};
@@ -692,7 +735,7 @@ function renderShareHTML(data, host, opts) {
   const model = buildModel(payload, lang);
   const total = model.items.length;
   const url = opts.url || ('https://' + host + '/');
-  const langHref = '?lang=' + (lang === 'tr' ? 'en' : 'tr');
+  const langHref = (opts.langBase || '?') + 'lang=' + (lang === 'tr' ? 'en' : 'tr');
 
   const subParts = [t.sharedWithYou, t.items(total)];
   if (model.inSeason > 0) subParts.push(t.inSeasonCount(model.inSeason));
@@ -728,7 +771,7 @@ function renderShareHTML(data, host, opts) {
     '<section class="prog" id="prog" aria-live="polite">' +
     '<div class="prog-top"><p class="count" id="count"></p><button type="button" class="pill" id="reset" hidden>' + esc(t.reset) + '</button></div>' +
     '<div class="track" aria-hidden="true"><div class="track-fill"></div>' +
-    '<div class="sprout"><div class="sp-clip"><div class="sp-bloom"><div class="sp-nod"><div class="sp-rise"><div class="sp-size">' + sproutSvg() + '</div></div></div></div></div>' + burstHtml() + '</div>' +
+    '<div class="sprout" id="sprout">' + sproutSvg() + '</div>' +
     '</div></section>' +
     '<section class="finished" id="finished"><span class="finished-icon">' + ICON.checkCircle + '</span><div>' +
     '<h2>' + esc(t.finishedTitle) + '</h2><p>' + esc(t.finishedBody(total)) + '</p></div></section>' +
