@@ -282,7 +282,7 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 .why-grid{display:grid;gap:18px;margin-top:28px}
 .why-c{border-radius:28px;background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px rgba(43,33,24,.07);padding:18px 18px 22px;overflow:hidden}
 .why-c h3{margin:18px 4px 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(22px,1.7vw,30px);letter-spacing:-.015em;line-height:1.1;color:var(--paper-ink)}
-.why-c p{margin:8px 4px 0;font-size:clamp(15px,1vw,17px);line-height:1.5;color:var(--paper-2);text-wrap:pretty}
+.why-c > p{margin:8px 4px 0;font-size:clamp(15px,1vw,17px);line-height:1.5;color:var(--paper-2);text-wrap:pretty}
 .why-link{display:inline-flex;align-items:center;min-height:44px;margin:4px 4px 0;color:var(--accent);font-weight:600;text-decoration:none}
 .why-demo{display:grid;place-items:center;min-height:300px;border-radius:20px;background:rgba(43,33,24,.04);padding:18px 12px;overflow:hidden}
 .pal{--pal-bg:#FFFFFF;--pal-text:#1C1C1A;--pal-2:#6F6E69;--pal-pill:#F3F2EE;--pal-pillb:#E4E3DE;--pal-val:#9C5B45;--pal-ico:#A56B55;--pal-mint:#DCEBE4;--pal-mintfg:#2A7A5E;--pal-btn:#2D8B75;--pal-row:#EEEDE8;--pal-sep:#E2E1DC;--pal-tile:#E4E3DE;--pal-ring:#3A3A38;--pal-page:#F6F5F1;color:var(--pal-text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",sans-serif}
