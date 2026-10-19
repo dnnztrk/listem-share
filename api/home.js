@@ -74,6 +74,7 @@ const AT = ROWS.map((_, i) => ROW_START + i * ROW_STEP);
 
 const SV = {
   back: '<svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>',
+  moon: '<svg viewBox="0 0 24 24"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z" fill="currentColor" stroke="none"/></svg>',
   sun: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
   gear: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
@@ -113,7 +114,7 @@ function stage(lang) {
     '<div class="ap-head"><span class="ap-back">' + SV.back + '</span>' +
     '<span class="ap-tile"><span class="ap-emo">🧺</span><span class="ap-badge"><span class="ap-n">' + (ROWS.length - 1) + '</span></span></span>' +
     '<span class="ap-title">' + esc(t.list) + '</span>' +
-    '<span class="ap-tools"><span class="ap-lang">' + (lang === 'en' ? 'EN' : 'TR') + '</span>' + SV.sun + SV.gear + '</span></div>' +
+    '<span class="ap-tools"><span class="ap-lang">' + (lang === 'en' ? 'EN' : 'TR') + '</span><span class="ap-ic-l">' + SV.sun + '</span><span class="ap-ic-d">' + SV.moon + '</span>' + SV.gear + '</span></div>' +
     '<div class="ap-search"><span class="ap-field">' + SV.search + '<span>' + esc(t.search) + '</span></span></div>' +
     '<div class="ap-body">' +
     '<div class="ap-sec" style="--d:' + AT[0] + 'ms"><span aria-hidden="true">🍎</span>' + esc(t.fruit) + '</div><ul class="ap-rows">' + fruitRows + '</ul>' +
@@ -218,6 +219,7 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 .ap-tools{display:flex;align-items:center;gap:1.2em;margin-left:auto;color:var(--ap-text)}
 .ap-lang{font-size:.58em;font-weight:700}
 .ap-tools svg{width:.95em;height:.95em;stroke-width:1.7}
+.ap-ic-l,.ap-ic-d{display:flex}.ap-ic-d{display:none;color:#A3A29C}
 .ap-search{padding:0 .9em .5em;border-bottom:1px solid var(--ap-sep)}
 .ap-field{display:flex;align-items:center;gap:.5em;height:2.15em;padding:0 .8em;border-radius:.75em;background:var(--ap-field);box-shadow:inset 0 0 0 1px var(--ap-fieldb);color:var(--ap-2)}
 .ap-field span{font-size:.64em}
@@ -285,6 +287,8 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 .stage.play.wait *{animation-play-state:paused!important}
 /* koyu tema: kâğıt gece rengi, kart uygulamanın koyu yüzeyi; parçalar kendi renginde */
 ${DARK('.home{--paper-ink:var(--text);--paper-2:var(--text2)}')}
+${DARK('.ap-ic-l{display:none}')}
+${DARK('.ap-ic-d{display:flex}')}
 ${DARK('.app{--ap-bg:#121212;--ap-row:#1E1E1C;--ap-sep:#2A2A28;--ap-tile:#2A2A28;--ap-text:#F2F2EF;--ap-2:#8E8D88;--ap-ring:#7A7975;--ap-green:#3DB394;--ap-mint:#1F3A30;--ap-sfg:#4FC79B;--ap-fbg:#1B3140;--ap-ffg:#5BB3E0;--ap-field:#262624;--ap-fieldb:#262624;box-shadow:0 1.2em 3em rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.06)}')}
 ${DARK('body.home{background:var(--bg)}')}
 ${DARK('body.home::before{display:none}')}

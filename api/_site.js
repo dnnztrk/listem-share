@@ -13,7 +13,7 @@ const SITE = {
     tagline: 'Türkiye’ye özel market alışveriş listesi',
     nav: { season: 'Mevsim Takvimi', seasonShort: 'Takvim' },
     legal: 'Yasal', soon: 'Çok yakında App Store’da', langGroup: 'Dil',
-    themeSystem: 'Görünüm: sistem', themeLight: 'Görünüm: açık', themeDark: 'Görünüm: koyu',
+    toDark: 'Koyu temaya geç', toLight: 'Açık temaya geç',
     otherLang: 'EN', otherLangLabel: 'Show in English',
     privacy: 'Gizlilik', terms: 'Koşullar', contact: 'İletişim',
     home: 'Ana sayfa',
@@ -22,7 +22,7 @@ const SITE = {
     tagline: 'A grocery list made for Türkiye',
     nav: { season: 'Seasonal Calendar', seasonShort: 'Calendar' },
     legal: 'Legal', soon: 'Coming soon to the App Store', langGroup: 'Language',
-    themeSystem: 'Appearance: system', themeLight: 'Appearance: light', themeDark: 'Appearance: dark',
+    toDark: 'Switch to dark theme', toLight: 'Switch to light theme',
     otherLang: 'TR', otherLangLabel: 'Türkçe göster',
     privacy: 'Privacy', terms: 'Terms', contact: 'Contact',
     home: 'Home',
@@ -109,6 +109,10 @@ body.p-share{--page:#DEE7EA}
 .langs a:active{opacity:.6}
 .tool{width:40px;height:40px;border-radius:999px;border:0;background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);text-decoration:none;transition:background-color .2s ease}
 .tool svg{width:18px;height:18px}
+.tool .ic{display:flex}.tool .ic-d{display:none}
+:root[data-theme="dark"] .tool .ic-l{display:none}:root[data-theme="dark"] .tool .ic-d{display:flex}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{transition:background-color .4s ease,color .4s ease,border-color .4s ease,fill .4s ease,stroke .4s ease,box-shadow .4s ease!important}
 .tool:active{opacity:.6}
 @media (hover:hover){.nav a:hover,.tool:hover{background:var(--chip-chrome);color:var(--text)}.langs a:hover{color:var(--text)}}
 @media (max-width:440px){.nav .long{display:none}.nav .short{display:inline}.nav a{padding:0 11px}.bar-right{gap:2px}}
@@ -157,24 +161,33 @@ body.p-share{--page:#DEE7EA}
 `;
 
 /* Görünüm seçimi ilk boyamadan önce uygulanır: gece açılan sayfa bir an bile parlamaz. */
-const THEME_BOOT = "(function(){try{var m=localStorage.getItem('listem-theme');if(m==='light'||m==='dark')document.documentElement.setAttribute('data-theme',m);}catch(e){}})();";
+const THEME_BOOT = "(function(){var r=document.documentElement,m=null;try{m=localStorage.getItem('listem-theme')}catch(e){}if(m!=='light'&&m!=='dark'){m=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}r.setAttribute('data-theme',m)})();";
 const THEME_JS = `
 (function(){
-  /* Görünüm: sistem → açık → koyu. Seçim bu tarayıcıda saklanır, sitenin her sayfasında geçerli. */
+  /* Görünüm: açık ↔ koyu. Seçim bu tarayıcıda saklanır, sitenin her sayfasında geçerli.
+     Yeni tema, düğmenin olduğu yerden bir daire gibi açılarak sayfaya yayılır. */
   var root = document.documentElement, btn = document.getElementById('theme');
   if (!btn) return;
-  var modes = ['system', 'light', 'dark'];
-  var icons = JSON.parse(btn.getAttribute('data-icons'));
   var labels = JSON.parse(btn.getAttribute('data-labels'));
-  function set(m, save){
-    if (m === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', m);
-    if (save) { try { if (m === 'system') localStorage.removeItem('listem-theme'); else localStorage.setItem('listem-theme', m); } catch(e){} }
-    btn.innerHTML = icons[m];
-    btn.setAttribute('aria-label', labels[m]);
-    btn.setAttribute('data-mode', m);
-  }
-  set(root.getAttribute('data-theme') || 'system', false);
-  btn.addEventListener('click', function(){ set(modes[(modes.indexOf(btn.getAttribute('data-mode')) + 1) % 3], true); });
+  function label(){ btn.setAttribute('aria-label', root.getAttribute('data-theme') === 'dark' ? labels.toLight : labels.toDark); }
+  function apply(m){ root.setAttribute('data-theme', m); try { localStorage.setItem('listem-theme', m); } catch(e){} label(); }
+  label();
+  btn.addEventListener('click', function(){
+    var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { apply(next); return; }
+    if (document.startViewTransition) {
+      var r = btn.getBoundingClientRect(), x = r.left + r.width / 2, y = r.top + r.height / 2;
+      var R = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      var vt = document.startViewTransition(function(){ apply(next); });
+      vt.ready.then(function(){
+        root.animate({ clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + R + 'px at ' + x + 'px ' + y + 'px)'] },
+          { duration: 560, easing: 'cubic-bezier(.3,.7,.2,1)', pseudoElement: '::view-transition-new(root)' });
+      }).catch(function(){});
+    } else {
+      root.classList.add('theme-anim'); apply(next);
+      setTimeout(function(){ root.classList.remove('theme-anim'); }, 450);
+    }
+  });
 })();
 (function(){
   /* Başlık: sayfa kayınca buzlu cam zemin; yazı kaybolur, sepet işareti kalır. */
@@ -203,7 +216,7 @@ function header(lang, langHref, current) {
     '<div class="bar-right">' +
     '<nav class="nav" aria-label="List-em"><a href="' + seasonHref + '"' + (current === 'season' ? ' aria-current="page"' : '') + '><span class="long">' + esc(t.nav.season) + '</span><span class="short" aria-hidden="true">' + esc(t.nav.seasonShort) + '</span></a></nav>' +
     '<div class="langs" role="group" aria-label="' + esc(t.langGroup) + '">' + langs + '</div>' +
-    '<button type="button" class="tool" id="theme" aria-label="' + esc(t.themeSystem) + '" data-icons="' + esc(JSON.stringify(ICON)) + '" data-labels="' + esc(JSON.stringify({ system: t.themeSystem, light: t.themeLight, dark: t.themeDark })) + '">' + ICON.system + '</button>' +
+    '<button type="button" class="tool" id="theme" aria-label="' + esc(t.toDark) + '" data-labels="' + esc(JSON.stringify({ toDark: t.toDark, toLight: t.toLight })) + '"><span class="ic ic-l">' + ICON.light + '</span><span class="ic ic-d">' + ICON.dark + '</span></button>' +
     '</div></header>';
 }
 /* Alt bilgi. lead: sayfaya özel ilk satır (HTML, çağıran kaçışlar). */
