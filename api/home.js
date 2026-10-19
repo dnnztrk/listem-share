@@ -483,8 +483,11 @@ ${DARK('.now,.home .site-foot{border-top-color:var(--border)}')}
   .now{margin-top:clamp(56px,8vh,120px);padding-top:clamp(28px,3vw,48px)}
   .why{margin-top:clamp(72px,10vh,140px);padding-top:clamp(36px,4vw,56px)}
   .why-grid{gap:clamp(96px,10vw,160px);margin-top:clamp(56px,6vw,96px)}
-  .why-c{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(40px,6vw,110px)}
-  .why-c:nth-child(even){grid-template-columns:minmax(0,7fr) minmax(0,5fr)}
+  /* görsel metne yaslanır, boşluk dış kenarda kalır */
+  .why-c{grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:clamp(48px,6vw,96px)}
+  .why-c:nth-child(even){grid-template-columns:minmax(0,1fr) minmax(0,420px)}
+  .why-c:nth-child(odd) .why-demo{justify-items:start}
+  .why-c:nth-child(even) .why-demo{justify-items:end}
   .why-c:nth-child(even) .why-txt{order:2}
   .k-a .sheet-m{--w:min(100cqw - 8px,380px)}
   .k-c .chat{zoom:1.12}
