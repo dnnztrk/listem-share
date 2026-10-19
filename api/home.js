@@ -363,7 +363,8 @@ ${DARK('.bub-link{color:#5ED0A6}')}
 ${DARK('.why-c{background:var(--surface);box-shadow:inset 0 0 0 1px var(--border)}')}
 ${DARK('.why-demo{background:rgba(255,255,255,.03)}')}
 ${DARK('.why{border-top-color:var(--border)}')}
-@media (prefers-reduced-motion:reduce){.why-c .sheet-m,.why-c .bub{transform:none;opacity:1}/* sahne: telefonda önce tezgâh, altında uygulama; masaüstünde uygulama solda, tezgâh sağda */
+@media (prefers-reduced-motion:reduce){.why-c .sheet-m,.why-c .bub{transform:none;opacity:1}.mr i.on b{transform:none}.aisle-m li:not(.ah){transform:translateY(var(--y1))}.aisle-m li.ah{opacity:1}}
+/* sahne: telefonda önce tezgâh, altında uygulama; masaüstünde uygulama solda, tezgâh sağda */
 .stage{position:relative;margin:40px 0 0;container-type:inline-size}
 .pile{position:relative;aspect-ratio:1.55;margin:0 -4px}
 .pc{position:absolute;left:var(--mx);top:var(--my);width:var(--mw);height:auto;transform:rotate(var(--r)) scaleX(var(--f));transform-origin:50% 60%}
