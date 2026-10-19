@@ -257,11 +257,17 @@ function pageShell(o) {
     (o.description ? '<meta name="description" content="' + esc(o.description) + '">\n' : '') +
     '<meta property="og:title" content="' + esc(o.ogTitle || o.title) + '">\n' +
     '<meta property="og:description" content="' + esc(o.ogDescription || o.description || '') + '">\n' +
-    '<meta property="og:image" content="https://' + esc(host) + '/og-image.png">\n' +
+    '<meta property="og:image" content="https://' + esc(host) + '/og-image' + (o.lang === 'en' ? '-en' : '') + '.jpg">\n' +
+    '<meta property="og:image:type" content="image/jpeg">\n' +
+    '<meta property="og:image:width" content="1200">\n' +
+    '<meta property="og:image:height" content="630">\n' +
+    '<meta property="og:image:alt" content="' + (o.lang === 'en' ? 'List-em: a grocery list made for Türkiye' : 'List-em: Türkiye’ye özel market alışveriş listesi') + '">\n' +
+    '<meta name="twitter:image" content="https://' + esc(host) + '/og-image' + (o.lang === 'en' ? '-en' : '') + '.jpg">\n' +
     '<meta property="og:type" content="website">\n' +
     '<meta name="twitter:card" content="summary_large_image">\n' +
     (o.index ? '' : '<meta name="robots" content="noindex">\n') +
     '<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n' +
+    '<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">\n' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n' +
     '<link rel="preload" href="/fonts/fraunces-latin-soft-normal.woff2" as="font" type="font/woff2" crossorigin>\n' +
     '<style>' + FONT_CSS + TOKENS_CSS + BASE_CSS + (o.css || '') + '</style>\n' +
