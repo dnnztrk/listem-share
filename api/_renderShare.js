@@ -236,10 +236,10 @@ function rowHtml(it, t) {
 }
 
 const CSS = `
-body.paper{--paper:#F7E8CE;background:var(--paper)}
+body.paper{background:var(--page)}
 body.paper::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .12 0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:.16;mix-blend-mode:multiply;pointer-events:none;z-index:30}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body.paper{background:var(--bg)}:root:not([data-theme="light"]) body.paper::before{display:none}}
-:root[data-theme="dark"] body.paper{background:var(--bg)}:root[data-theme="dark"] body.paper::before{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body.paper::before{display:none}:root:not([data-theme="light"]) .qr{--qr-tile:#CBC6BA}}
+:root[data-theme="dark"] body.paper::before{display:none}:root[data-theme="dark"] .qr{--qr-tile:#CBC6BA}
 .layout{padding-top:12px}
 .sheet{--surface:#EEEDE8;--bg:#F6F5F1;--border:#E2E1DC;--emoji-bg:#E4E3DE;background:#F6F5F1;border-radius:24px;padding:4px 12px 20px;box-shadow:0 18px 44px rgba(70,45,20,.14),0 2px 6px rgba(70,45,20,.06)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sheet{--surface:#1E1E1C;--bg:#121212;--border:#2A2A28;--emoji-bg:#2A2A28;background:#121212;box-shadow:0 18px 44px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}}
@@ -276,7 +276,7 @@ body.paper::before{content:"";position:fixed;inset:0;background-image:url("data:
 .track-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:var(--accent);transition:width 250ms var(--move)}
 .sprout{position:absolute;bottom:2px;left:0;width:36px;height:27px;transition:left 250ms var(--move)}
 .sprout svg{position:absolute;left:0;bottom:0;width:36px;height:27px;overflow:visible}
-.plant{fill:var(--accent);stroke:var(--accent);stroke-width:3;stroke-linejoin:round}
+.plant{fill:var(--accent);stroke:none}
 .count .all{display:block;font-size:16px;font-weight:600;color:var(--accent);line-height:21px}
 .count .all-sub{display:block;margin-top:2px;font-size:13px;font-weight:500;color:var(--text2)}
 .note{margin:10px 2px 0;font-size:12px;line-height:1.45;color:var(--text2)}
@@ -441,25 +441,22 @@ const CLIENT_JS = `
     return 'matrix(' + [a, b, cc, d, sp.bx + dx - (a * sp.bx + cc * sp.by), sp.by + dy - (b * sp.bx + d * sp.by)].map(fx).join(' ') + ')';
   }
   function draw(g, sw, sc){
-    var gs = Math.max(0, g), over = Math.max(0, g - 1);
-    var sh = eo(c01(gs / 0.28)), lean = (1 - eio(c01((gs - 0.1) / 0.32))) * 0.42, wx = 0.62 + 0.38 * eo(c01(gs / 0.4)), k = -lean * sh;
-    if (sh > 0.002) {
-      stemEl.setAttribute('transform', 'matrix(' + [wx, 0, k, sh, B.x - wx * B.x - k * B.y, B.y - sh * B.y].map(fx).join(' ') + ')');
+    var gs = c01(g);
+    var st = eo(c01(gs / 0.34));
+    if (st > 0.002) {
+      stemEl.setAttribute('transform', 'translate(0 ' + fx(B.y) + ') scale(1 ' + fx(st) + ') translate(0 ' + fx(-B.y) + ')');
       stemEl.style.display = '';
     } else stemEl.style.display = 'none';
-    var dX = B.x + wx * (J.x - B.x) + k * (J.y - B.y) - J.x, dY = B.y + sh * (J.y - B.y) - J.y;
-    var ap = eo(c01((gs - 0.14) / 0.14));
-    if (ap > 0.002) {
-      var a = c01((gs - 0.14) / 0.6), b = c01((gs - 0.24) / 0.6);
-      var Ls = ap * (0.32 + 0.68 * eo(a)) * (1 + over * 0.5), Rs = ap * (0.32 + 0.68 * eo(b)) * (1 + over * 0.5);
-      var rL = 0.52 + 0.48 * eio(c01((gs - 0.22) / 0.6)), rR = 0.52 + 0.48 * eio(c01((gs - 0.32) / 0.58));
-      var thL = (50 * Math.PI / 180) * (1 - eo(c01((gs - 0.18) / 0.66))) - over * 0.12;
-      var thR = (-42 * Math.PI / 180) * (1 - eo(c01((gs - 0.27) / 0.62))) + over * 0.12;
-      nodeEl.setAttribute('transform', 'translate(' + fx(dX) + ' ' + fx(dY) + ') translate(609 318) scale(' + fx(ap) + ') translate(-609 -318)');
-      lfL.setAttribute('transform', leafMatrix(LL, thL, Ls, Ls * rL * (1 + over * 0.6), dX, dY));
-      lfR.setAttribute('transform', leafMatrix(RL, thR, Rs, Rs * rR * (1 + over * 0.6), dX, dY));
-      nodeEl.style.display = lfL.style.display = lfR.style.display = '';
-    } else nodeEl.style.display = lfL.style.display = lfR.style.display = 'none';
+    var dY = (1 - st) * (B.y - J.y);
+    var aL = eo(c01((gs - 0.18) / 0.5)), aR = eo(c01((gs - 0.34) / 0.56)), an = eo(c01((gs - 0.16) / 0.3));
+    function leaf(el, a, open){
+      if (a < 0.002) { el.style.display = 'none'; return; }
+      el.style.display = '';
+      el.setAttribute('transform', 'translate(0 ' + fx(dY) + ') translate(' + J.x + ' ' + J.y + ') rotate(' + fx(open * (1 - a)) + ') scale(' + fx(a) + ') translate(' + (-J.x) + ' ' + (-J.y) + ')');
+    }
+    leaf(lfL, aL, 38); leaf(lfR, aR, -38);
+    if (an > 0.002) { nodeEl.style.display = ''; nodeEl.setAttribute('transform', 'translate(0 ' + fx(dY) + ') translate(609 318) scale(' + fx(an) + ') translate(-609 -318)'); }
+    else nodeEl.style.display = 'none';
     plantG.setAttribute('transform', 'rotate(' + sw.toFixed(3) + ' 591.5 438) translate(591.5 438) scale(' + fx(sc) + ') translate(-591.5 -438)');
   }
   function Spring(x, k, c){ this.x = x; this.v = 0; this.t = x; this.k = k; this.c = c; }
@@ -759,7 +756,7 @@ function renderShareHTML(data, host, opts) {
     host,
     css: CSS,
     body,
-    bodyClass: 'paper',
+    bodyClass: 'paper p-share',
     scripts: '<script type="application/json" id="share-data">' + inlineData + '</script>\n<script>' + CLIENT_JS + '</script>\n',
     index: false,
   });
@@ -808,7 +805,7 @@ async function qrSvgFor(url) {
   if (!url) return '';
   try {
     if (url.length > 160) {
-      return await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#17423AFF', light: '#FFFFFFFF' } });
+      return await QRCode.toString(url, { type: 'svg', margin: 0, errorCorrectionLevel: 'M', color: { dark: '#17423AFF', light: '#00000000' } });
     }
     const qr = QRCode.create(url, { errorCorrectionLevel: 'H' });
     const n = qr.modules.size;

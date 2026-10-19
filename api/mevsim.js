@@ -98,10 +98,10 @@ const DARK = (sel) => '@media (prefers-color-scheme:dark){:root:not([data-theme=
 
 const CSS = `
 :root{--vine:#3F6E48;--tile:rgba(255,255,255,.6);--gridline:rgba(43,33,24,.06);--paper:#F7E8CE;--ink:#2B2118;--ink2:#6A5D4E;--ink3:#4A3F33;--rule:rgba(43,33,24,.1);--band:rgba(45,139,117,.13);--chip:rgba(255,255,255,.55);--c-Fruit:#E0703A;--c-Vegetables:#4C8A55;--c-Fish:#3C6893;--namew:118px}
-body.paper{background:var(--paper)}
+body.paper{background:var(--page)}
 body.paper::before{content:"";position:fixed;inset:0;background-image:${GRAIN};opacity:.16;mix-blend-mode:multiply;pointer-events:none;z-index:30}
 ${DARK('.cal{--vine:#4E8B5A;--tile:var(--surface);--gridline:rgba(255,255,255,.05);--ink:var(--text);--ink2:var(--text2);--ink3:var(--text2);--rule:rgba(255,255,255,.08);--band:rgba(56,182,150,.16);--chip:var(--surface);--c-Fruit:#F0864E;--c-Vegetables:#63A36C;--c-Fish:#5A8CBF}')}
-${DARK('body.paper{background:var(--bg)}')}
+${DARK('body.paper{background:var(--page)}')}
 ${DARK('body.paper::before{display:none}')}
 .cal [hidden]{display:none!important}
 .cal{padding:4px 0 24px;color:var(--ink)}
@@ -145,8 +145,8 @@ ${DARK('.kind[aria-pressed="true"]{color:var(--bg)}')}
 .legend .lband{width:14px;height:18px;border-radius:4px;background:var(--band)}
 .chart > h2{margin:0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(28px,2.6vw,48px);letter-spacing:-.02em}
 .grid-h,.sr{display:grid;grid-template-columns:var(--namew) repeat(12,minmax(0,1fr))}
-.grid-h{position:sticky;top:60px;z-index:2;margin-top:16px;padding:8px 0;background:var(--paper);border-bottom:1px solid var(--rule)}
-${DARK('.grid-h{background:var(--bg)}')}
+.grid-h{position:sticky;top:60px;z-index:2;margin-top:16px;padding:8px 0;background:var(--page);border-bottom:1px solid var(--rule)}
+${DARK('.grid-h{background:var(--page)}')}
 .grid-h span{display:grid;place-items:center;min-height:24px;font-size:12px;font-weight:600;color:var(--ink2);border-radius:6px}
 .grid-h span.sel{background:var(--band);color:var(--accent)}
 .grid-h .l{display:none}
@@ -331,7 +331,7 @@ function render(lang, host, q) {
     '</main>' + site.footer(lang, '') + '</div>' +
     '<script type="application/json" id="cal-data">' + JSON.stringify(payload).replace(/</g, '\\u003c') + '</script>' +
     '<script>' + CLIENT + '</script>';
-  return site.pageShell({ lang, title: t.title + ' · List-em', description: t.metaDesc, ogTitle: t.title, ogDescription: t.metaDesc, host, css: CSS, body, bodyClass: 'paper', index: true });
+  return site.pageShell({ lang, title: t.title + ' · List-em', description: t.metaDesc, ogTitle: t.title, ogDescription: t.metaDesc, host, css: CSS, body, bodyClass: 'paper p-cal', index: true });
 }
 
 module.exports = (req, res) => {
