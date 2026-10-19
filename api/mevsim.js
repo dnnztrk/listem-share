@@ -109,7 +109,7 @@ ${DARK('body.paper::before{display:none}')}
 @property --grow{syntax:'<length>';inherits:false;initial-value:0px}
 .cal{position:relative}
 .ivy{display:none}
-.ivy-top{position:absolute;top:-2px;right:-16px;width:min(66vw,330px);height:auto;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));transition:--grow 1.6s cubic-bezier(.2,.7,.2,1)}
+.ivy-top{position:absolute;top:-4px;right:-16px;width:min(82vw,380px);height:auto;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));mask-image:linear-gradient(to bottom,#000 calc(var(--grow) - 90px),transparent var(--grow));transition:--grow 1.6s cubic-bezier(.2,.7,.2,1)}
 .kicker{margin:0;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
 .cal-hero{position:relative}
 .more{display:inline-flex;align-items:center;min-height:34px;padding:0 13px;border-radius:999px;border:1px dashed var(--rule);background:transparent;color:var(--accent);font:700 14px/1 inherit;font-family:inherit;cursor:pointer}
@@ -194,7 +194,7 @@ ${DARK('.grid-h{background:var(--bg)}')}
   .explain{font-size:16px}
   .sr i b{height:14px}
 }
-@media (max-width:899px){.cal-hero{padding-top:92px}.cal h1{font-size:68px;margin-top:12px}.lead{margin-top:12px}.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:36px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.kinds{margin-top:16px}.show{margin-top:48px;gap:36px}.chart{margin-top:72px}.yr{margin-top:64px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
+@media (max-width:899px){.cal-hero{padding-top:64px}.cal h1{font-size:68px;margin-top:12px}.lead{margin-top:12px}.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:36px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.kinds{margin-top:16px}.show{margin-top:48px;gap:36px}.chart{margin-top:72px}.yr{margin-top:64px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
 @media (hover:hover){.sr:hover{background:var(--chip)}}
 `;
 

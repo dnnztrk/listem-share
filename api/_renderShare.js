@@ -43,6 +43,7 @@ const STR = {
     copied: 'Bağlantı kopyalandı.',
     print: 'Yazdır',
     madeWith: 'Bu liste List-em ile hazırlandı.',
+    promoTitle: 'Bu liste List-em ile hazırlandı', promoBody: 'Türkiye’ye özel market alışveriş listesi. Ürünleri gramıyla, kalorisiyle ve mevsimiyle bilir; markette reyon sırasına dizilir.', soon: 'Çok yakında App Store’da', meet: 'List-em’i tanı', calendar: 'Mevsim Takvimi',
     localOnly: 'İşaretlerin yalnızca bu cihazda tutulur.',
     ttlDays: (d) => d <= 1 ? 'Bağlantı yarın kapanıyor.' : 'Bağlantı ' + d + ' gün daha açık.',
     ttlDefault: 'Paylaşılan listeler 30 gün açık kalır.',
@@ -82,6 +83,7 @@ const STR = {
     copied: 'Link copied.',
     print: 'Print',
     madeWith: 'This list was made with List-em.',
+    promoTitle: 'This list was made with List-em', promoBody: 'A grocery list made for Türkiye. It knows products by weight, calories and season, and puts your list in aisle order.', soon: 'Coming soon to the App Store', meet: 'Meet List-em', calendar: 'Seasonal Calendar',
     localOnly: 'Your ticks are kept only on this device.',
     ttlDays: (d) => d <= 1 ? 'The link closes tomorrow.' : 'The link stays open for ' + d + ' more days.',
     ttlDefault: 'Shared lists stay open for 30 days.',
@@ -152,6 +154,7 @@ function buildModel(payload, lang) {
       title: text.title || it.name || '',
       second: text.second || '',
       emoji: (product && product.emoji) || it.emoji || cat.emoji || '🛒',
+      pid: product ? product.id : null,
       cat,
       seasonKind: inSeason ? (season.kind === 'sea' ? 'sea' : 'land') : null,
       qty,
@@ -214,6 +217,9 @@ function sproutSvg() {
     '</g></g></svg>';
 }
 
+/* Ürün işaretleri: çizimi olanlar çizimle (sitenin her yerinde aynı kural), diğerleri uygulamadaki emojiyle. */
+const PIECE = { nar: 'nar', ayva: 'ayva', 'trabzon-hurmasi': 'hurma', mandalina: 'mandalina', hamsi: 'hamsi' };
+
 function rowHtml(it, t) {
   const badge = it.seasonKind
     ? '<span class="badge badge-' + it.seasonKind + '">' + esc(it.seasonKind === 'sea' ? t.inSeasonSea : t.inSeasonLand) + '</span>'
@@ -223,13 +229,37 @@ function rowHtml(it, t) {
   return '<li class="row" data-i="' + it.index + '" data-o="' + it.order + '">' +
     '<button type="button" class="row-btn" aria-pressed="false">' +
     '<span class="check" aria-hidden="true"><span class="fill"></span>' + ICON.check + '</span>' +
-    '<span class="emoji" aria-hidden="true">' + esc(it.emoji) + '</span>' +
+    '<span class="emoji" aria-hidden="true">' + (PIECE[it.pid] ? '<img src="/img/pazar/' + PIECE[it.pid] + '.webp" alt="">' : esc(it.emoji)) + '</span>' +
     '<span class="txt"><span class="l1"><span class="name">' + esc(it.title) + '<span class="strike"></span></span>' + badge + '</span>' + second + '</span>' +
     qty +
     '</button></li>';
 }
 
 const CSS = `
+body.paper{--paper:#F7E8CE;background:var(--paper)}
+body.paper::before{content:"";position:fixed;inset:0;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .12 0 0 0 .55 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");opacity:.16;mix-blend-mode:multiply;pointer-events:none;z-index:30}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) body.paper{background:var(--bg)}:root:not([data-theme="light"]) body.paper::before{display:none}}
+:root[data-theme="dark"] body.paper{background:var(--bg)}:root[data-theme="dark"] body.paper::before{display:none}
+.layout{padding-top:12px}
+.sheet{--surface:#EEEDE8;--bg:#F6F5F1;--border:#E2E1DC;--emoji-bg:#E4E3DE;background:#F6F5F1;border-radius:24px;padding:4px 12px 20px;box-shadow:0 18px 44px rgba(70,45,20,.14),0 2px 6px rgba(70,45,20,.06)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sheet{--surface:#1E1E1C;--bg:#121212;--border:#2A2A28;--emoji-bg:#2A2A28;background:#121212;box-shadow:0 18px 44px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}}
+:root[data-theme="dark"] .sheet{--surface:#1E1E1C;--bg:#121212;--border:#2A2A28;--emoji-bg:#2A2A28;background:#121212;box-shadow:0 18px 44px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
+.emoji img{width:84%;height:84%;object-fit:contain}
+.col{display:grid;gap:20px;margin-top:40px}
+.promo{position:relative;padding:28px 22px 24px;border-radius:24px;background:rgba(255,255,255,.55);box-shadow:inset 0 0 0 1px rgba(43,33,24,.08);overflow:visible}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .promo{background:var(--surface);box-shadow:inset 0 0 0 1px var(--border)}}
+:root[data-theme="dark"] .promo{background:var(--surface);box-shadow:inset 0 0 0 1px var(--border)}
+.promo-art{position:absolute;top:-26px;right:10px;width:132px;height:84px;pointer-events:none}
+.promo-art img{position:absolute;height:auto}
+.pa1{width:44px;right:86px;top:16px;transform:rotate(-28deg)}.pa2{width:62px;right:34px;top:0;transform:rotate(-8deg)}.pa3{width:58px;right:-6px;top:22px;transform:rotate(10deg)}
+.promo-soon{display:inline-flex;align-items:center;margin:0;min-height:28px;padding:0 12px;border-radius:999px;background:rgba(45,139,117,.12);color:var(--accent);font-size:13px;font-weight:600}
+.promo h2{margin:14px 0 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:26px;line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
+.nb{white-space:nowrap}
+.promo-body{margin:10px 0 0;font-size:15px;line-height:1.5;color:var(--text2);text-wrap:pretty}
+.promo-links{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:16px}
+.promo-links a{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:600;text-decoration:none}
+.promo-links .promo-main{padding:0 18px;border-radius:12px;background:var(--accent);color:#fff}
+.promo-links a:active{opacity:.6}
 .head{display:flex;align-items:center;gap:12px;padding:12px 0 0}
 .face{flex:none;width:44px;height:44px;border-radius:12px;background:var(--accent-muted);display:flex;align-items:center;justify-content:center;font-size:20px}
 .head h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.4px;line-height:1.1;overflow-wrap:anywhere}
@@ -307,10 +337,14 @@ ul{list-style:none;margin:0;padding:0}
 .toast button{border:0;border-radius:8px;min-height:36px;padding:8px 10px;background:transparent;color:var(--bg);font-weight:700;cursor:pointer;text-decoration:underline}
 .toast button[hidden]{display:none}
 @media (min-width:900px){
-  .layout{display:grid;grid-template-columns:minmax(0,640px) 300px;justify-content:center;gap:64px;align-items:start}
+  .layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(320px,1fr);gap:clamp(32px,4vw,72px);align-items:start;padding-top:28px}
+  .sheet{border-radius:28px;padding:8px 24px 28px}
+  .col{position:sticky;top:96px;margin-top:0}
+  .promo{padding:32px 28px 28px}
+  .promo h2{font-size:30px}
   .head{padding-top:24px}
   .head h1{font-size:34px}
-  .side{display:block;position:sticky;top:24px;margin-top:24px;background:var(--surface);border:.5px solid var(--border);border-radius:16px;padding:20px}
+  .side{display:block;background:rgba(255,255,255,.55);border:0;box-shadow:inset 0 0 0 1px rgba(43,33,24,.08);border-radius:24px;padding:24px 24px 22px}
   .side[hidden]{display:none}
   .side h2{margin:0;font-size:16px;font-weight:600;line-height:21px}
   .side p{margin:8px 0 0;font-size:13px;line-height:1.45;color:var(--text2)}
@@ -322,8 +356,10 @@ ul{list-style:none;margin:0;padding:0}
   .act svg{width:18px;height:18px;color:var(--accent)}
   .act:active{opacity:.6}
 }
+@media (min-width:900px){@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .side{background:var(--surface);box-shadow:inset 0 0 0 1px var(--border)}}:root[data-theme="dark"] .side{background:var(--surface);box-shadow:inset 0 0 0 1px var(--border)}}
 @media print{
-  .side,.toast,.prog,.note{display:none!important}
+  .side,.toast,.prog,.note,.col{display:none!important}
+  .sheet{box-shadow:none;padding:0}
   .done-sec.closed ul{display:block}
   .row{break-inside:avoid}
   .layout{display:block}
@@ -671,10 +707,19 @@ function renderShareHTML(data, host, opts) {
       '</div></aside>'
     : '';
 
+  const q = lang === 'en' ? '?lang=en' : '';
+  const promo = '<section class="promo" aria-labelledby="promo-title">' +
+    '<div class="promo-art" aria-hidden="true"><img class="pa1" src="/img/pazar/yaprak.webp" alt=""><img class="pa2" src="/img/pazar/nar.webp" alt=""><img class="pa3" src="/img/pazar/mandalina.webp" alt=""></div>' +
+    '<p class="promo-soon">' + esc(t.soon) + '</p>' +
+    '<h2 id="promo-title">' + esc(t.promoTitle).replace('List-em', '<span class="nb">List-em</span>') + '</h2>' +
+    '<p class="promo-body">' + esc(t.promoBody) + '</p>' +
+    '<div class="promo-links"><a class="promo-main" href="/' + q + '">' + esc(t.meet) + ' →</a><a href="/mevsim' + q + '">' + esc(t.calendar) + ' →</a></div>' +
+    '</section>';
+
   const body =
     '<div class="wrap">' +
     site.header(lang, langHref, null) +
-    '<div class="layout"><main class="main">' +
+    '<div class="layout"><main class="main"><div class="sheet">' +
     '<div class="head"><span class="face" aria-hidden="true">' + esc(model.icon) + '</span><div>' +
     '<h1>' + esc(model.name) + '</h1>' +
     '<p class="sub">' + esc(subParts.join(' · ')) + '</p></div></div>' +
@@ -688,7 +733,7 @@ function renderShareHTML(data, host, opts) {
     '<section class="done-sec" id="done-sec" hidden>' +
     '<button type="button" class="done-h" aria-expanded="true"><span class="done-title"></span>' + ICON.chevronDown + '</button>' +
     '<ul></ul></section></div>' +
-    '</main>' + side + '</div>' + site.footer(lang, esc(t.madeWith)) + '</div>' +
+    '</div></main><div class="col">' + side + promo + '</div></div>' + site.footer(lang, '') + '</div>' +
     '<div class="toast" id="toast" role="status"><span></span><button type="button" hidden>' + esc(t.undo) + '</button></div>';
 
   const inlineData = JSON.stringify({
@@ -714,6 +759,7 @@ function renderShareHTML(data, host, opts) {
     host,
     css: CSS,
     body,
+    bodyClass: 'paper',
     scripts: '<script type="application/json" id="share-data">' + inlineData + '</script>\n<script>' + CLIENT_JS + '</script>\n',
     index: false,
   });
