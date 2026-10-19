@@ -16,7 +16,7 @@ const SITE = {
     toDark: 'Koyu temaya geç', toLight: 'Açık temaya geç',
     otherLang: 'EN', otherLangLabel: 'Show in English',
     privacy: 'Gizlilik', terms: 'Koşullar', contact: 'İletişim',
-    home: 'Ana sayfa',
+    home: 'Ana sayfa', features: 'Özellikler', menu: 'Menü', closeMenu: 'Menüyü kapat',
   },
   en: {
     tagline: 'A grocery list made for Türkiye',
@@ -25,7 +25,7 @@ const SITE = {
     toDark: 'Switch to dark theme', toLight: 'Switch to light theme',
     otherLang: 'TR', otherLangLabel: 'Türkçe göster',
     privacy: 'Privacy', terms: 'Terms', contact: 'Contact',
-    home: 'Home',
+    home: 'Home', features: 'Features', menu: 'Menu', closeMenu: 'Close menu',
   },
 };
 
@@ -35,6 +35,8 @@ const SOCIAL = {
 };
 
 const ICON = {
+  menu: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8.5h16M4 15.5h16"/></svg>',
+  close: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/></svg>',
   system: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3.4a8.6 8.6 0 0 1 0 17.2z" fill="currentColor"/></svg>',
   light: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.5 5.5l1.7 1.7M16.8 16.8l1.7 1.7M5.5 18.5l1.7-1.7M16.8 7.2l1.7-1.7"/></svg>',
   dark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4a8.2 8.2 0 1 0 10.6 10.6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
@@ -161,6 +163,72 @@ html.theme-anim *,html.theme-anim *::before,html.theme-anim *::after{transition:
 `;
 
 /* Görünüm seçimi ilk boyamadan önce uygulanır: gece açılan sayfa bir an bile parlamaz. */
+const NAV_CSS = `
+/* Gezinme: masaüstünde başlıkta bağlantılar; telefonda Menü düğmesi ve tam ekran menü */
+.bar .nav{display:none}
+.bar-right .langs{display:none}
+.menu-btn .ic-m,.menu-btn .ic-x{display:flex}.menu-btn .ic-x{display:none}
+.menu-btn[aria-expanded="true"] .ic-m{display:none}.menu-btn[aria-expanded="true"] .ic-x{display:flex}
+.menu-btn svg{width:22px;height:22px}
+.menu{position:fixed;inset:0;z-index:39;overflow-y:auto;overscroll-behavior:contain;background:var(--page);padding:calc(76px + env(safe-area-inset-top,0px)) 22px calc(26px + env(safe-area-inset-bottom,0px));opacity:0;transform:translateY(-12px);transition:opacity .22s ease,transform .32s cubic-bezier(.2,.8,.2,1)}
+.menu[hidden]{display:none}
+.menu.open{opacity:1;transform:none}
+.menu-in{display:flex;flex-direction:column;min-height:100%;max-width:560px;margin:0 auto}
+.menu-nav{display:flex;flex-direction:column;border-top:1px solid var(--rule-chrome)}
+.menu-nav a{display:flex;align-items:center;gap:12px;min-height:68px;border-bottom:1px solid var(--rule-chrome);font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:34px;letter-spacing:-.02em;line-height:1.05;color:var(--text);text-decoration:none}
+.menu-nav a[aria-current="page"]{color:var(--accent)}
+.menu-nav a[aria-current="page"]::after{content:"";width:9px;height:9px;margin-left:auto;border-radius:50%;background:currentColor}
+.menu-nav a:active,.menu-sub a:active{opacity:.6}
+.menu-sub{display:flex;flex-wrap:wrap;gap:0 24px;margin-top:18px}
+.menu-sub a{display:flex;align-items:center;min-height:44px;font-size:16px;font-weight:600;color:var(--text2);text-decoration:none}
+.menu-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;padding-top:32px}
+.menu-foot .langs{display:flex}
+.menu-soc{display:flex;gap:8px}
+.menu-soon{margin:18px 0 0;font-size:14px;color:var(--text2)}
+html.menu-open{overflow:hidden}
+@media (min-width:900px){
+  .bar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)}
+  .bar-right{justify-content:flex-end}
+  .bar .nav{display:flex;gap:4px}
+  .bar .nav a{position:relative;padding:0 14px;background:none;color:var(--text2)}
+  .bar .nav a[aria-current="page"]{color:var(--text);background:none}
+  .bar .nav a[aria-current="page"]::after{content:"";position:absolute;left:14px;right:14px;bottom:4px;height:2px;border-radius:2px;background:var(--accent)}
+  .bar-right .langs{display:flex}
+  .menu-btn,.menu{display:none!important}
+}
+@media (hover:hover) and (min-width:900px){.bar .nav a:hover{background:none;color:var(--text)}}
+/* alt bilgi telefonda da gruplu */
+@media (max-width:899px){
+  .foot-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 16px;padding-top:24px;border-top:1px solid var(--rule-chrome)}
+  .foot-cols > div{display:block}
+  .foot-cols h2{display:block}
+  .foot-cols > div:last-child{grid-column:1 / -1}
+}
+`;
+const NAV_JS = `
+(function(){
+  var btn = document.getElementById('menu-btn'), m = document.getElementById('menu');
+  if (!btn || !m) return;
+  var root = document.documentElement, L = {};
+  try { L = JSON.parse(btn.getAttribute('data-labels')) || {}; } catch (e) {}
+  function isOpen(){ return btn.getAttribute('aria-expanded') === 'true'; }
+  function open(){
+    m.hidden = false; root.classList.add('menu-open');
+    btn.setAttribute('aria-expanded', 'true'); if (L.close) btn.setAttribute('aria-label', L.close);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ m.classList.add('open'); }); });
+  }
+  function close(){
+    m.classList.remove('open'); root.classList.remove('menu-open');
+    btn.setAttribute('aria-expanded', 'false'); if (L.open) btn.setAttribute('aria-label', L.open);
+    setTimeout(function(){ if (!isOpen()) m.hidden = true; }, 320);
+  }
+  btn.addEventListener('click', function(){ isOpen() ? close() : open(); });
+  m.addEventListener('click', function(e){ if (e.target.closest('a')) close(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && isOpen()) { close(); btn.focus(); } });
+  var mq = window.matchMedia('(min-width:900px)');
+  if (mq.addEventListener) mq.addEventListener('change', function(ev){ if (ev.matches && isOpen()) close(); });
+})();
+`;
 const THEME_BOOT = "(function(){var r=document.documentElement,m=null;try{m=localStorage.getItem('listem-theme')}catch(e){}if(m!=='light'&&m!=='dark'){m=window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}r.setAttribute('data-theme',m)})();";
 const THEME_JS = `
 (function(){
@@ -205,19 +273,29 @@ function lockupSvg() {
 /* Başlık: solda tek renk marka, sağda menü, dil ve görünüm. current: 'season' | null */
 function header(lang, langHref, current) {
   const t = SITE[lang];
-  const homeHref = lang === 'en' ? '/?lang=en' : '/';
-  const seasonHref = '/mevsim' + (lang === 'en' ? '?lang=en' : '');
+  const q = lang === 'en' ? '?lang=en' : '';
+  const homeHref = '/' + q, featHref = '/' + q + '#neden', seasonHref = '/mevsim' + q;
   const other = lang === 'tr' ? 'en' : 'tr';
   const langs = ['tr', 'en'].map((l) => l === lang
     ? '<span aria-current="true">' + l.toUpperCase() + '</span>'
     : '<a href="' + esc(langHref) + '" hreflang="' + other + '" lang="' + other + '" aria-label="' + esc(t.otherLangLabel) + '">' + l.toUpperCase() + '</a>').join('');
+  const link = (href, label, key) => '<a href="' + href + '"' + (current === key ? ' aria-current="page"' : '') + '>' + esc(label) + '</a>';
   return '<header class="bar" id="bar">' +
     '<a class="lockup" href="' + homeHref + '" aria-label="List-em, ' + esc(t.home) + '">' + lockupSvg() + '<span class="wordmark" aria-hidden="true">List-em</span></a>' +
+    '<nav class="nav" aria-label="List-em">' + link(featHref, t.features, 'features') + link(seasonHref, t.nav.season, 'season') + '</nav>' +
     '<div class="bar-right">' +
-    '<nav class="nav" aria-label="List-em"><a href="' + seasonHref + '"' + (current === 'season' ? ' aria-current="page"' : '') + '><span class="long">' + esc(t.nav.season) + '</span><span class="short" aria-hidden="true">' + esc(t.nav.seasonShort) + '</span></a></nav>' +
     '<div class="langs" role="group" aria-label="' + esc(t.langGroup) + '">' + langs + '</div>' +
     '<button type="button" class="tool" id="theme" aria-label="' + esc(t.toDark) + '" data-labels="' + esc(JSON.stringify({ toDark: t.toDark, toLight: t.toLight })) + '"><span class="ic ic-l">' + ICON.light + '</span><span class="ic ic-d">' + ICON.dark + '</span></button>' +
-    '</div></header>';
+    '<button type="button" class="tool menu-btn" id="menu-btn" aria-expanded="false" aria-controls="menu" aria-label="' + esc(t.menu) + '" data-labels="' + esc(JSON.stringify({ open: t.menu, close: t.closeMenu })) + '"><span class="ic-m">' + ICON.menu + '</span><span class="ic-x">' + ICON.close + '</span></button>' +
+    '</div></header>' +
+    '<div class="menu" id="menu" hidden><div class="menu-in">' +
+    '<nav class="menu-nav" aria-label="List-em">' + link(homeHref, t.home, 'home') + link(featHref, t.features, 'features') + link(seasonHref, t.nav.season, 'season') + '</nav>' +
+    '<div class="menu-sub"><a href="/gizlilik">' + esc(t.privacy) + '</a><a href="/kosullar">' + esc(t.terms) + '</a><a href="mailto:contact@list-em.app">' + esc(t.contact) + '</a></div>' +
+    '<div class="menu-foot"><div class="langs" role="group" aria-label="' + esc(t.langGroup) + '">' + langs + '</div>' +
+    '<div class="menu-soc"><a class="soc-i" href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">' + SOCIAL.instagram + '</a>' +
+    '<a class="soc-i" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="X">' + SOCIAL.x + '</a></div></div>' +
+    '<p class="menu-soon">' + esc(t.soon) + '</p>' +
+    '</div></div>';
 }
 /* Alt bilgi. lead: sayfaya özel ilk satır (HTML, çağıran kaçışlar). */
 function footer(lang, lead) {
@@ -231,7 +309,7 @@ function footer(lang, lead) {
     '<div class="foot-soc"><a class="soc-i" href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">' + SOCIAL.instagram + '</a>' +
     '<a class="soc-i" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="X">' + SOCIAL.x + '</a></div></div>' +
     '<nav class="foot-cols" aria-label="List-em">' +
-    '<div><h2>List-em</h2><a href="/' + q + '">' + esc(t.home) + '</a><a href="/mevsim' + q + '">' + esc(t.nav.season) + '</a></div>' +
+    '<div><h2 lang="en">List-em</h2><a href="/' + q + '">' + esc(t.home) + '</a><a href="/' + q + '#neden">' + esc(t.features) + '</a><a href="/mevsim' + q + '">' + esc(t.nav.season) + '</a></div>' +
     '<div><h2>' + esc(t.legal) + '</h2><a href="/gizlilik">' + esc(t.privacy) + '</a><a href="/kosullar">' + esc(t.terms) + '</a></div>' +
     '<div><h2>' + esc(t.contact) + '</h2><a href="mailto:contact@list-em.app">contact@list-em.app</a></div>' +
     '</nav></div>' +
@@ -270,9 +348,9 @@ function pageShell(o) {
     '<link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">\n' +
     '<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n' +
     '<link rel="preload" href="/fonts/fraunces-latin-soft-normal.woff2" as="font" type="font/woff2" crossorigin>\n' +
-    '<style>' + FONT_CSS + TOKENS_CSS + BASE_CSS + (o.css || '') + '</style>\n' +
+    '<style>' + FONT_CSS + TOKENS_CSS + BASE_CSS + NAV_CSS + (o.css || '') + '</style>\n' +
     '</head>\n<body' + (o.bodyClass ? ' class="' + o.bodyClass + '"' : '') + '>\n' + o.body + '\n' +
-    '<script>' + THEME_JS + '</script>\n' +
+    '<script>' + THEME_JS + NAV_JS + '</script>\n' +
     (o.scripts || '') +
     '</body>\n</html>';
 }
