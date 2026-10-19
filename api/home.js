@@ -334,11 +334,10 @@ const INTRO_JS = '(function(){var s=document.querySelector(".stage");if(!s)retur
   'var bd=s.querySelector(".ap-badge"),bn=s.querySelector(".ap-n"),ft=s.querySelector(".ap-left"),B=bn.textContent,F=ft.textContent,tm=[];' +
   'function put(b,f){bd.style.visibility=b===null?"hidden":"";if(b!==null)bn.textContent=b;ft.textContent=f}' +
   's.classList.add("play","wait");put(null,"");' +
-  'function end(){tm.forEach(clearTimeout);s.classList.remove("play","wait");put(B,F);s.removeEventListener("pointerdown",end);removeEventListener("keydown",end)}' +
   'function go(){s.classList.remove("wait");' +
   'at.forEach(function(t,i){tm.push(setTimeout(function(){put(String(i+1),lf.replace("{n}",i+1))},t))});' +
   'tm.push(setTimeout(function(){put(String(at.length-1),pg)},ck));' +
-  's.addEventListener("pointerdown",end);addEventListener("keydown",end);tm.push(setTimeout(function(){s.classList.remove("play");s.removeEventListener("pointerdown",end);removeEventListener("keydown",end)},ck+2300))}' +
+  'tm.push(setTimeout(function(){s.classList.remove("play")},ck+2300))}' +
   'if(!("IntersectionObserver" in window))return go();' +
   'var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go()}},{threshold:.1});io.observe(s)})();';
 
