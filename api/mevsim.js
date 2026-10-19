@@ -198,6 +198,8 @@ ${DARK('.grid-h{background:var(--page)}')}
 }
 @media (max-width:899px){.cal-hero{padding-top:78px}.cal h1{font-size:68px;margin-top:12px}.lead{margin-top:12px}.months{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:36px 0 0;padding:0;overflow:visible}.mo{min-width:0;padding:0;font-size:14px}.kinds{margin-top:16px}.show{margin-top:48px;gap:36px}.chart{margin-top:72px}.yr{margin-top:64px}.grid-h .l{display:none}.sr .ico{width:26px;height:26px;font-size:15px;border-radius:8px}.sr .nm{gap:8px}}
 @media (hover:hover){.sr:hover{background:var(--chip)}}
+.sr.hl{background:color-mix(in srgb,var(--accent) 13%,transparent);box-shadow:inset 3px 0 0 var(--accent);animation:srhl 1.8s ease-out .6s both}
+@keyframes srhl{from{background:color-mix(in srgb,var(--accent) 34%,transparent)}to{background:color-mix(in srgb,var(--accent) 13%,transparent)}}
 `;
 
 const CLIENT = `
@@ -250,7 +252,11 @@ const CLIENT = `
       var u = new URL(location.href);
       u.searchParams.set('ay', month);
       if (kind === 'all') u.searchParams.delete('tur'); else u.searchParams.set('tur', kind);
+      u.searchParams.delete('urun');
+      var hl = document.querySelector('.sr.hl'); if (hl) hl.classList.remove('hl');
       history.replaceState(null, '', u.pathname + u.search);
+      /* dil bağlantıları seçili ayı ve türü taşır */
+      document.querySelectorAll('a[hreflang]').forEach(function(a){ var v = new URL(u.href); v.searchParams.set('lang', a.getAttribute('hreflang')); a.setAttribute('href', v.pathname + v.search); });
     }
   }
   tabs.forEach(function(b){ b.addEventListener('click', function(){ month = +b.getAttribute('data-m'); apply(true); }); });
@@ -278,6 +284,7 @@ const CLIENT = `
   })();
   var sel = document.querySelector('.mo[aria-selected="true"]');
   if (sel && sel.scrollIntoView && window.innerWidth < 900) sel.scrollIntoView({ block: 'nearest', inline: 'center' });
+  if (D.focus) { var fr = document.getElementById('u-' + D.focus); if (fr && !fr.hidden) { setTimeout(function(){ var y = fr.getBoundingClientRect().top + window.pageYOffset - 150; window.scrollTo({ top: Math.max(0, y), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }, 350); } }
 })();
 `;
 
@@ -298,8 +305,11 @@ function render(lang, host, q) {
   q = q || {};
   const now = istanbulMonth();
   const month = +q.ay >= 1 && +q.ay <= 12 ? +q.ay : now;
-  const kind = GROUPS.includes(q.tur) ? q.tur : 'all';
+  const focusId = typeof q.urun === 'string' && /^[a-z0-9-]{1,60}$/.test(q.urun) ? q.urun : '';
+  const kind = focusId ? 'all' : (GROUPS.includes(q.tur) ? q.tur : 'all');
   const data = build(lang);
+  /* ana sayfadan bir ürüne dokunulduysa takvim o ürünün satırında açılır */
+  const focus = focusId && data.seasonal.some((x) => x.id === focusId && x.months.includes(month)) ? focusId : '';
   const inKind = (c) => kind === 'all' || kind === c;
   const visible = data.seasonal.filter((x) => x.months.includes(month) && inKind(x.cat));
   const countTxt = t.months.map((_, i) => t.count(t.inMonth[i], '{n}'));
@@ -318,18 +328,18 @@ function render(lang, host, q) {
       items.map((x) => {
         const on = x.months.includes(month) && inKind(g);
         const flag = x.starts.includes(month) ? t.fresh : x.ends.includes(month) ? t.last : '';
-        return '<div class="sr" data-m="' + x.months.join(',') + '" data-s="' + x.starts.join(',') + '" data-e="' + x.ends.join(',') + '"' + (on ? '' : ' hidden') +
+        return '<div class="sr' + (x.id === focus ? ' hl' : '') + '" id="u-' + esc(x.id) + '" data-m="' + x.months.join(',') + '" data-s="' + x.starts.join(',') + '" data-e="' + x.ends.join(',') + '"' + (on ? '' : ' hidden') +
           ' aria-label="' + esc(x.name + ': ' + x.label) + '"><span class="nm">' + icon(x.id, x.emoji) + '<span class="tx"><b>' + esc(x.name) + '</b><span class="flag"' + (flag ? '' : ' hidden') + '>' + esc(flag) + '</span></span></span>' + cells(x.months, month) + '</div>';
       }).join('') + '</div>';
   }).join('');
   const head = '<div class="grid-h" aria-hidden="true"><span></span>' + t.short.map((s, i) =>
     '<span data-m="' + (i + 1) + '"' + (i + 1 === month ? ' class="sel"' : '') + '><span class="l">' + esc(s) + '</span><span class="s1">' + esc(s.charAt(0)) + '</span></span>').join('') + '</div>';
-  const payload = {
+  const payload = { focus,
     month, kind,
     t: { fresh: t.fresh, last: t.last, noneStart: t.noneStart, noneEnd: t.noneEnd, months: t.months, count: countTxt, more: t.more },
     items: data.seasonal.map((x) => ({ n: x.name, c: x.cat, s: x.starts, e: x.ends, i: icon(x.id, x.emoji) })),
   };
-  const body = '<div class="wrap">' + site.header(lang, '/mevsim?lang=' + (lang === 'tr' ? 'en' : 'tr'), 'season') +
+  const body = '<div class="wrap">' + site.header(lang, '/mevsim?ay=' + month + (kind !== 'all' ? '&tur=' + kind : '') + (focus ? '&urun=' + focus : '') + '&lang=' + (lang === 'tr' ? 'en' : 'tr'), 'season') +
     '<main class="cal"><div class="ivy" aria-hidden="true"></div><img class="ivy-top" src="/img/sarmasik-sarkan.webp" width="1100" height="700" alt="" aria-hidden="true">' +
     '<section class="cal-hero solo"><div style="position:relative;z-index:1"><p class="kicker">' + esc(t.title) + '</p>' +
     '<h1 id="mname">' + esc(t.months[month - 1]) + '</h1>' +

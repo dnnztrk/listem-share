@@ -240,7 +240,7 @@ function nowSection(lang, month, q) {
   const href = '/mevsim' + (q ? q + '&' : '?') + 'ay=' + month;
   return '<section class="now" aria-labelledby="now-h"><div class="now-head"><h2 id="now-h">' + esc(t.inSeason[month - 1]) + '</h2>' +
     '<a class="all" href="/mevsim' + q + '">' + esc(t.all) + ' →</a></div><ul class="now-list">' +
-    items.map((p) => '<li><a href="' + href + '"><span class="pic">' +
+    items.map((p) => '<li><a href="' + href + '&urun=' + encodeURIComponent(p.id) + '"><span class="pic">' +
       (PIECE[p.id] ? '<img src="/img/pazar/' + PIECE[p.id] + '.webp" alt="" loading="lazy">' : '<span class="emo" aria-hidden="true">' + esc(p.emoji) + '</span>') +
       '</span><span class="nm">' + esc(lang === 'en' ? p.nameEn : p.nameTr) + '</span><span class="rng">' + esc(range(p.season.months, month, lang)) + '</span></a></li>').join('') +
     '</ul><div class="now-dots" aria-hidden="true">' + items.map(() => '<button type="button" tabindex="-1"></button>').join('') + '</div></section>';
@@ -277,8 +277,8 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 .now .all{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:600;text-decoration:none;font-size:clamp(15px,1vw,18px)}
 .now-list{list-style:none;margin:20px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px 10px}
 .now-list a{display:flex;flex-direction:column;text-decoration:none;color:var(--paper-ink)}
-.now-list .pic{display:grid;place-items:center;aspect-ratio:1;border-radius:20px;background:rgba(255,255,255,.45)}
-.now-list img{width:72%;height:72%;object-fit:contain}
+.now-list .pic{display:grid;place-items:center;aspect-ratio:1}
+.now-list img{width:88%;height:88%;object-fit:contain}
 .now-list .emo{font-size:52px}
 .now-list .nm{margin-top:8px;font-size:clamp(15px,1.1vw,20px);font-weight:600;line-height:1.2}
 .now-dots{display:none}
@@ -481,7 +481,6 @@ ${DARK('body.home{background:var(--bg)}')}
 ${DARK('body.home::before{display:none}')}
 ${DARK('.soc{background:var(--surface);border-color:var(--border);color:var(--text)}')}
 ${DARK('.home{--paper-body:var(--text2)}')}
-${DARK('.now-list .pic{background:var(--surface)}')}
 ${DARK('.now,.home .site-foot{border-top-color:var(--border)}')}
 
 @media (min-width:900px){
