@@ -213,11 +213,12 @@ function sproutSvg() {
   const part = (cls, clip) => '<g class="' + cls + '"><g clip-path="url(#' + clip + ')"><path class="plant" d="' + body + '"/></g></g>';
   return '<svg viewBox="440 188 365 252" aria-hidden="true">' +
     '<defs>' +
-    '<clipPath id="sp-l" clipPathUnits="userSpaceOnUse"><rect x="430" y="180" width="176" height="177"/></clipPath>' +
-    '<clipPath id="sp-r" clipPathUnits="userSpaceOnUse"><rect x="606" y="180" width="234" height="177"/></clipPath>' +
-    '<clipPath id="sp-s" clipPathUnits="userSpaceOnUse"><rect x="430" y="356" width="410" height="81.5"/></clipPath>' +
+    '<clipPath id="sp-l" clipPathUnits="userSpaceOnUse"><rect x="430" y="180" width="178" height="179"/></clipPath>' +
+    '<clipPath id="sp-r" clipPathUnits="userSpaceOnUse"><rect x="604" y="180" width="236" height="179"/></clipPath>' +
+    '<clipPath id="sp-s" clipPathUnits="userSpaceOnUse"><rect x="430" y="353" width="410" height="84.5"/></clipPath>' +
+    '<clipPath id="sp-w" clipPathUnits="userSpaceOnUse"><rect x="430" y="180" width="410" height="257.5"/></clipPath>' +
     '</defs>' +
-    '<g class="plant-g">' + part('stem-f', 'sp-s') + part('lf-l', 'sp-l') + part('lf-r', 'sp-r') + '</g></svg>';
+    '<g class="plant-g">' + part('stem-f', 'sp-s') + part('lf-l', 'sp-l') + part('lf-r', 'sp-r') + part('whole', 'sp-w') + '</g></svg>';
 }
 
 /* Ürün işaretleri: çizimi olanlar çizimle (sitenin her yerinde aynı kural), diğerleri uygulamadaki emojiyle. */
@@ -424,7 +425,8 @@ const CLIENT_JS = `
   var prog = document.getElementById('prog');
   var fillEl = prog.querySelector('.track-fill');
   var sprout = document.getElementById('sprout');
-  var plantG = sprout.querySelector('.plant-g'), stemEl = sprout.querySelector('.stem-f');
+  var plantG = sprout.querySelector('.plant-g'), stemEl = sprout.querySelector('.stem-f'), wholeEl = sprout.querySelector('.whole');
+  var LEFT_D = '${SPROUT_LEFT}', RIGHT_D = '${SPROUT_RIGHT}';
   var lfL = sprout.querySelector('.lf-l'), lfR = sprout.querySelector('.lf-r');
   var countEl = document.getElementById('count');
   var resetBtn = document.getElementById('reset');
@@ -444,6 +446,9 @@ const CLIENT_JS = `
   }
   function draw(g, sw, sc){
     var gs = c01(g);
+    var full = gs >= 0.999;
+    wholeEl.style.display = full ? '' : 'none';
+    if (full) { stemEl.style.display = lfL.style.display = lfR.style.display = 'none'; plantG.setAttribute('transform', 'rotate(' + sw.toFixed(3) + ' ' + B.x + ' ' + B.y + ') translate(' + B.x + ' ' + B.y + ') scale(' + fx(sc) + ') translate(' + (-B.x) + ' ' + (-B.y) + ')'); return; }
     var st = eo(c01(gs / 0.34));
     if (st > 0.002) {
       stemEl.setAttribute('transform', 'translate(0 ' + fx(B.y) + ') scale(1 ' + fx(st) + ') translate(0 ' + fx(-B.y) + ')');
