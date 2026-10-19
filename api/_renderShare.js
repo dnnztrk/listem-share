@@ -207,14 +207,17 @@ const ICON = {
 /* İlerleme göstergesi: ikondaki filiz. Gövde, boğum ve iki yaprak ayrı çizilir; çizgi toprak gibi
    davranır (altı kırpılır). Biçimini ve hareketini sayfadaki betik çizer. */
 function sproutSvg() {
-  return '<svg viewBox="440 190 365 270" aria-hidden="true">' +
-    '<defs><clipPath id="sprout-ground"><rect x="380" y="40" width="500" height="398.54"/></clipPath></defs>' +
-    '<g clip-path="url(#sprout-ground)"><g class="plant-g">' +
-    '<path class="plant stem-f" d="' + SPROUT_STEM + ' L615.55 446 L567.45 446 Z"/>' +
-    '<circle class="plant node" cx="609" cy="318" r="16"/>' +
-    '<path class="plant lf-l" d="' + SPROUT_LEFT + '"/>' +
-    '<path class="plant lf-r" d="' + SPROUT_RIGHT + '"/>' +
-    '</g></g></svg>';
+  /* Logonun gövde çiziminden üç bölge kesilir: sol yaprak, sağ yaprak, gövde (sepetin kenarına kadar).
+     Hepsi bittiğinde ortaya çıkan şekil logodaki filizin pikseli pikseline aynısıdır. */
+  const body = site.LOGO_PATH.split(/(?=M)/)[0];
+  const part = (cls, clip) => '<g class="' + cls + '"><g clip-path="url(#' + clip + ')"><path class="plant" d="' + body + '"/></g></g>';
+  return '<svg viewBox="440 188 365 252" aria-hidden="true">' +
+    '<defs>' +
+    '<clipPath id="sp-l" clipPathUnits="userSpaceOnUse"><rect x="430" y="180" width="176" height="177"/></clipPath>' +
+    '<clipPath id="sp-r" clipPathUnits="userSpaceOnUse"><rect x="606" y="180" width="234" height="177"/></clipPath>' +
+    '<clipPath id="sp-s" clipPathUnits="userSpaceOnUse"><rect x="430" y="356" width="410" height="81.5"/></clipPath>' +
+    '</defs>' +
+    '<g class="plant-g">' + part('stem-f', 'sp-s') + part('lf-l', 'sp-l') + part('lf-r', 'sp-r') + '</g></svg>';
 }
 
 /* Ürün işaretleri: çizimi olanlar çizimle (sitenin her yerinde aynı kural), diğerleri uygulamadaki emojiyle. */
@@ -274,8 +277,8 @@ body.paper::before{content:"";position:fixed;inset:0;background-image:url("data:
 .pill[hidden]{display:none}
 .track{position:relative;margin-top:34px;height:4px;border-radius:2px;background:var(--track)}
 .track-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:2px;background:var(--accent);transition:width 250ms var(--move)}
-.sprout{position:absolute;bottom:2px;left:0;width:36px;height:27px;transition:left 250ms var(--move)}
-.sprout svg{position:absolute;left:0;bottom:0;width:36px;height:27px;overflow:visible}
+.sprout{position:absolute;bottom:2px;left:0;width:38px;height:26px;transition:left 250ms var(--move)}
+.sprout svg{position:absolute;left:0;bottom:0;width:38px;height:26px;overflow:visible}
 .plant{fill:var(--accent);stroke:none}
 .count .all{display:block;font-size:16px;font-weight:600;color:var(--accent);line-height:21px}
 .count .all-sub{display:block;margin-top:2px;font-size:13px;font-weight:500;color:var(--text2)}
@@ -421,17 +424,16 @@ const CLIENT_JS = `
   var prog = document.getElementById('prog');
   var fillEl = prog.querySelector('.track-fill');
   var sprout = document.getElementById('sprout');
-  var plantG = sprout.querySelector('.plant-g'), stemEl = sprout.querySelector('.stem-f'), nodeEl = sprout.querySelector('.node');
+  var plantG = sprout.querySelector('.plant-g'), stemEl = sprout.querySelector('.stem-f');
   var lfL = sprout.querySelector('.lf-l'), lfR = sprout.querySelector('.lf-r');
   var countEl = document.getElementById('count');
   var resetBtn = document.getElementById('reset');
-  var LEFT_D = lfL.getAttribute('d'), RIGHT_D = lfR.getAttribute('d');
   function c01(v){ return v < 0 ? 0 : v > 1 ? 1 : v; }
   function eo(t){ return 1 - Math.pow(1 - t, 3); }
   function eio(t){ return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
   function spec(bx, by, tx, ty){ var dx = tx - bx, dy = ty - by, l = Math.sqrt(dx * dx + dy * dy); return { bx: bx, by: by, ux: dx / l, uy: dy / l }; }
   var LL = spec(594.6, 325.2, 451.81, 255.76), RL = spec(620.9, 322.9, 793.19, 204.62);
-  var J = { x: 609.51, y: 294.18 }, B = { x: 591.5, y: 438.04 };
+  var J = { x: 605, y: 356 }, B = { x: 596, y: 437.5 };
   function fx(n){ return n.toFixed(4); }
   function leafMatrix(sp, th, lam, wid, dx, dy){
     var ux = sp.ux, uy = sp.uy, vx = -uy, vy = ux;
@@ -448,16 +450,14 @@ const CLIENT_JS = `
       stemEl.style.display = '';
     } else stemEl.style.display = 'none';
     var dY = (1 - st) * (B.y - J.y);
-    var aL = eo(c01((gs - 0.18) / 0.5)), aR = eo(c01((gs - 0.34) / 0.56)), an = eo(c01((gs - 0.16) / 0.3));
+    var aL = eo(c01((gs - 0.18) / 0.5)), aR = eo(c01((gs - 0.34) / 0.56));
     function leaf(el, a, open){
       if (a < 0.002) { el.style.display = 'none'; return; }
       el.style.display = '';
       el.setAttribute('transform', 'translate(0 ' + fx(dY) + ') translate(' + J.x + ' ' + J.y + ') rotate(' + fx(open * (1 - a)) + ') scale(' + fx(a) + ') translate(' + (-J.x) + ' ' + (-J.y) + ')');
     }
-    leaf(lfL, aL, 38); leaf(lfR, aR, -38);
-    if (an > 0.002) { nodeEl.style.display = ''; nodeEl.setAttribute('transform', 'translate(0 ' + fx(dY) + ') translate(609 318) scale(' + fx(an) + ') translate(-609 -318)'); }
-    else nodeEl.style.display = 'none';
-    plantG.setAttribute('transform', 'rotate(' + sw.toFixed(3) + ' 591.5 438) translate(591.5 438) scale(' + fx(sc) + ') translate(-591.5 -438)');
+    leaf(lfL, aL, 38); leaf(lfR, aR, -30);
+    plantG.setAttribute('transform', 'rotate(' + sw.toFixed(3) + ' ' + B.x + ' ' + B.y + ') translate(' + B.x + ' ' + B.y + ') scale(' + fx(sc) + ') translate(' + (-B.x) + ' ' + (-B.y) + ')');
   }
   function Spring(x, k, c){ this.x = x; this.v = 0; this.t = x; this.k = k; this.c = c; }
   Spring.prototype.step = function(dt){ this.v += (-this.k * (this.x - this.t) - this.c * this.v) * dt; this.x += this.v * dt; };
@@ -522,13 +522,13 @@ const CLIENT_JS = `
     if (d === 0) celebrated = false;
     if (p >= 0.7 && !reduced) loadConfetti().catch(function(){});
     if (mode === 'still' || reduced) {
-      grow.x = grow.t = p; grow.v = 0; scale.x = scale.t = complete ? 1.1 : 1; scale.v = 0; sway.x = sway.v = 0;
+      grow.x = grow.t = p; grow.v = 0; scale.x = scale.t = 1; scale.v = 0; sway.x = sway.v = 0;
       draw(grow.x, 0, scale.x);
       return;
     }
     grow.t = p;
     if (complete) {
-      scale.t = 1.1;
+      scale.t = 1;
       if (!celebrated) { celebrated = true; scale.v += 2.4; celebrate(); }
     } else {
       scale.t = 1;

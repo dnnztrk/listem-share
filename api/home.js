@@ -3,7 +3,7 @@
  * Ana sayfa (list-em.app) — ilk ekran ve bu ayın mevsim şeridi.
  * Açılış "listeden pazara": uygulamanın liste kartına satırlar tek tek düşer, her satırla o
  * ürünün çizimi kartın yanındaki tezgâha konar, sonunda ilk ürün işaretlenir. Yaklaşık 2,6 sn;
- * dışarıdan gelen her ziyarette ve yenilemede, sahne ekrana girince oynar; site içinde dolaşırken oynamaz; dokunuş/kaydırma/tuşla anında son hâline geçer, "hareketi azalt"
+ * her gösterilişte baştan oynar (site içinden ya da geri tuşuyla gelince de); dokunuş/kaydırma/tuşla anında son hâline geçer, "hareketi azalt"
  * açıksa ve betik yoksa doğrudan son hâli görünür. Yalnız transform ve opacity oynar.
  * Görsel dil: mevsim afişi (düz çizim, risograf dokusu, krem kâğıt). Şimdilik ekim.
  */
@@ -326,20 +326,15 @@ ${DARK('.now,.home .site-foot{border-top-color:var(--border)}')}
 
 /* Açılış: oturumda bir kez; dokunuş, kaydırma ya da tuşla anında son hâline geçer. */
 const INTRO_JS = '(function(){var s=document.querySelector(".stage");if(!s)return;' +
-  'var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches,inside=false,reload=false;' +
-  'try{inside=!!document.referrer&&new URL(document.referrer).host===location.host}catch(e){}' +
-  'try{var n=performance.getEntriesByType("navigation")[0];reload=!!n&&n.type==="reload"}catch(e){}' +
-  'if(rm||(inside&&!reload))return;' +
+  'if(window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches)return;' +
   'var at=s.getAttribute("data-at").split(",").map(Number),ck=+s.getAttribute("data-check"),lf=s.getAttribute("data-left"),pg=s.getAttribute("data-progress");' +
   'var bd=s.querySelector(".ap-badge"),bn=s.querySelector(".ap-n"),ft=s.querySelector(".ap-left"),B=bn.textContent,F=ft.textContent,tm=[];' +
   'function put(b,f){bd.style.visibility=b===null?"hidden":"";if(b!==null)bn.textContent=b;ft.textContent=f}' +
-  's.classList.add("play","wait");put(null,"");' +
-  'function go(){s.classList.remove("wait");' +
+  'function run(){tm.forEach(clearTimeout);tm=[];s.classList.remove("play","wait");void s.offsetWidth;s.classList.add("play");put(null,"");' +
   'at.forEach(function(t,i){tm.push(setTimeout(function(){put(String(i+1),lf.replace("{n}",i+1))},t))});' +
   'tm.push(setTimeout(function(){put(String(at.length-1),pg)},ck));' +
-  'tm.push(setTimeout(function(){s.classList.remove("play")},ck+2300))}' +
-  'if(!("IntersectionObserver" in window))return go();' +
-  'var io=new IntersectionObserver(function(es){if(es[0].isIntersecting){io.disconnect();go()}},{threshold:.1});io.observe(s)})();';
+  'tm.push(setTimeout(function(){s.classList.remove("play");put(B,F)},ck+2300))}' +
+  'run();addEventListener("pageshow",function(e){if(e.persisted)run()})})();';
 
 function render(lang, host) {
   const t = T[lang];
