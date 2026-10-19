@@ -22,7 +22,7 @@ const T = {
     list: 'Ekim pazarı', season: 'Mevsiminde', search: 'Hızlı Ara & Ekle...', fruit: 'Meyve', fish: 'Balık & Deniz Ürünleri',
     done: (n) => 'Tamamlananlar (' + n + ')', clear: 'Temizle', add: 'Ürün Ekle', left: (n) => n + ' Kaldı', progress: (a, b) => a + ' / ' + b + ' tamamlandı',
     stage: 'Uygulamada Ekim pazarı listesi: Satsuma mandalina, Trabzon hurması, ayva, Hicaz nar ve hamsi; nar işaretlenmiş. Yanında bu ürünlerden kurulmuş bir pazar tezgâhı çizimi.',
-    meta: 'List-em: Türkiye’ye özel market alışveriş listesi. Ürünleri gramıyla, kalorisiyle ve mevsimiyle bilir. Çok yakında App Store’da.',
+    meta: 'Ürünleri gramıyla, kalorisiyle ve mevsimiyle bilir; markette reyon sırasına dizilir. Çok yakında App Store’da.',
   },
   en: {
     eyebrow: 'Coming soon to the App Store',
@@ -34,7 +34,7 @@ const T = {
     list: 'October market', season: 'In season', search: 'Quick search & add...', fruit: 'Fruit', fish: 'Fish & Seafood',
     done: (n) => 'Completed (' + n + ')', clear: 'Clear', add: 'Add item', left: (n) => n + ' left', progress: (a, b) => a + ' / ' + b + ' done',
     stage: 'The October market list in the app: satsuma tangerines, persimmons, quinces, Hicaz pomegranates and anchovies, with the pomegranates ticked; beside it, a market stall drawn from them.',
-    meta: 'List-em: a grocery list made for Türkiye. It knows products by weight, calories and season. Coming soon to the App Store.',
+    meta: 'It knows products by weight, calories and season, and puts your list in aisle order. Coming soon to the App Store.',
   },
 };
 
@@ -128,6 +128,80 @@ function stage(lang) {
     '<div class="pile" aria-hidden="true">' + pcs + '</div>' + app + '</div>';
 }
 
+/* "Neden List-em": dört kanıt, konumlandırma sırasıyla (ürün bilgisi, mevsim, uygulamasız paylaşım, reyon).
+   Uygulamayı gösteren her parça uygulamanın ekran görüntülerinden birebir; tek fark ürün ikonları. */
+const WHY_T = {
+  tr: {
+    h: 'Neden List-em?', lead: 'Markete çıkarken bilmen gereken her şey, tek listede.',
+    a: ['Gramını ve kalorisini bilir', 'Her ürün gramajı, kalorisi ve besin değerleriyle gelir; çeşidini ve miktarını seçmen yeter.'],
+    b: ['Mevsimini bilir', 'Mevsimindeki ürünleri işaretler; hangisinin ne zaman en taze olduğunu ay ay gösterir.'],
+    c: ['Uygulaması olmayan da açar', 'Listeni WhatsApp’tan gönder; karşındaki kişi bağlantıya dokunur, listeyi tarayıcıda açar ve işaretleyerek alışverişe çıkar.'],
+    d: ['Reyon sırasına dizilir', 'Ekledikçe liste kendiliğinden reyonlara ayrılır; markette geri dönmeden yürürsün.'],
+    cal: 'Mevsim Takvimi',
+    sheet: { name: 'Nar', per: '100g için', kcal: 'kcal', pro: 'protein', fat: 'yağ', fib: 'lif', d: (n) => String(n).replace('.', ','), type: 'TÜR', size: 'MİKTAR', v: ['Hicaz', 'Ekşi'], season: 'Mevsiminde · Eylül - Aralık',
+      tipB: 'Biliyor muydunuz?', tip: 'Nar, polifenol içeriğiyle kırmızı şaraptan 3 kat daha yüksek antioksidan kapasitesine sahiptir.', note: 'Besin değerleri yaklaşık/tahmini olup bilgilendirme amaçlıdır. Tıbbi/ sağlık danışmanlığı niteliği taşımaz.', add: 'Listeye Ekle' },
+    msg: { card: '🧺 Ekim pazarı (5 ürün)', cardSub: '“Ekim pazarı” listesi (5 ürün) seninle paylaşıldı', text: '“Ekim pazarı” listemi seninle paylaşıyorum! 📝', items: ['Hamsi', 'Mandalina', 'Trabzon hurması', 'Ayva', 'Nar'] },
+    aisles: ['Meyve', 'Sebze', 'Balık & Deniz Ürünleri', 'Kahvaltılık'],
+    rows: { mandalina: 'Mandalina', nar: 'Nar', ispanak: 'Ispanak', hamsi: 'Hamsi', yumurta: 'Yumurta' },
+    months: 'OŞMNMHTAEEKA',
+  },
+  en: {
+    h: 'Why List-em?', lead: 'Everything you need to know for the market, in one list.',
+    a: ['Knows grams and calories', 'Every product comes with its weight, calories and nutrition; just pick the variety and the amount.'],
+    b: ['Knows what’s in season', 'It marks what’s in season and shows, month by month, when each product is at its freshest.'],
+    c: ['Opens without the app', 'Send your list on WhatsApp; the other person taps the link, opens the list in the browser and ticks it off at the market.'],
+    d: ['Sorted by aisle', 'As you add, the list sorts itself into aisles, so you never walk back through the market.'],
+    cal: 'Seasonal Calendar',
+    sheet: { name: 'Pomegranate', per: 'per 100g', kcal: 'kcal', pro: 'protein', fat: 'fat', fib: 'fiber', d: (n) => String(n), type: 'TYPE', size: 'SIZE', v: ['Hicaz', 'Sour'], season: 'In Season · September - December',
+      tipB: 'Did you know?', tip: 'Pomegranate has 3 times the antioxidant capacity of red wine due to its polyphenol content.', note: 'Nutrition values are approximate estimates for informational purposes only. Not medical or health advice.', add: 'Add to List' },
+    msg: { card: '🧺 October market (5 items)', cardSub: '“October market” list (5 items) shared with you', text: 'Sharing my “October market” list with you! 📝', items: ['Anchovy', 'Tangerine', 'Persimmon', 'Quince', 'Pomegranate'] },
+    aisles: ['Fruit', 'Vegetables', 'Fish & Seafood', 'Breakfast'],
+    rows: { mandalina: 'Tangerine', nar: 'Pomegranate', ispanak: 'Spinach', hamsi: 'Anchovy', yumurta: 'Eggs' },
+    months: 'JFMAMJJASOND',
+  },
+};
+const IC = {
+  kcal: '<svg viewBox="0 0 24 24"><path d="M12 3c1 3 4 4.5 4 8.5A4 4 0 0 1 8 12c0-1.4.6-2.5 1.4-3.3.2 1.5 1.1 2.3 1.9 2.3 0-3 .2-5.4.7-8z"/><path d="M8.2 14.5a4 4 0 0 0 7.6 0"/></svg>',
+  pro: '<svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M4 9.5v5M20 9.5v5M6.5 12h11"/></svg>',
+  fat: '<svg viewBox="0 0 24 24"><path d="M12 3.5c2.8 3.6 5 6.4 5 9.5a5 5 0 0 1-10 0c0-3.1 2.2-5.9 5-9.5z"/></svg>',
+  fib: '<svg viewBox="0 0 24 24"><path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14zm0 0l7-7"/></svg>',
+  bulb: '<svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>',
+  plus: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="currentColor" stroke="none"/><path d="M12 8v8M8 12h8" stroke="var(--pal-btn)" stroke-width="2.4"/></svg>',
+  x: '<svg viewBox="0 0 24 24"><path d="M8 8l8 8M16 8l-8 8"/></svg>',
+  link: '<svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>',
+};
+function whySection(lang) {
+  const t = WHY_T[lang], S = t.sheet, q = lang === 'en' ? '?lang=en' : '';
+  const nut = [[83, S.kcal, IC.kcal, ''], [1.7, S.pro, IC.pro, 'g'], [1.2, S.fat, IC.fat, 'g'], [4, S.fib, IC.fib, 'g']]
+    .map(([v, l, i, u]) => '<span class="nu"><span class="ni">' + i + '</span><b>' + S.d(v) + (u ? '<small>' + u + '</small>' : '') + '</b><em>' + esc(l) + '</em></span>').join('');
+  const sheet = '<div class="sheet-m pal" aria-hidden="true"><span class="sx">' + IC.x + '</span>' +
+    '<img class="sh-img" src="/img/pazar/nar.webp" alt=""><b class="sh-n">' + esc(S.name) + '</b><span class="sh-per">' + esc(S.per) + '</span>' +
+    '<div class="nus">' + nut + '</div>' +
+    '<span class="sh-l">' + esc(S.type) + '</span><div class="pills"><span>' + esc(S.v[0]) + ' <i>83</i></span><span>' + esc(S.v[1]) + ' <i>78</i></span></div>' +
+    '<span class="sh-l">' + esc(S.size) + '</span><div class="pills"><span>500g</span><span>1kg</span></div>' +
+    '<span class="sh-season">🌿 ' + esc(S.season) + '</span>' +
+    '<p class="sh-tip">' + IC.bulb + '<span><b>' + esc(S.tipB) + '</b> <em>' + esc(S.tip) + '</em></span></p>' +
+    '<p class="sh-note">' + esc(S.note) + '</p><span class="sh-btn">' + IC.plus + esc(S.add) + '</span></div>';
+  const months = t.months.split('').map((m, i) => '<span' + ([8, 9, 10, 11].includes(i) ? ' class="on' + (i === 8 ? ' s' : '') + (i === 11 ? ' e' : '') + (i === 9 ? ' cur' : '') + '"' : (i === 9 ? ' class="cur"' : '')) + '><i></i><em>' + m + '</em></span>').join('');
+  const season = '<div class="season-m" aria-hidden="true"><span class="sh-season big">🌿 ' + esc(S.season) + '</span>' +
+    '<div class="mrow"><span class="mic"><img src="/img/pazar/nar.webp" alt=""></span><b>' + esc(S.name) + '</b></div><div class="mbars">' + months + '</div></div>';
+  const msg = '<div class="chat" aria-hidden="true"><div class="bub"><img class="bub-img" src="/og-image' + (lang === 'en' ? '-en' : '') + '.jpg" alt="">' +
+    '<div class="bub-card"><b>' + esc(t.msg.card) + '</b><span>' + esc(t.msg.cardSub) + '</span><span class="dom">' + IC.link + 'list-em.app</span></div>' +
+    '<p>' + esc(t.msg.text) + '</p><ul>' + t.msg.items.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul><span class="bub-link">https://list-em.app/s/NXn3oUhl</span></div></div>';
+  // aisles: shuffled first, then sorted into the app's aisle order with headings
+  const R = [['yumurta', '🥚', 3], ['hamsi', null, 2], ['nar', null, 0], ['ispanak', '🥬', 1], ['mandalina', null, 0]];
+  const order = [['h', 0], ['mandalina'], ['nar'], ['h', 1], ['ispanak'], ['h', 2], ['hamsi'], ['h', 3], ['yumurta']];
+  let y = 0; const pos = {}, heads = [];
+  order.forEach((o) => { if (o[0] === 'h') { heads.push([o[1], y]); y += 26; } else { pos[o[0]] = y; y += 44; } });
+  const rows = R.map(([id, emo], i) => '<li style="--y0:' + (i * 44) + 'px;--y1:' + pos[id] + 'px;--d:' + (i * 70) + 'ms"><span class="rc"></span><span class="ri">' +
+    (emo ? '<span>' + emo + '</span>' : '<img src="/img/pazar/' + (id === 'hamsi' ? 'hamsi' : id) + '.webp" alt="">') + '</span><b>' + esc(t.rows[id]) + '</b></li>').join('') +
+    heads.map(([k, hy]) => '<li class="ah" style="--y1:' + hy + 'px">' + esc(t.aisles[k]) + '</li>').join('');
+  const aisle = '<div class="aisle-m pal" aria-hidden="true"><ul style="height:' + y + 'px">' + rows + '</ul></div>';
+  const card = (k, demo, extra) => '<article class="why-c why-' + k + '"><div class="why-demo">' + demo + '</div><h3>' + esc(t[k][0]) + '</h3><p>' + esc(t[k][1]) + '</p>' + (extra || '') + '</article>';
+  return '<section class="why" aria-labelledby="why-h"><div class="why-head"><h2 id="why-h">' + esc(t.h) + '</h2><p>' + esc(t.lead) + '</p></div><div class="why-grid">' +
+    card('a', sheet) + card('b', season, '<a class="why-link" href="/mevsim' + q + '">' + esc(t.cal) + ' →</a>') + card('c', msg) + card('d', aisle) + '</div></section>';
+}
+
 /* Bu ayın mevsimindekiler: tezgâhtaki ürünler önce, ay değişince katalog ne diyorsa o. */
 const FEATURED = ['nar', 'ayva', 'trabzon-hurmasi', 'mandalina', 'hamsi'];
 function inSeasonNow(month) {
@@ -201,6 +275,80 @@ body.home::before{content:"";position:fixed;inset:0;background-image:${GRAIN};op
 .now-list .rng{margin-top:3px;font-size:clamp(12.5px,.9vw,16px);color:var(--paper-2)}
 @media (hover:hover){.now-list a:hover .pic{background:rgba(255,255,255,.75)}}
 
+/* Neden List-em */
+.why{margin-top:72px;padding-top:36px;border-top:1px solid rgba(43,33,24,.14)}
+.why-head h2{margin:0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(30px,2.8vw,52px);letter-spacing:-.02em;line-height:1.05;color:var(--paper-ink)}
+.why-head p{margin:10px 0 0;font-size:clamp(16px,1.1vw,20px);color:var(--paper-2);max-width:40ch}
+.why-grid{display:grid;gap:18px;margin-top:28px}
+.why-c{border-radius:28px;background:rgba(255,255,255,.45);box-shadow:inset 0 0 0 1px rgba(43,33,24,.07);padding:18px 18px 22px;overflow:hidden}
+.why-c h3{margin:18px 4px 0;font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:clamp(22px,1.7vw,30px);letter-spacing:-.015em;line-height:1.1;color:var(--paper-ink)}
+.why-c p{margin:8px 4px 0;font-size:clamp(15px,1vw,17px);line-height:1.5;color:var(--paper-2);text-wrap:pretty}
+.why-link{display:inline-flex;align-items:center;min-height:44px;margin:4px 4px 0;color:var(--accent);font-weight:600;text-decoration:none}
+.why-demo{display:grid;place-items:center;min-height:300px;border-radius:20px;background:rgba(43,33,24,.04);padding:18px 12px;overflow:hidden}
+.pal{--pal-bg:#FFFFFF;--pal-text:#1C1C1A;--pal-2:#6F6E69;--pal-pill:#F3F2EE;--pal-pillb:#E4E3DE;--pal-val:#9C5B45;--pal-ico:#A56B55;--pal-mint:#DCEBE4;--pal-mintfg:#2A7A5E;--pal-btn:#2D8B75;--pal-row:#EEEDE8;--pal-sep:#E2E1DC;--pal-tile:#E4E3DE;--pal-ring:#3A3A38;--pal-page:#F6F5F1;color:var(--pal-text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter","Segoe UI",sans-serif}
+${DARK('.pal{--pal-bg:#2A2A28;--pal-text:#F2F2EF;--pal-2:#A3A29C;--pal-pill:#1F1F1D;--pal-pillb:#1F1F1D;--pal-val:#E8A27A;--pal-ico:#E8A27A;--pal-mint:#1F3A30;--pal-mintfg:#4FC79B;--pal-btn:#3DB394;--pal-row:#1E1E1C;--pal-sep:#2A2A28;--pal-tile:#2A2A28;--pal-ring:#7A7975;--pal-page:#121212}')}
+.pal svg,.why svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sheet-m{position:relative;width:min(100%,300px);padding:18px 18px 16px;border-radius:24px;background:var(--pal-bg);box-shadow:0 14px 34px rgba(70,45,20,.16);display:flex;flex-direction:column;align-items:center;text-align:center}
+.sx{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:#B9B8B3;color:#fff;display:grid;place-items:center}.sx svg{width:14px;height:14px;stroke-width:2.6}
+.sh-img{width:40px;height:40px;object-fit:contain}
+.sh-n{margin-top:4px;font-size:21px;font-weight:800;letter-spacing:-.01em}
+.sh-per{margin-top:8px;font-size:11px;font-weight:600;color:var(--pal-2)}
+.nus{display:grid;grid-template-columns:repeat(4,1fr);width:100%;margin-top:8px}
+.nu{display:flex;flex-direction:column;align-items:center;gap:1px}
+.ni{color:var(--pal-ico)}.ni svg{width:16px;height:16px}
+.nu b{font-size:19px;font-weight:800;color:var(--pal-val)}.nu b small{font-size:10px;margin-left:1px}
+.nu em{font-style:normal;font-size:11px;font-weight:600;color:var(--pal-2)}
+.sh-l{margin-top:12px;font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--pal-2)}
+.pills{display:flex;gap:8px;margin-top:7px}
+.pills span{padding:7px 14px;border-radius:999px;background:var(--pal-pill);box-shadow:inset 0 0 0 1.5px var(--pal-pillb);font-size:12.5px;font-weight:700}
+.pills i{font-style:normal;font-weight:600;font-size:10px;color:var(--pal-2);margin-left:3px}
+.sh-season{margin-top:12px;padding:4px 10px;border-radius:999px;background:var(--pal-mint);color:var(--pal-mintfg);font-size:11.5px;font-weight:700}
+.sh-tip{display:flex;gap:6px;margin:12px 0 0;text-align:left;font-size:10px;line-height:1.4;color:var(--pal-text)}
+.sh-tip svg{flex:none;width:13px;height:13px;color:var(--pal-2)}.sh-tip em{color:var(--pal-2)}
+.sh-note{margin:6px 0 0;text-align:left;font-size:9px;line-height:1.4;color:var(--pal-2)}
+.sh-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:12px;padding:12px 0;border-radius:14px;background:var(--pal-btn);color:#fff;font-size:14px;font-weight:700}
+.sh-btn svg{width:17px;height:17px;color:#fff;stroke:none}
+.season-m{display:flex;flex-direction:column;align-items:center;gap:22px;width:min(100%,340px)}
+.sh-season.big{font-size:14px;padding:7px 14px;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Inter",sans-serif;background:#DCEBE4;color:#2A7A5E}
+${DARK('.sh-season.big{background:#1F3A30;color:#4FC79B}')}
+.mrow{display:flex;align-items:center;gap:10px;align-self:flex-start;font-size:16px;color:var(--paper-ink)}
+.mic{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.7)}.mic img{width:84%;height:84%;object-fit:contain}
+${DARK('.mic{background:var(--surface)}')}
+.mbars{display:grid;grid-template-columns:repeat(12,1fr);width:100%;margin-top:-10px}
+.mbars span{display:flex;flex-direction:column;align-items:center;gap:8px}
+.mbars i{display:block;width:100%;height:14px}
+.mbars .on i{background:#E0703A;transform-origin:left;transform:scaleX(0)}
+.mbars .on.s i{border-radius:7px 0 0 7px;margin-left:3px;width:calc(100% - 3px)}.mbars .on.e i{border-radius:0 7px 7px 0;width:calc(100% - 3px);align-self:flex-start}
+.mbars em{font-style:normal;font-size:11px;font-weight:700;color:var(--paper-2)}
+.mbars .cur{background:rgba(45,139,117,.13);border-radius:6px}.mbars .cur em{color:var(--accent)}
+.chat{width:min(100%,330px);padding:6px}
+.bub{position:relative;padding:4px 4px 10px;border-radius:16px 16px 4px 16px;background:#DCF3E4;color:#1C1C1A;font-size:13px;line-height:1.4;box-shadow:0 10px 24px rgba(70,45,20,.12);transform:translateY(16px);opacity:0}
+${DARK('.bub{background:#1F3B31;color:#EDEDE8}')}
+.bub-img{display:block;width:100%;border-radius:12px 12px 0 0}
+.bub-card{display:flex;flex-direction:column;gap:2px;padding:8px 10px;background:rgba(0,0,0,.05);border-radius:0 0 10px 10px;font-size:12px}
+.bub-card span{opacity:.75}.bub-card .dom{display:flex;align-items:center;gap:5px;opacity:.6}.bub-card .dom svg{width:12px;height:12px}
+.bub p{margin:10px 10px 0}.bub ul{margin:6px 0 0;padding:0 10px 0 28px}
+.bub-link{display:block;margin:8px 10px 0;color:#1F7A63;text-decoration:underline;word-break:break-all}
+${DARK('.bub-link{color:#5ED0A6}')}
+.aisle-m{width:min(100%,320px);padding:12px;border-radius:22px;background:var(--pal-page);box-shadow:0 14px 34px rgba(70,45,20,.14)}
+.aisle-m ul{position:relative;list-style:none;margin:0;padding:0}
+.aisle-m li{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;background:var(--pal-row);box-shadow:inset 0 -1px 0 var(--pal-sep);transform:translateY(var(--y0));transition:transform .7s cubic-bezier(.3,.7,.2,1);transition-delay:var(--d)}
+.aisle-m li.ah{height:26px;padding:0 2px;background:none;box-shadow:none;font-size:11px;font-weight:700;color:var(--pal-2);transform:translateY(var(--y1));opacity:0;transition:opacity .4s ease .9s}
+.rc{flex:none;width:18px;height:18px;border-radius:50%;box-shadow:inset 0 0 0 1.6px var(--pal-ring)}
+.ri{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:var(--pal-tile);font-size:15px}.ri img{width:84%;height:84%;object-fit:contain}
+.aisle-m b{font-size:14px;font-weight:700}
+/* ekrana girince bir kez */
+.why-c.in .aisle-m li:not(.ah){transform:translateY(var(--y1));transition-delay:calc(var(--d) + .5s)}
+.why-c.in .aisle-m li.ah{opacity:1}
+.why-c.in .mbars .on i{transform:scaleX(1);transition:transform .5s cubic-bezier(.3,.7,.2,1)}
+.why-c.in .mbars .on:nth-child(10) i{transition-delay:.15s}.why-c.in .mbars .on:nth-child(11) i{transition-delay:.3s}.why-c.in .mbars .on:nth-child(12) i{transition-delay:.45s}
+.why-c.in .bub{transform:none;opacity:1;transition:transform .6s cubic-bezier(.3,.7,.2,1),opacity .4s ease}
+.why-c .sheet-m{transform:translateY(14px) scale(.98);opacity:0}
+.why-c.in .sheet-m{transform:none;opacity:1;transition:transform .6s cubic-bezier(.3,.7,.2,1),opacity .4s ease}
+${DARK('.why-c{background:var(--surface);box-shadow:inset 0 0 0 1px var(--border)}')}
+${DARK('.why-demo{background:rgba(255,255,255,.03)}')}
+${DARK('.why{border-top-color:var(--border)}')}
+@media (prefers-reduced-motion:reduce){.why-c .sheet-m,.why-c .bub{transform:none;opacity:1}.mbars .on i{transform:none}.aisle-m li:not(.ah){transform:translateY(var(--y1))}.aisle-m li.ah{opacity:1}}
 /* sahne: telefonda önce tezgâh, altında uygulama; masaüstünde uygulama solda, tezgâh sağda */
 .stage{position:relative;margin:40px 0 0;container-type:inline-size}
 .pile{position:relative;aspect-ratio:1.55;margin:0 -4px}
@@ -308,6 +456,10 @@ ${DARK('.now,.home .site-foot{border-top-color:var(--border)}')}
   .hero p.body{font-size:clamp(18px,1.2vw,22px);margin-top:24px;max-width:40ch}
   .follow{margin-top:40px}
   .now{margin-top:clamp(56px,8vh,120px);padding-top:clamp(28px,3vw,48px)}
+  .why{margin-top:clamp(72px,10vh,140px);padding-top:clamp(36px,4vw,56px)}
+  .why-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(18px,2vw,32px);margin-top:clamp(28px,3vw,48px)}
+  .why-c{padding:22px 22px 28px}
+  .why-demo{min-height:400px}
   .now-list{margin:clamp(20px,2.4vw,40px) 0 0;padding:0;grid-auto-flow:row;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(12px,1.6vw,28px);overflow:visible}
   .eyebrow{font-size:clamp(13px,.9vw,16px);min-height:clamp(28px,2vw,36px);padding:0 clamp(12px,.9vw,16px)}
 }
@@ -338,7 +490,9 @@ const INTRO_JS = '(function(){var s=document.querySelector(".stage");if(!s)retur
   'at.forEach(function(t,i){tm.push(setTimeout(function(){put(String(i+1),lf.replace("{n}",i+1))},t))});' +
   'tm.push(setTimeout(function(){put(String(at.length-1),pg)},ck));' +
   'tm.push(setTimeout(function(){s.classList.remove("play");put(B,F)},ck+2300))}' +
-  'run();addEventListener("pageshow",function(e){if(e.persisted)run()})})();';
+  'run();addEventListener("pageshow",function(e){if(e.persisted)run()})})();' +
+  '(function(){var cs=[].slice.call(document.querySelectorAll(".why-c"));if(!("IntersectionObserver" in window)){cs.forEach(function(c){c.classList.add("in")});return}' +
+  'var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{threshold:.35});cs.forEach(function(c){io.observe(c)})})();';
 
 function render(lang, host) {
   const t = T[lang];
@@ -353,9 +507,9 @@ function render(lang, host) {
     '<div class="follow"><span class="follow-label">' + esc(t.follow) + '</span><div class="soc-row">' +
     '<a class="soc" href="https://www.instagram.com/listem.app/" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.ig) + '">' + site.SOCIAL.instagram + '<span>Instagram</span></a>' +
     '<a class="soc" href="https://x.com/listemapp" target="_blank" rel="noopener noreferrer" aria-label="' + esc(t.x) + '">' + site.SOCIAL.x + '<span>X</span></a></div></div>' +
-    '</div>' + stage(lang) + '</main>' + nowSection(lang, month, q) + site.footer(lang, '') + '</div>' +
+    '</div>' + stage(lang) + '</main>' + whySection(lang) + nowSection(lang, month, q) + site.footer(lang, '') + '</div>' +
     '<script>' + INTRO_JS + '</script>';
-  return site.pageShell({ lang, title: 'List-em · ' + t.title, description: t.meta, ogTitle: 'List-em', ogDescription: t.meta, host, css: CSS, body, bodyClass: 'home', index: true });
+  return site.pageShell({ lang, title: 'List-em · ' + t.title, description: t.meta, ogTitle: 'List-em · ' + t.title, ogDescription: t.meta, host, css: CSS, body, bodyClass: 'home', index: true });
 }
 
 module.exports = (req, res) => {
