@@ -135,7 +135,7 @@ const WHY_T = {
     h: 'Neden List-em?', lead: 'Markete çıkarken bilmen gereken her şey, tek listede.',
     a: ['Gramını ve kalorisini bilir', 'Her ürün gramajı, kalorisi ve besin değerleriyle gelir; çeşidini ve miktarını seçmen yeter.'],
     b: ['Mevsimini bilir', 'Mevsimindeki ürünleri işaretler; hangisinin ne zaman en taze olduğunu ay ay gösterir.'],
-    c: ['Uygulaması olmayan da açar', 'Listeni WhatsApp’tan gönder; karşındaki kişi bağlantıya dokunur, listeyi tarayıcıda açar ve işaretleyerek alışverişe çıkar.'],
+    c: ['Uygulaması olmayan da açar', 'Listeni istediğin uygulamadan gönder; karşındaki kişi bağlantıya dokunur, listeyi tarayıcıda açar ve işaretleyerek alışverişe çıkar.'],
     d: ['Reyon sırasına dizilir', 'Ekledikçe liste kendiliğinden reyonlara ayrılır; markette geri dönmeden yürürsün.'],
     cal: 'Mevsim Takvimi',
     sheet: { name: 'Nar', per: '100g için', kcal: 'kcal', pro: 'protein', fat: 'yağ', fib: 'lif', d: (n) => String(n).replace('.', ','), type: 'TÜR', size: 'MİKTAR', v: ['Hicaz', 'Ekşi'], season: 'Mevsiminde · Eylül - Aralık',
@@ -149,7 +149,7 @@ const WHY_T = {
     h: 'Why List-em?', lead: 'Everything you need to know for the market, in one list.',
     a: ['Knows grams and calories', 'Every product comes with its weight, calories and nutrition; just pick the variety and the amount.'],
     b: ['Knows what’s in season', 'It marks what’s in season and shows, month by month, when each product is at its freshest.'],
-    c: ['Opens without the app', 'Send your list on WhatsApp; the other person taps the link, opens the list in the browser and ticks it off at the market.'],
+    c: ['Opens without the app', 'Send your list from any app; the other person taps the link, opens the list in the browser and ticks it off at the market.'],
     d: ['Sorted by aisle', 'As you add, the list sorts itself into aisles, so you never walk back through the market.'],
     cal: 'Seasonal Calendar',
     sheet: { name: 'Pomegranate', per: 'per 100g', kcal: 'kcal', pro: 'protein', fat: 'fat', fib: 'fiber', d: (n) => String(n), type: 'TYPE', size: 'SIZE', v: ['Hicaz', 'Sour'], season: 'In Season · September - December',
@@ -343,13 +343,13 @@ ${DARK('.mic{background:var(--surface)}')}
 .mh{min-height:26px}.mh em{font-style:normal;text-align:center;font-size:12px;font-weight:700;color:var(--cink2);padding:6px 0}
 .mh em.cur{color:var(--accent);background:rgba(45,139,117,.13);border-radius:0 0 6px 6px}
 .chat{width:min(100%,330px);padding:6px}
-.bub{position:relative;padding:4px 4px 10px;border-radius:16px 16px 4px 16px;background:#DCF3E4;color:#1C1C1A;font-size:13px;line-height:1.4;box-shadow:0 10px 24px rgba(70,45,20,.12);transform:translateY(16px);opacity:0}
-${DARK('.bub{background:#1F3B31;color:#EDEDE8}')}
+.bub{position:relative;padding:4px 4px 10px;border-radius:18px 18px 4px 18px;background:#FFFFFF;color:#1C1C1A;font-size:13px;line-height:1.4;box-shadow:0 10px 24px rgba(70,45,20,.12);transform:translateY(16px);opacity:0}
+${DARK('.bub{background:#24282A;color:#EDEDE8}')}
 .bub-img{display:block;width:100%;border-radius:12px 12px 0 0}
 .bub-card{display:flex;flex-direction:column;gap:2px;padding:8px 10px;background:rgba(0,0,0,.05);border-radius:0 0 10px 10px;font-size:12px}
 .bub-card span{opacity:.75}.bub-card .dom{display:flex;align-items:center;gap:5px;opacity:.6}.bub-card .dom svg{width:12px;height:12px}
 .bub p{margin:10px 10px 0}.bub ul{margin:6px 0 0;padding:0 10px 0 28px}
-.bub-link{display:block;margin:8px 10px 0;color:#1F7A63;text-decoration:underline;word-break:break-all}
+.bub-link{display:block;margin:8px 10px 0;color:#2D8B75;text-decoration:underline;word-break:break-all}
 ${DARK('.bub-link{color:#5ED0A6}')}
 .aisle-m{width:min(100%,320px);padding:12px;border-radius:22px;background:var(--pal-page);box-shadow:0 14px 34px rgba(70,45,20,.14)}
 .aisle-m ul{position:relative;list-style:none;margin:0;padding:0}
